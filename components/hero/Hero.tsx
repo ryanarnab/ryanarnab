@@ -138,10 +138,12 @@ export default function Hero() {
     <motion.section
       id="hero"
       style={{
-        y: -progress * 250,
-        opacity: 1 - progress,
-        scale: 1 - progress * 0.08,
+        y: -progress * 420,
+        opacity: Math.max(0, 1 - progress * 1.35),
+        scale: 1 - progress * 0.18,
+        filter: `blur(${progress * 5}px)`,
       }}
+    
       className="relative flex h-screen w-full items-center overflow-hidden"
     >
       {/* Background Particles */}

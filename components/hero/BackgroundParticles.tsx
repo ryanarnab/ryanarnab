@@ -13,6 +13,8 @@ import {
   useState,
 } from "react";
 
+import { useScrollProgress } from "../scroll/ScrollProvider";
+
 type Dot = {
   id: number;
   x: number;
@@ -45,6 +47,8 @@ const SPRING = {
 
 export default function BackgroundParticles() {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const scrollProgress = useScrollProgress();
 
   const mouseX = useMotionValue(
     Number.POSITIVE_INFINITY
@@ -79,8 +83,8 @@ export default function BackgroundParticles() {
         ) {
           newDots.push({
             id: id++,
-            x,
-            y,
+            x: x + (Math.random() - 0.5) * SPACING * 0.8,
+            y: y + (Math.random() - 0.5) * SPACING * 0.8,
           });
         }
       }

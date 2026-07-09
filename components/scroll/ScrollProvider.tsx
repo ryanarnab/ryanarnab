@@ -1,37 +1,69 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+} from "react";
 
-const ScrollContext = createContext(0);
+import {
+  MotionValue,
+  motionValue,
+} from "framer-motion";
+
+const scrollProgress = motionValue(0);
+
+const ScrollContext =
+  createContext<MotionValue<number>>(scrollProgress);
 
 export function ScrollProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [progress, setProgress] = useState(0);
-
   useEffect(() => {
-    const update = () => {
-      const h = window.innerHeight;
+    let ticking = false;
 
-      const p = Math.min(window.scrollY / h, 1);
+    const updateScroll = () => {
+      const viewportHeight = window.innerHeight;
 
-      setProgress(p);
+      const progress = Math.min(
+        Math.max(window.scrollY / viewportHeight, 0),
+        1
+      );
+
+      scrollProgress.set(progress);
+      ticking = false;
     };
 
-    update();
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScroll);
+        ticking = true;
+      }
+    };
 
-    window.addEventListener("scroll", update);
+    updateScroll();
 
-    return () => window.removeEventListener("scroll", update);
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    window.addEventListener("resize", updateScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateScroll);
+    };
   }, []);
 
   return (
-    <ScrollContext.Provider value={progress}>
+    <ScrollContext.Provider value={scrollProgress}>
       {children}
     </ScrollContext.Provider>
   );
 }
 
-export const useScrollProgress = () => useContext(ScrollContext);
+export function useScrollProgress() {
+  return useContext(ScrollContext);
+}
