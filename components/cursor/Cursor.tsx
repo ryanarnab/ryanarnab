@@ -1,246 +1,508 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MousePointer2, Pencil, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Point = {
   x: number;
   y: number;
+  time: number;
 };
 
-function buildSmoothPath(points: Point[]) {
-    if (points.length < 2) return "";
-
-    let d = `M ${points[0].x} ${points[0].y}`;
-
-    for (let i = 1; i < points.length - 1; i++) {
-        const xc = (points[i].x + points[i + 1].x) / 2;
-        const yc = (points[i].y + points[i + 1].y) / 2;
-
-        d += ` Q ${points[i].x} ${points[i].y} ${xc} ${yc}`;
-    }
-
-    return d;
-}
+type Mode = "normal" | "draw";
 
 export default function Cursor() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const trailCanvasRef = useRef<HTMLCanvasElement>(null);
+  const drawCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [cursor, setCursor] = useState<Point>({
+  const cursorRef = useRef<HTMLDivElement>(null);
+
+  const mouse = useRef({
     x: -100,
     y: -100,
   });
-  
-  const [moving, setMoving] = useState(false);
-  
-  const moveTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const [trail, setTrail] = useState<Point[]>([]);
-  const trailTimeout = useRef<NodeJS.Timeout | null>(null);
+  const smoothMouse = useRef({
+    x: -100,
+    y: -100,
+  });
 
-  const [mode, setMode] = useState<"normal" | "draw">("normal");
-
-  const [drawing, setDrawing] = useState(false);
+  const trail = useRef<Point[]>([]);
+  const lastMoveTime = useRef(0);
 
   const currentStroke = useRef<Point[]>([]);
   const strokes = useRef<Point[][]>([]);
 
+  const modeRef = useRef<Mode>("normal");
+  const drawingRef = useRef(false);
+
+  const [mode, setMode] = useState<Mode>("normal");
+  const [hasDrawings, setHasDrawings] = useState(false);
+
+  /*
+    Keep ref synced without rebuilding event listeners.
+  */
   useEffect(() => {
-    const move = (e: PointerEvent) => {
-      const p = {
-        x: e.clientX,
-        y: e.clientY,
-      };
+    modeRef.current = mode;
+  }, [mode]);
 
-      setCursor(p);
+  /*
+    POINTER EVENTS
+  */
+  useEffect(() => {
+    const handleMove = (event: PointerEvent) => {
+      const now = performance.now();
 
-      setTrail((prev) => [...prev.slice(-30), p]);
-      
-      if (trailTimeout.current) {
-        clearTimeout(trailTimeout.current);
-    }
-    
-    trailTimeout.current = setTimeout(() => {
-        setTrail([]);
-    }, 160);
+      mouse.current.x = event.clientX;
+      mouse.current.y = event.clientY;
 
-      if (drawing && mode === "draw") {
-        currentStroke.current.push(p);
+      lastMoveTime.current = now;
+
+      trail.current.push({
+        x: event.clientX,
+        y: event.clientY,
+        time: now,
+      });
+
+      /*
+        Keep the trail short.
+        No React state update here.
+      */
+      if (trail.current.length > 12) {
+        trail.current.shift();
+      }
+
+      if (drawingRef.current && modeRef.current === "draw") {
+        currentStroke.current.push({
+          x: event.clientX,
+          y: event.clientY,
+          time: now,
+        });
       }
     };
 
-    const down = () => {
-      if (mode !== "draw") return;
+    const handleDown = () => {
+      if (modeRef.current !== "draw") return;
 
-      setDrawing(true);
+      drawingRef.current = true;
       currentStroke.current = [];
     };
 
-    const up = () => {
-      if (!drawing) return;
+    const handleUp = () => {
+      if (!drawingRef.current) return;
 
-      setDrawing(false);
+      drawingRef.current = false;
 
       if (currentStroke.current.length > 1) {
         strokes.current.push([...currentStroke.current]);
+        setHasDrawings(true);
       }
 
       currentStroke.current = [];
     };
 
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerdown", down);
-    window.addEventListener("pointerup", up);
+    window.addEventListener("pointermove", handleMove, {
+      passive: true,
+    });
+
+    window.addEventListener("pointerdown", handleDown);
+    window.addEventListener("pointerup", handleUp);
 
     return () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerdown", down);
-      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerdown", handleDown);
+      window.removeEventListener("pointerup", handleUp);
     };
-  }, [drawing, mode]);
+  }, []);
 
+  /*
+    CANVAS + CURSOR ANIMATION
+
+    One RAF loop handles:
+    - smooth cursor movement
+    - short tapered trail
+    - sketch rendering
+  */
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const trailCanvas = trailCanvasRef.current;
+    const drawCanvas = drawCanvasRef.current;
+    const cursor = cursorRef.current;
 
-    if (!canvas) return;
+    if (!trailCanvas || !drawCanvas || !cursor) return;
 
-    const ctx = canvas.getContext("2d");
+    const trailContext = trailCanvas.getContext("2d");
+    const drawContext = drawCanvas.getContext("2d");
 
-    if (!ctx) return;
+    if (!trailContext || !drawContext) return;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      [trailCanvas, drawCanvas].forEach((canvas) => {
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+      });
+
+      trailContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawContext.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resize();
 
     window.addEventListener("resize", resize);
 
-    let frame = 0;
+    let animationFrame = 0;
 
     const render = () => {
-      frame = requestAnimationFrame(render);
+      animationFrame = requestAnimationFrame(render);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const now = performance.now();
 
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      /*
+        Smooth cursor interpolation.
+        No React re-render.
+      */
+      smoothMouse.current.x +=
+        (mouse.current.x - smoothMouse.current.x) * 0.28;
 
-      strokes.current.forEach((stroke) => {
+      smoothMouse.current.y +=
+        (mouse.current.y - smoothMouse.current.y) * 0.28;
+
+      cursor.style.transform = `translate3d(
+        ${smoothMouse.current.x}px,
+        ${smoothMouse.current.y}px,
+        0
+      ) translate(-50%, -50%)`;
+
+      /*
+        TRAIL
+
+        Remove old points aggressively.
+        Trail only exists while actively moving.
+      */
+      trail.current = trail.current.filter(
+        (point) => now - point.time < 110
+      );
+
+      trailContext.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+      );
+
+      if (
+        now - lastMoveTime.current < 75 &&
+        trail.current.length > 1
+      ) {
+        const points = trail.current;
+
+        for (let i = 1; i < points.length; i++) {
+          const previous = points[i - 1];
+          const current = points[i];
+
+          const progress = i / (points.length - 1);
+
+          /*
+            Old end:
+            very thin + nearly invisible
+
+            Cursor end:
+            slightly stronger
+          */
+          const opacity =
+            Math.pow(progress, 2.2) * 0.22;
+
+          const width =
+            0.25 + Math.pow(progress, 1.7) * 1.1;
+
+          trailContext.beginPath();
+
+          trailContext.moveTo(
+            previous.x,
+            previous.y
+          );
+
+          trailContext.lineTo(
+            current.x,
+            current.y
+          );
+
+          trailContext.strokeStyle =
+            `rgba(255, 255, 255, ${opacity})`;
+
+          trailContext.lineWidth = width;
+          trailContext.lineCap = "round";
+
+          trailContext.stroke();
+        }
+      }
+
+      /*
+        DRAWING CANVAS
+      */
+      drawContext.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+      );
+
+      drawContext.lineCap = "round";
+      drawContext.lineJoin = "round";
+      drawContext.strokeStyle = "#ffffff";
+      drawContext.lineWidth = 2;
+
+      const drawStroke = (stroke: Point[]) => {
         if (stroke.length < 2) return;
 
-        ctx.beginPath();
+        drawContext.beginPath();
 
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-
-        ctx.moveTo(stroke[0].x, stroke[0].y);
-
-        for (let i = 1; i < stroke.length; i++) {
-          ctx.lineTo(stroke[i].x, stroke[i].y);
-        }
-
-        ctx.stroke();
-      });
-
-      if (drawing && currentStroke.current.length > 1) {
-        ctx.beginPath();
-
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-
-        ctx.moveTo(
-          currentStroke.current[0].x,
-          currentStroke.current[0].y
+        drawContext.moveTo(
+          stroke[0].x,
+          stroke[0].y
         );
 
-        for (let i = 1; i < currentStroke.current.length; i++) {
-          ctx.lineTo(
-            currentStroke.current[i].x,
-            currentStroke.current[i].y
+        for (let i = 1; i < stroke.length; i++) {
+          drawContext.lineTo(
+            stroke[i].x,
+            stroke[i].y
           );
         }
 
-        ctx.stroke();
+        drawContext.stroke();
+      };
+
+      strokes.current.forEach(drawStroke);
+
+      if (drawingRef.current) {
+        drawStroke(currentStroke.current);
       }
     };
 
     render();
 
     return () => {
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
-  }, [drawing]);
+  }, []);
+
+  const changeMode = (nextMode: Mode) => {
+    setMode(nextMode);
+  };
+
+  const clearDrawings = () => {
+    strokes.current = [];
+    currentStroke.current = [];
+    setHasDrawings(false);
+  };
 
   return (
     <>
+      {/* SUBTLE TAPERED TRAIL */}
       <canvas
-        ref={canvasRef}
-        className="fixed inset-0 z-[9998] pointer-events-none"
+        ref={trailCanvasRef}
+        className="pointer-events-none fixed inset-0 z-[9998] mix-blend-exclusion"
       />
 
-    <svg
-        className="fixed inset-0 pointer-events-none z-[9999]"
-        width="100%"
-        height="100%"
-    >
-        <path
-            d={buildSmoothPath(trail)}
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity=".55"
-        />
-    </svg>
-    
+      {/* SKETCH CANVAS */}
+      <canvas
+        ref={drawCanvasRef}
+        className="pointer-events-none fixed inset-0 z-[9997]"
+      />
+
+      {/* ONE CURSOR ONLY */}
       <div
-        className="fixed z-[10000] rounded-full bg-white pointer-events-none"
-        style={{
-          left: cursor.x,
-          top: cursor.y,
-          width: 6,
-          height: 6,
-          transform: "translate(-50%,-50%)",
-        }}
+        ref={cursorRef}
+        className="
+          pointer-events-none
+          fixed
+          left-0
+          top-0
+          z-[10000]
+          h-[7px]
+          w-[7px]
+          rounded-full
+          bg-white
+          mix-blend-exclusion
+          will-change-transform
+        "
       />
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[10001] flex rounded-full border border-white/10 bg-black/70 backdrop-blur px-2 py-2 gap-2">
-
-        <button
-          onClick={() => setMode("normal")}
-          className={`px-3 py-1 rounded-full text-sm ${
-            mode === "normal"
-              ? "bg-white text-black"
-              : "text-white"
-          }`}
-        >
-          Normal
-        </button>
-
-        <button
-          onClick={() => setMode("draw")}
-          className={`px-3 py-1 rounded-full text-sm ${
-            mode === "draw"
-              ? "bg-white text-black"
-              : "text-white"
-          }`}
-        >
-          Draw
-        </button>
-
-        <button
-          onClick={() => {
-            strokes.current = [];
+      {/* ONE VERTICAL PILL */}
+      <motion.div
+        initial={{
+          opacity: 0,
+          x: 20,
+          scale: 0.94,
+        }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          scale: 1,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 350,
+          damping: 28,
+          mass: 0.7,
+        }}
+        className="
+          fixed
+          right-6
+          top-1/2
+          z-[10001]
+          -translate-y-1/2
+        "
+      >
+        <motion.div
+          layout
+          transition={{
+            layout: {
+              type: "spring",
+              stiffness: 500,
+              damping: 38,
+              mass: 0.7,
+            },
           }}
-          className="px-3 py-1 rounded-full text-sm text-white"
+          className="
+            flex
+            w-[52px]
+            flex-col
+            items-center
+            gap-1
+            rounded-full
+            border
+            border-white/10
+            bg-black/60
+            p-1.5
+            backdrop-blur-xl
+          "
         >
-          Clear
-        </button>
+          {/* EXPLORE */}
+          <motion.button
+            layout
+            onClick={() => changeMode("normal")}
+            whileTap={{ scale: 0.88 }}
+            animate={{
+              backgroundColor:
+                mode === "normal"
+                  ? "rgba(255,255,255,1)"
+                  : "rgba(255,255,255,0)",
 
-      </div>
+              color:
+                mode === "normal"
+                  ? "rgba(0,0,0,1)"
+                  : "rgba(255,255,255,0.55)",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 35,
+            }}
+            className="
+              flex
+              h-10
+              w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+            "
+            aria-label="Explore mode"
+          >
+            <MousePointer2 size={15} />
+          </motion.button>
+
+          {/* SKETCH */}
+          <motion.button
+            layout
+            onClick={() => changeMode("draw")}
+            whileTap={{ scale: 0.88 }}
+            animate={{
+              backgroundColor:
+                mode === "draw"
+                  ? "rgba(255,255,255,1)"
+                  : "rgba(255,255,255,0)",
+
+              color:
+                mode === "draw"
+                  ? "rgba(0,0,0,1)"
+                  : "rgba(255,255,255,0.55)",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 35,
+            }}
+            className="
+              flex
+              h-10
+              w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+            "
+            aria-label="Sketch mode"
+          >
+            <Pencil size={15} />
+          </motion.button>
+
+          {/* CLEAR — ONLY WHEN USEFUL */}
+          <AnimatePresence initial={false}>
+            {mode === "draw" && hasDrawings && (
+              <motion.button
+                key="clear"
+                initial={{
+                  opacity: 0,
+                  scale: 0,
+                  height: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  height: 40,
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0,
+                  height: 0,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 32,
+                }}
+                whileTap={{
+                  scale: 0.85,
+                }}
+                onClick={clearDrawings}
+                className="
+                  flex
+                  w-10
+                  items-center
+                  justify-center
+                  overflow-hidden
+                  rounded-full
+                  text-white/50
+                  transition-colors
+                  hover:bg-white/10
+                  hover:text-white
+                "
+                aria-label="Clear drawing"
+              >
+                <Trash2 size={14} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
     </>
   );
 }
