@@ -150,7 +150,7 @@ export default function Hero() {
       {/* Hero Content */}
       <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-end px-10">
         <div className="max-w-[700px]">
-          <h1 className="leading-[0.9] font-medium tracking-[-0.08em] text-[180px] text-white">
+          <h1 data-wrap-text className="leading-[0.9] font-medium tracking-[-0.08em] text-[180px] text-white">
             <GravityWord>RYAN</GravityWord>
             <GravityWord>ARNAB</GravityWord>
           </h1>

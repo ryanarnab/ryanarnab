@@ -17,6 +17,7 @@ export default function Cursor() {
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const cursorRef = useRef<HTMLDivElement>(null);
+  const satelliteRef = useRef<HTMLDivElement>(null);
 
   const mouse = useRef({
     x: -100,
@@ -28,6 +29,11 @@ export default function Cursor() {
     y: -100,
   });
 
+  const satelliteMouse = useRef({
+    x: -100,
+    y: -100,
+  });
+  
   const trail = useRef<Point[]>([]);
   const lastMoveTime = useRef(0);
 
@@ -39,6 +45,8 @@ export default function Cursor() {
 
   const [mode, setMode] = useState<Mode>("normal");
   const [hasDrawings, setHasDrawings] = useState(false);
+  const [overText, setOverText] = useState(false);
+  const overTextRef = useRef(false);
 
   /*
     Keep ref synced without rebuilding event listeners.
@@ -64,6 +72,19 @@ export default function Cursor() {
         y: event.clientY,
         time: now,
       });
+
+      const element = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+      
+      const isOverText =
+        element?.closest("[data-warp-text]") !== null;
+      
+      if (isOverText !== overTextRef.current) {
+        overTextRef.current = isOverText;
+        setOverText(isOverText);
+      }
 
       /*
         Keep the trail short.
@@ -128,8 +149,9 @@ export default function Cursor() {
     const trailCanvas = trailCanvasRef.current;
     const drawCanvas = drawCanvasRef.current;
     const cursor = cursorRef.current;
-
-    if (!trailCanvas || !drawCanvas || !cursor) return;
+    const satellite = satelliteRef.current;
+    
+    if (!trailCanvas || !drawCanvas || !cursor || !satellite) return;
 
     const trailContext = trailCanvas.getContext("2d");
     const drawContext = drawCanvas.getContext("2d");
@@ -156,21 +178,27 @@ export default function Cursor() {
     window.addEventListener("resize", resize);
 
     let animationFrame = 0;
+    let previousTime = performance.now();
 
     const render = () => {
       animationFrame = requestAnimationFrame(render);
 
       const now = performance.now();
+      const delta = Math.min((now - previousTime) / 1000, 0.05);
+      previousTime = now;
+
+      const cursorSmoothness = 1 - Math.exp(-28 * delta);
+      const satelliteSmoothness = 1 - Math.exp(-10 * delta);
 
       /*
-        Smooth cursor interpolation.
-        No React re-render.
+        MAIN CURSOR
+        Fast, smooth, responsive.
       */
       smoothMouse.current.x +=
-        (mouse.current.x - smoothMouse.current.x) * 0.28;
+        (mouse.current.x - smoothMouse.current.x) * cursorSmoothness;
 
       smoothMouse.current.y +=
-        (mouse.current.y - smoothMouse.current.y) * 0.28;
+        (mouse.current.y - smoothMouse.current.y) * cursorSmoothness;
 
       cursor.style.transform = `translate3d(
         ${smoothMouse.current.x}px,
@@ -179,13 +207,29 @@ export default function Cursor() {
       ) translate(-50%, -50%)`;
 
       /*
-        TRAIL
+        SATELLITE
+        Smoothly follows the main cursor with more inertia.
+      */
+      satelliteMouse.current.x +=
+        (smoothMouse.current.x - satelliteMouse.current.x) *
+        satelliteSmoothness;
 
-        Remove old points aggressively.
-        Trail only exists while actively moving.
+      satelliteMouse.current.y +=
+        (smoothMouse.current.y - satelliteMouse.current.y) *
+        satelliteSmoothness;
+
+      satellite.style.transform = `translate3d(
+        ${satelliteMouse.current.x}px,
+        ${satelliteMouse.current.y}px,
+        0
+      ) translate(-50%, -50%)`;
+
+      /*
+        TRAIL
+        Short, visible and tapered.
       */
       trail.current = trail.current.filter(
-        (point) => now - point.time < 110
+        (point) => now - point.time < 130
       );
 
       trailContext.clearRect(
@@ -196,7 +240,7 @@ export default function Cursor() {
       );
 
       if (
-        now - lastMoveTime.current < 75 &&
+        now - lastMoveTime.current < 100 &&
         trail.current.length > 1
       ) {
         const points = trail.current;
@@ -207,18 +251,11 @@ export default function Cursor() {
 
           const progress = i / (points.length - 1);
 
-          /*
-            Old end:
-            very thin + nearly invisible
-
-            Cursor end:
-            slightly stronger
-          */
           const opacity =
-            Math.pow(progress, 2.2) * 0.22;
+            Math.pow(progress, 1.8) * 0.24;
 
           const width =
-            0.25 + Math.pow(progress, 1.7) * 1.1;
+            0.3 + Math.pow(progress, 1.5) * 1.25;
 
           trailContext.beginPath();
 
@@ -307,28 +344,59 @@ export default function Cursor() {
       {/* SUBTLE TAPERED TRAIL */}
       <canvas
         ref={trailCanvasRef}
-        className="pointer-events-none fixed inset-0 z-[9998] mix-blend-exclusion"
+        className="pointer-events-none fixed inset-0 z-[9997] mix-blend-exclusion"
       />
 
       {/* SKETCH CANVAS */}
       <canvas
         ref={drawCanvasRef}
-        className="pointer-events-none fixed inset-0 z-[9997]"
+        className="pointer-events-none fixed inset-0 z-[9996]"
       />
 
-      {/* ONE CURSOR ONLY */}
-      <div
+      {/* MAIN CURSOR — actual pointer */}
+      <motion.div
         ref={cursorRef}
+        animate={{
+          width: overText ? 54 : 14,
+          height: overText ? 54 : 14,
+          backgroundColor: overText
+            ? "rgba(255,255,255,0.08)"
+            : "rgba(255,255,255,1)",
+          borderWidth: overText ? 1 : 0,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 380,
+          damping: 28,
+          mass: 0.6,
+        }}
+        className="
+          pointer-events-none
+          fixed
+          left-0
+          top-0
+          z-[10001]
+          rounded-full
+          border-white/40
+          mix-blend-exclusion
+          backdrop-blur-[1px]
+          will-change-transform
+        "
+      />
+
+      {/* SATELLITE — decorative follower */}
+      <div
+        ref={satelliteRef}
         className="
           pointer-events-none
           fixed
           left-0
           top-0
           z-[10000]
-          h-[7px]
-          w-[7px]
+          h-[4px]
+          w-[4px]
           rounded-full
-          bg-white
+          bg-white/70
           mix-blend-exclusion
           will-change-transform
         "
@@ -356,7 +424,7 @@ export default function Cursor() {
           fixed
           right-6
           top-1/2
-          z-[10001]
+          z-[9998]
           -translate-y-1/2
         "
       >

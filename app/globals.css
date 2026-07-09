@@ -52,11 +52,6 @@ body {
   }
 }
 
-::selection {
-  background: var(--accent);
-  color: var(--foreground);
-}
-
 .glass-nav {
   border-bottom: 1px solid rgb(255 255 255 / 0.12);
   background: rgb(10 10 10 / 0.55);
@@ -78,4 +73,9 @@ body {
 
 * {
   cursor: none !important;
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
 }
