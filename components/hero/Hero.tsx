@@ -134,14 +134,25 @@ function GravityLetter({
 export default function Hero() {
   const progress = useScrollProgress();
 
+  const heroY = useTransform(progress, [0, 1], [0, -420]);
+
+  const heroOpacity = useTransform(progress, [0, 0.74], [1, 0]);
+
+  const heroScale = useTransform(progress, [0, 1], [1, 0.82]);
+
+  const heroBlur = useTransform(
+    progress,
+    [0, 1],
+    ["blur(0px)", "blur(5px)"]
+  );
+
   return (
     <motion.section
       id="hero"
       style={{
-        y: -progress * 420,
-        opacity: Math.max(0, 1 - progress * 1.35),
-        scale: 1 - progress * 0.18,
-        filter: `blur(${progress * 5}px)`,
+        y: heroY,
+        opacity: heroOpacity,
+        scale: heroScale,
       }}
     
       className="relative flex h-screen w-full items-center overflow-hidden"
