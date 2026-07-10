@@ -154,9 +154,8 @@ export default function Hero() {
         y: heroY,
         opacity: heroOpacity,
         scale: heroScale,
-      }}
-    
-      className="relative flex h-screen w-full items-center overflow-hidden"
+      }}   
+      
     >
       {/* Background Particles */}
       <BackgroundParticles />
