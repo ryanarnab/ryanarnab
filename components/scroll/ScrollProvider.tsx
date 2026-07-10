@@ -11,6 +11,8 @@ import {
   motionValue,
 } from "framer-motion";
 
+import Lenis from "lenis";
+
 const scrollProgress = motionValue(0);
 
 const ScrollContext =
@@ -22,38 +24,42 @@ export function ScrollProvider({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    let ticking = false;
+    const lenis = new Lenis({
+      lerp: 0.12,
+      smoothWheel: true,
+      syncTouch: false,
+      wheelMultiplier: 1,
+    });
 
-    const updateScroll = () => {
+    const updateProgress = ({
+      scroll,
+    }: {
+      scroll: number;
+    }) => {
       const viewportHeight = window.innerHeight;
 
       const progress = Math.min(
-        Math.max(window.scrollY / viewportHeight, 0),
+        Math.max(scroll / viewportHeight, 0),
         1
       );
 
       scrollProgress.set(progress);
-      ticking = false;
     };
 
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateScroll);
-        ticking = true;
-      }
+    lenis.on("scroll", updateProgress);
+
+    let animationFrame = 0;
+
+    const raf = (time: number) => {
+      lenis.raf(time);
+      animationFrame = requestAnimationFrame(raf);
     };
 
-    updateScroll();
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    window.addEventListener("resize", updateScroll);
+    animationFrame = requestAnimationFrame(raf);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateScroll);
+      cancelAnimationFrame(animationFrame);
+      lenis.destroy();
     };
   }, []);
 

@@ -39,9 +39,21 @@ const projects = [
 
 export default function WorkSection() {
   return (
-    <section
+    <motion.section
       id="works"
-      className="relative w-full overflow-hidden bg-black text-white"
+      initial={{
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+      }}
+      className="
+        relative
+        z-20
+        w-full
+        overflow-hidden
+        rounded-t-[32px]
+        bg-[#000000]
+        text-white
+      "
     >
       {/* INTRO */}
       <div className="mx-auto flex min-h-screen w-full max-w-[1400px] items-center px-10">
@@ -155,6 +167,6 @@ export default function WorkSection() {
           );
         })}
       </div>
-    </section>
+    </motion.section>
   );
 }

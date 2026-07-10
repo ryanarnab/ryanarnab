@@ -149,6 +149,7 @@ export default function Hero() {
   return (
     <motion.section
       id="hero"
+      className="sticky top-0 flex h-screen w-full items-center overflow-hidden"
       style={{
         y: heroY,
         opacity: heroOpacity,

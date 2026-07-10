@@ -15,8 +15,14 @@ export default function Home() {
       {/*<ImageTrail />*/}
 
       <Navbar />
-      <Hero />
-      <WorkSection />
+      <div className="relative">
+        <Hero />
+
+      <div className="relative z-20">
+        <WorkSection />
+      </div>
+      </div>
+
       <AboutSection />
       <PlaygroundSection />
 
