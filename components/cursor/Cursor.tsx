@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { MousePointer2, Pencil, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import ClickEffects from "./ClickEffects";
+import { label } from "framer-motion/client";
 
 type Point = {
   x: number;
@@ -18,6 +20,7 @@ export default function Cursor() {
 
   const cursorRef = useRef<HTMLDivElement>(null);
   const satelliteRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
 
   const mouse = useRef({
     x: -100,
@@ -47,6 +50,7 @@ export default function Cursor() {
   const [hasDrawings, setHasDrawings] = useState(false);
   const [overText, setOverText] = useState(false);
   const overTextRef = useRef(false);
+  const [cursorLabel, setCursorLabel] = useState("");
 
   /*
     Keep ref synced without rebuilding event listeners.
@@ -54,6 +58,14 @@ export default function Cursor() {
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
+
+  useEffect(() => {
+    (window as any).setCursorLabel = setCursorLabel;
+  
+    return () => {
+      delete (window as any).setCursorLabel;
+    };
+  }, []);
 
   /*
     POINTER EVENTS
@@ -194,11 +206,13 @@ export default function Cursor() {
         MAIN CURSOR
         Fast, smooth, responsive.
       */
-      smoothMouse.current.x +=
-        (mouse.current.x - smoothMouse.current.x) * cursorSmoothness;
+      const follow = 1 - Math.exp(-38 * delta);
 
+      smoothMouse.current.x +=
+        (mouse.current.x - smoothMouse.current.x) * follow;
+      
       smoothMouse.current.y +=
-        (mouse.current.y - smoothMouse.current.y) * cursorSmoothness;
+        (mouse.current.y - smoothMouse.current.y) * follow;
 
       cursor.style.transform = `translate3d(
         ${smoothMouse.current.x}px,
@@ -210,19 +224,28 @@ export default function Cursor() {
         SATELLITE
         Smoothly follows the main cursor with more inertia.
       */
-      satelliteMouse.current.x +=
-        (smoothMouse.current.x - satelliteMouse.current.x) *
-        satelliteSmoothness;
+      const orbit = 1 - Math.exp(-15 * delta);
 
+      satelliteMouse.current.x +=
+        (smoothMouse.current.x - satelliteMouse.current.x) * orbit;
+      
       satelliteMouse.current.y +=
-        (smoothMouse.current.y - satelliteMouse.current.y) *
-        satelliteSmoothness;
+        (smoothMouse.current.y - satelliteMouse.current.y) * orbit;
 
       satellite.style.transform = `translate3d(
         ${satelliteMouse.current.x}px,
         ${satelliteMouse.current.y}px,
         0
       ) translate(-50%, -50%)`;
+
+      if (labelRef.current) {
+        labelRef.current.style.transform = `translate3d(
+          ${smoothMouse.current.x}px,
+          ${smoothMouse.current.y - 42}px,
+          0
+        ) translate(-50%, -50%)`;
+        labelRef.current.style.opacity = cursorLabel ? "1" : "0";
+      }
 
       /*
         TRAIL
@@ -341,6 +364,9 @@ export default function Cursor() {
 
   return (
     <>
+
+    <ClickEffects />
+    
       {/* SUBTLE TAPERED TRAIL */}
       <canvas
         ref={trailCanvasRef}
@@ -356,23 +382,11 @@ export default function Cursor() {
       {/* MAIN CURSOR — actual pointer */}
       <motion.div
         ref={cursorRef}
-        animate={{
-          width: overText ? 54 : 14,
-          height: overText ? 54 : 14,
-          backgroundColor: overText
-            ? "rgba(255,255,255,0.08)"
-            : "rgba(255,255,255,1)",
-          borderWidth: overText ? 1 : 0,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 380,
-          damping: 28,
-          mass: 0.6,
-        }}
+        initial={false}
         className="
           pointer-events-none
           fixed
+          opacity-0
           left-0
           top-0
           z-[10001]
@@ -383,6 +397,44 @@ export default function Cursor() {
           will-change-transform
         "
       />
+
+      <motion.div
+        ref={labelRef}
+        animate={{
+          opacity: cursorLabel ? 1 : 0,
+          scale: cursorLabel ? 1 : 0.85,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 400,
+          damping: 30,
+        }}
+        className="
+          pointer-events-none
+          fixed
+          left-0
+          top-0
+          z-[10002]
+          px-3
+          py-1
+          rounded-full
+          bg-white/10
+          border
+          border-white/15
+          backdrop-blur-md
+          text-white
+          text-[10px]
+          font-medium
+          uppercase
+          tracking-[0.18em]
+          whitespace-nowrap
+          mix-blend-normal
+          will-change-transform
+        "
+      >
+        {cursorLabel}
+      </motion.div>
+
 
       {/* SATELLITE — decorative follower */}
       <div
@@ -572,5 +624,7 @@ export default function Cursor() {
         </motion.div>
       </motion.div>
     </>
+
+
   );
 }
