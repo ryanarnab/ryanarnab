@@ -24,9 +24,9 @@ const LERP_SPEED = 0.14;
 
 const SPACE_PALETTE = [
   "rgba(255, 255, 255,",   // Pure Stardust
-  "rgba(180, 230, 255,",   // Cosmic Cyan
-  "rgba(216, 180, 254,",   // Nebula Violet
-  "rgba(255, 255, 255,",   // Pure Stardust
+  "rgba(251, 191, 36,",    // Martian Solar Amber
+  "rgba(251, 146, 60,",    // Mars Warm Rust
+  "rgba(253, 230, 138,",   // Golden Hour Light
 ];
 
 export default function BackgroundParticles() {

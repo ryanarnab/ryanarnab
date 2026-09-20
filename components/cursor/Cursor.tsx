@@ -30,6 +30,13 @@ export default function Cursor() {
     y: -100,
   });
 
+  const targetPillOffset = useRef({
+    x: 0,
+    y: 0,
+  });
+
+  const hoveredElementRect = useRef<DOMRect | null>(null);
+
   const orbitAngle = useRef(0);
   const trail = useRef<Point[]>([]);
   const lastMoveTime = useRef(0);
@@ -77,7 +84,7 @@ export default function Cursor() {
   }, []);
 
   /*
-    ZERO-LATENCY DIRECT POINTER EVENTS
+    ZERO-LATENCY DIRECT POINTER EVENTS WITH SMART COLLISION DETECTION
   */
   useEffect(() => {
     if (!isFinePointer) return;
@@ -91,7 +98,7 @@ export default function Cursor() {
       mouse.current.y = clientY;
       lastMoveTime.current = now;
 
-      // DIRECT ZERO-LATENCY INSTANT UPDATE ON PLANET
+      // DIRECT ZERO-LATENCY INSTANT POINTER UPDATE
       if (planetRef.current) {
         planetRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%)`;
       }
@@ -103,12 +110,38 @@ export default function Cursor() {
       });
 
       const element = document.elementFromPoint(clientX, clientY);
-      const interactive =
-        element?.closest("a, button, [role='button'], input, textarea, [data-interactive]") !== null;
+      const interactiveEl = element?.closest(
+        "a, button, [role='button'], input, textarea, [data-interactive], [data-warp-text]"
+      );
+      const interactive = interactiveEl !== null;
 
       if (interactive !== isInteractiveRef.current) {
         isInteractiveRef.current = interactive;
         setIsInteractive(interactive);
+      }
+
+      if (interactiveEl) {
+        const rect = interactiveEl.getBoundingClientRect();
+        hoveredElementRect.current = rect;
+
+        // DYNAMIC COLLISION AVOIDANCE CALCULATION:
+        // Position the pill safely away from the element boundary and cursor tip
+        let pillX = clientX + 32;
+        let pillY = rect.top - 24; // Float above element
+
+        // If too close to the top screen edge, float below the element
+        if (pillY < 40) {
+          pillY = rect.bottom + 24;
+        }
+
+        // If too close to the right screen edge, float to the left
+        if (clientX > window.innerWidth - 160) {
+          pillX = rect.left - 48;
+        }
+
+        targetPillOffset.current = { x: pillX, y: pillY };
+      } else {
+        hoveredElementRect.current = null;
       }
 
       if (trail.current.length > 16) {
@@ -197,15 +230,22 @@ export default function Cursor() {
       const isMoving = now - lastMoveTime.current < 120;
       const hasAction = !!cursorLabelRef.current || isInteractiveRef.current;
 
-      // SATELLITE ORBITAL LAG OR EXPANDED ACTION PILL OFFSET
+      // SATELLITE WITH COLLISION AVOIDANCE POSITIONING
       if (hasAction) {
-        // Position smoothly next to the cursor like an orbital capsule
-        const targetX = mx + 24;
-        const targetY = my - 12;
-        const satFollow = 1 - Math.exp(-22 * delta);
+        let targetX = targetPillOffset.current.x;
+        let targetY = targetPillOffset.current.y;
+
+        // Fallback offset if no specific rect computed
+        if (!targetX || !targetY) {
+          targetX = mx > window.innerWidth - 180 ? mx - 70 : mx + 40;
+          targetY = my < 80 ? my + 30 : my - 24;
+        }
+
+        const satFollow = 1 - Math.exp(-20 * delta);
         satellitePos.current.x += (targetX - satellitePos.current.x) * satFollow;
         satellitePos.current.y += (targetY - satellitePos.current.y) * satFollow;
       } else {
+        // Celestial Orbit around planet core
         orbitAngle.current += delta * (isMoving ? 2.0 : 2.8);
         const orbitRadius = isMoving ? 16 : 20;
         const targetX = mx + Math.cos(orbitAngle.current) * orbitRadius;
@@ -217,7 +257,7 @@ export default function Cursor() {
 
       satellite.style.transform = `translate3d(${satellitePos.current.x}px, ${satellitePos.current.y}px, 0) translate(-50%, -50%)`;
 
-      // STARDUST TRAIL (Cosmic stardust gradient stream)
+      // WARM SOLAR STARDUST TRAIL
       trail.current = trail.current.filter((point) => now - point.time < 160);
       trailContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -227,14 +267,14 @@ export default function Cursor() {
           const prev = points[i - 1];
           const curr = points[i];
           const progress = i / (points.length - 1);
-          const opacity = Math.pow(progress, 1.6) * 0.4;
+          const opacity = Math.pow(progress, 1.6) * 0.45;
           const width = 0.5 + Math.pow(progress, 1.4) * 2;
 
           trailContext.beginPath();
           trailContext.moveTo(prev.x, prev.y);
           trailContext.lineTo(curr.x, curr.y);
-          // Subtle celestial starlight cyan hue
-          trailContext.strokeStyle = `rgba(180, 230, 255, ${opacity})`;
+          // Warm Martian solar amber trail
+          trailContext.strokeStyle = `rgba(251, 191, 36, ${opacity})`;
           trailContext.lineWidth = width;
           trailContext.lineCap = "round";
           trailContext.stroke();
@@ -245,7 +285,7 @@ export default function Cursor() {
       drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       drawContext.lineCap = "round";
       drawContext.lineJoin = "round";
-      drawContext.strokeStyle = "rgba(192, 132, 252, 0.85)"; // Nebula violet starlight
+      drawContext.strokeStyle = "rgba(245, 158, 11, 0.85)"; // Mars gold
       drawContext.lineWidth = 1.5;
 
       const drawStroke = (stroke: Point[]) => {
@@ -260,7 +300,7 @@ export default function Cursor() {
 
         stroke.forEach((pt, idx) => {
           if (idx % 4 === 0 || idx === stroke.length - 1) {
-            drawContext.fillStyle = "#38bdf8"; // Cosmic cyan star
+            drawContext.fillStyle = "#fb923c"; // Orange star
             drawContext.beginPath();
             drawContext.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
             drawContext.fill();
@@ -330,13 +370,13 @@ export default function Cursor() {
           will-change-transform
           ${
             isInteractive
-              ? "h-3.5 w-3.5 bg-cyan-300 shadow-[0_0_14px_rgba(56,189,248,0.9)]"
+              ? "h-3.5 w-3.5 bg-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.9)]"
               : "h-2 w-2 bg-white shadow-[0_0_10px_rgba(255,255,255,1)]"
           }
         `}
       />
 
-      {/* 🛰️ THE SATELLITE (Morphs from Orbiting Moon into Action Pill Capsule on Hover) */}
+      {/* 🛰️ THE DYNAMIC SATELLITE (Smart Collision Avoidance & Morphing Action Pill) */}
       <div
         ref={satelliteRef}
         className={`
@@ -355,14 +395,14 @@ export default function Cursor() {
           will-change-transform
           ${
             activeLabel
-              ? "px-3 py-1 bg-black/80 border border-cyan-400/40 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.25)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
-              : "h-1.5 w-1.5 bg-violet-300/90 shadow-[0_0_8px_rgba(192,132,252,0.8)]"
+              ? "px-3.5 py-1 bg-black/90 border border-amber-500/40 text-amber-200 shadow-[0_0_24px_rgba(245,158,11,0.3)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
+              : "h-1.5 w-1.5 bg-amber-400/90 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
           }
         `}
       >
         {activeLabel && (
           <span className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="h-1 w-1 rounded-full bg-cyan-400 animate-ping" />
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
             {activeLabel}
           </span>
         )}
@@ -412,7 +452,7 @@ export default function Cursor() {
               transition-all
               ${
                 mode === "normal"
-                  ? "bg-white text-black shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+                  ? "bg-amber-400 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)]"
                   : "text-white/40 hover:text-white"
               }
             `}
@@ -435,7 +475,7 @@ export default function Cursor() {
               transition-all
               ${
                 mode === "draw"
-                  ? "bg-violet-400 text-black shadow-[0_0_12px_rgba(192,132,252,0.6)]"
+                  ? "bg-orange-500 text-white shadow-[0_0_12px_rgba(234,88,12,0.6)]"
                   : "text-white/40 hover:text-white"
               }
             `}

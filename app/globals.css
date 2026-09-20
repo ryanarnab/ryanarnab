@@ -3,10 +3,11 @@
 :root {
   --background: #000000;
   --foreground: #ffffff;
-  --muted: #8e8e93;
-  --accent: #e8ff00;
-  --stardust: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.1);
+  --muted: #a1a1aa;
+  --accent: #f59e0b;
+  --mars-rust: #ea580c;
+  --mars-gold: #fbbf24;
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
@@ -14,6 +15,8 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-mars-rust: var(--mars-rust);
+  --color-mars-gold: var(--mars-gold);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-instrument-serif);
@@ -34,10 +37,10 @@ html,
 body {
   min-height: 100%;
   background-color: #000000;
-  /* Deep Space Cosmic Nebula subtle backdrop */
+  /* Mars Golden Hour Sunrise Atmospheric Backdrop */
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 70%, rgba(30, 64, 175, 0.08), transparent);
+    radial-gradient(ellipse 95% 45% at 50% -10%, rgba(245, 158, 11, 0.18), rgba(234, 88, 12, 0.09), transparent 75%),
+    radial-gradient(ellipse 60% 35% at 85% 65%, rgba(225, 29, 72, 0.06), transparent 70%);
   background-attachment: fixed;
   color: #ffffff;
   overflow-x: hidden;
@@ -63,14 +66,14 @@ body {
 /* Telemetry Glass styling */
 .glass-telemetry {
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(10, 10, 12, 0.65);
+  background: rgba(12, 10, 10, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
 .glass-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(130% 100% at 50% 0%, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: radial-gradient(130% 100% at 50% 0%, rgba(251, 146, 60, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
   backdrop-filter: blur(12px);
 }
 
