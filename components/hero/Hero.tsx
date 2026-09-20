@@ -162,14 +162,18 @@ export default function Hero() {
 
       {/* Hero Content */}
       <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-end px-10">
-        <div className="max-w-[700px]">
-          <h1 data-wrap-text className="leading-[0.9] font-medium tracking-[-0.08em] text-[180px] text-white">
+        <div className="max-w-[850px]">
+          <h1
+            data-warp-text
+            data-wrap-text
+            className="text-[clamp(68px,13.5vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-white"
+          >
             <GravityWord>RYAN</GravityWord>
             <GravityWord>ARNAB</GravityWord>
           </h1>
 
-          <p className="mt-8 ml-auto w-[230px] text-right text-sm leading-5 text-white/80">
-           
+          <p className="mt-8 ml-auto max-w-[280px] text-right text-xs sm:text-sm leading-relaxed text-white/60">
+            Communication Designer & Creative Developer exploring identity, interaction and motion.
           </p>
         </div>
       </div>

@@ -40,9 +40,9 @@ export default function ContactSection() {
           max-w-[1400px]
           flex-col
           justify-between
-          px-10
+          px-6 sm:px-10
           pb-10
-          pt-32
+          pt-24 sm:pt-32
         "
       >
         {/* TOP INFORMATION */}
@@ -92,14 +92,14 @@ export default function ContactSection() {
             duration: 0.9,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="py-24"
+          className="py-16 sm:py-24"
         >
           <p
             className="
               mb-8
               max-w-[380px]
-              text-sm
-              leading-6
+              text-xs sm:text-sm
+              leading-relaxed
               text-white/45
             "
           >
@@ -110,9 +110,9 @@ export default function ContactSection() {
           <h2
             className="
               max-w-[1250px]
-              text-[clamp(70px,12vw,180px)]
+              text-[clamp(54px,11vw,180px)]
               font-medium
-              leading-[0.8]
+              leading-[0.85]
               tracking-[-0.085em]
             "
           >
@@ -131,7 +131,7 @@ export default function ContactSection() {
           {/* EMAIL */}
 
           <motion.a
-            href="mailto:your-email@example.com"
+            href="mailto:ryanarnab.design@gmail.com"
             whileHover={{
               x: 8,
             }}
@@ -142,21 +142,21 @@ export default function ContactSection() {
             }}
             className="
               group
-              mt-20
+              mt-14 sm:mt-20
               inline-flex
               items-center
-              gap-4
+              gap-3 sm:gap-4
               border-b
               border-white/25
-              pb-3
-              text-[clamp(22px,3vw,42px)]
-              tracking-[-0.04em]
+              pb-2 sm:pb-3
+              text-[clamp(18px,2.8vw,42px)]
+              tracking-[-0.03em]
               text-white
               transition-colors
               hover:border-white
             "
           >
-            your-email@example.com
+            ryanarnab.design@gmail.com
 
             <ArrowUpRight
               className="
@@ -164,7 +164,7 @@ export default function ContactSection() {
                 duration-300
                 group-hover:rotate-45
               "
-              size={30}
+              size={24}
               strokeWidth={1.5}
             />
           </motion.a>
@@ -175,8 +175,10 @@ export default function ContactSection() {
         <div
           className="
             flex
-            items-end
+            flex-col sm:flex-row
+            items-start sm:items-end
             justify-between
+            gap-6 sm:gap-0
             border-t
             border-white/10
             pt-6
@@ -192,7 +194,7 @@ export default function ContactSection() {
             </p>
           </div>
 
-          <div className="flex items-center gap-7">
+          <div className="flex items-center gap-6 sm:gap-7">
             {links.map((link) => (
               <a
                 key={link.label}

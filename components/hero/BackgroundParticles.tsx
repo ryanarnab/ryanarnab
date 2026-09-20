@@ -1,364 +1,195 @@
 "use client";
 
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform
-} from "framer-motion";
-
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-import { useScrollProgress } from "../scroll/ScrollProvider";
+import { useEffect, useRef } from "react";
 
 type Dot = {
   id: number;
-  x: number;
-  y: number;
+  baseX: number;
+  baseY: number;
+  currX: number;
+  currY: number;
+  currOpacity: number;
+  seed: number;
+  turbSeed: number;
 };
 
 const DOT_SIZE = 2;
 const SPACING = 34;
-
-/*
-  Size of the cursor interaction area
-*/
 const RADIUS = 170;
-
-/*
-  How far particles get pushed away
-*/
+const RADIUS_SQ = RADIUS * RADIUS;
 const FORCE = 95;
-
-/*
-  Normal visibility of every dot
-*/
 const BASE_OPACITY = 0.40;
-
-const SPRING = {
-  stiffness: 150,
-  damping: 16,
-  mass: 0.5,
-};
+const LERP_SPEED = 0.14;
 
 export default function BackgroundParticles() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const scrollProgress = useScrollProgress();
-
-  const mouseX = useMotionValue(
-    Number.POSITIVE_INFINITY
-  );
-
-  const mouseY = useMotionValue(
-    Number.POSITIVE_INFINITY
-  );
-
-  const [dots, setDots] = useState<Dot[]>([]);
+  const mouseRef = useRef({ x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY });
 
   useEffect(() => {
-    const createDots = () => {
-      if (!containerRef.current) return;
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
 
-      const rect =
-        containerRef.current.getBoundingClientRect();
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let dots: Dot[] = [];
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+
+    const resize = () => {
+      const rect = container.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = rect.width;
+      height = rect.height;
+
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
 
       const newDots: Dot[] = [];
-
       let id = 0;
 
-      for (
-        let y = 0;
-        y < rect.height;
-        y += SPACING
-      ) {
-        for (
-          let x = 0;
-          x < rect.width;
-          x += SPACING
-        ) {
+      for (let y = 0; y < height; y += SPACING) {
+        for (let x = 0; x < width; x += SPACING) {
+          const baseX = x + (Math.random() - 0.5) * SPACING * 0.8;
+          const baseY = y + (Math.random() - 0.5) * SPACING * 0.8;
           newDots.push({
             id: id++,
-            x: x + (Math.random() - 0.5) * SPACING * 0.8,
-            y: y + (Math.random() - 0.5) * SPACING * 0.8,
+            baseX,
+            baseY,
+            currX: baseX,
+            currY: baseY,
+            currOpacity: BASE_OPACITY,
+            seed: id * 0.73,
+            turbSeed: id * 1.73,
           });
         }
       }
-
-      setDots(newDots);
+      dots = newDots;
     };
 
-    createDots();
+    resize();
 
-    const observer = new ResizeObserver(createDots);
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+    const handlePointerMove = (e: PointerEvent) => {
+      const rect = container.getBoundingClientRect();
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        mouseRef.current.x = e.clientX - rect.left;
+        mouseRef.current.y = e.clientY - rect.top;
+      } else {
+        mouseRef.current.x = Number.NEGATIVE_INFINITY;
+        mouseRef.current.y = Number.NEGATIVE_INFINITY;
+      }
+    };
 
-    return () => observer.disconnect();
-  }, []);
+    const handlePointerLeave = () => {
+      mouseRef.current.x = Number.NEGATIVE_INFINITY;
+      mouseRef.current.y = Number.NEGATIVE_INFINITY;
+    };
 
-  type ParticleProps = {
-    dot: Dot;
-    mouseX: typeof mouseX;
-    mouseY: typeof mouseY;
-  };
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
 
-  function Particle({
-    dot,
-    mouseX,
-    mouseY,
-  }: ParticleProps) {
-    const x = useSpring(0, SPRING);
-    const y = useSpring(0, SPRING);
+    const render = (time: number) => {
+      const t = time * 0.0005;
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      const mouseActive = Number.isFinite(mx) && Number.isFinite(my);
 
-    const opacity = useSpring(
-      BASE_OPACITY,
-      SPRING
-    );
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
 
-    const idleX = useMotionValue(0);
-    const idleY = useMotionValue(0);
+      for (let i = 0; i < dots.length; i++) {
+        const dot = dots[i];
+        const seed = dot.seed;
 
-    const combinedX = useTransform(
-      [x, idleX],
-      ([mouseOffset, idleOffset]) =>
-        Number(mouseOffset) + Number(idleOffset)
-    );
-    
-    const combinedY = useTransform(
-      [y, idleY],
-      ([mouseOffset, idleOffset]) =>
-        Number(mouseOffset) + Number(idleOffset)
-    );
-
-    useEffect(() => {
-      let animationFrame: number;
-    
-      const seed = dot.id * 0.73;
-    
-      const animate = (time: number) => {
-        const t = time * 0.0005;
-    
-        // Very subtle organic space-like drift
+        // Multi-frequency organic idle drift
         const driftX =
           Math.sin(t + seed) * 15 +
-          Math.sin(t * 0.50 + seed * 2.1) * 5;
+          Math.sin(t * 0.5 + seed * 2.1) * 5;
 
         const driftY =
           Math.cos(t * 0.8 + seed) * 10 +
           Math.sin(t * 0.35 + seed * 1.7) * 5;
-    
-        idleX.set(driftX);
-        idleY.set(driftY);
-    
-        animationFrame = requestAnimationFrame(animate);
-      };
-    
-      animationFrame = requestAnimationFrame(animate);
-    
-      return () => {
-        cancelAnimationFrame(animationFrame);
-      };
-    }, [dot.id, idleX, idleY]);
-    
-    useEffect(() => {
-      const update = () => {
-        const mx = mouseX.get();
-        const my = mouseY.get();
 
-        /*
-          Cursor outside hero:
-          smoothly return home.
-        */
-        if (
-          !Number.isFinite(mx) ||
-          !Number.isFinite(my)
-        ) {
-          x.set(0);
-          y.set(0);
-          opacity.set(BASE_OPACITY);
+        let targetOffsetX = driftX;
+        let targetOffsetY = driftY;
+        let targetOpacity = BASE_OPACITY;
 
-          return;
+        if (mouseActive) {
+          const currentPosX = dot.baseX + driftX;
+          const currentPosY = dot.baseY + driftY;
+          const dx = currentPosX - mx;
+          const dy = currentPosY - my;
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq < RADIUS_SQ) {
+            const dist = Math.sqrt(distSq);
+            const rawStrength = 1 - dist / RADIUS;
+            const strength = rawStrength * rawStrength * (3 - 2 * rawStrength);
+            const safeDistance = Math.max(dist, 0.001);
+            const directionX = dx / safeDistance;
+            const directionY = dy / safeDistance;
+
+            const push = Math.pow(strength, 1.35) * FORCE;
+            const tangentX = -directionY;
+            const tangentY = directionX;
+            const turbulence = Math.sin(dot.turbSeed) * strength * 18;
+
+            targetOffsetX += directionX * push + tangentX * turbulence;
+            targetOffsetY += directionY * push + tangentY * turbulence;
+            targetOpacity = BASE_OPACITY * Math.max(0, 1 - strength * 1.4);
+          }
         }
 
-        const dx = dot.x - mx;
-        const dy = dot.y - my;
+        // Smoothly interpolate towards target position and opacity
+        dot.currX += (dot.baseX + targetOffsetX - dot.currX) * LERP_SPEED;
+        dot.currY += (dot.baseY + targetOffsetY - dot.currY) * LERP_SPEED;
+        dot.currOpacity += (targetOpacity - dot.currOpacity) * LERP_SPEED;
 
-        const distance = Math.sqrt(
-          dx * dx + dy * dy
-        );
-
-        /*
-          Outside interaction radius:
-          stay completely normal.
-        */
-        if (distance >= RADIUS) {
-          x.set(0);
-          y.set(0);
-          opacity.set(BASE_OPACITY);
-
-          return;
+        if (dot.currOpacity > 0.01) {
+          ctx.globalAlpha = dot.currOpacity;
+          ctx.beginPath();
+          ctx.arc(dot.currX, dot.currY, DOT_SIZE / 2, 0, Math.PI * 2);
+          ctx.fill();
         }
-
-        /*
-          1 at cursor centre.
-          0 at edge of radius.
-
-          Smoothstep makes the transition
-          much less harsh.
-        */
-        const rawStrength =
-          1 - distance / RADIUS;
-
-        const strength =
-          rawStrength *
-          rawStrength *
-          (3 - 2 * rawStrength);
-
-        /*
-          Direction away from cursor.
-        */
-        const safeDistance = Math.max(
-          distance,
-          0.001
-        );
-
-        const directionX =
-          dx / safeDistance;
-
-        const directionY =
-          dy / safeDistance;
-
-        /*
-          Stronger push near cursor.
-        */
-        const push = Math.pow(strength, 1.35) * FORCE;
-
-        /*
-          Slight sideways turbulence makes the particles
-          flow around the cursor instead of only moving
-          directly away from it.
-        */
-        const tangentX = -directionY;
-        const tangentY = directionX;
-        
-        const turbulence =
-          Math.sin(dot.id * 1.73) *
-          strength *
-          18;
-        
-        x.set(
-          directionX * push +
-          tangentX * turbulence
-        );
-        
-        y.set(
-          directionY * push +
-          tangentY * turbulence
-        );
-
-        /*
-          Fade particles closest to cursor.
-
-          This creates the clean empty zone.
-        */
-        const newOpacity =
-          BASE_OPACITY *
-          Math.max(
-            0,
-            1 - strength * 1.4
-          );
-
-        opacity.set(newOpacity);
-      };
-
-      const unsubX =
-        mouseX.on("change", update);
-
-      const unsubY =
-        mouseY.on("change", update);
-
-      return () => {
-        unsubX();
-        unsubY();
-      };
-    }, [
-      dot,
-      mouseX,
-      mouseY,
-      x,
-      y,
-      opacity,
-    ]);
-
-    return (
-      <motion.div
-        className="absolute rounded-full bg-white"
-        style={{
-          left: dot.x,
-          top: dot.y,
-          width: DOT_SIZE,
-          height: DOT_SIZE,
-          x: combinedX,
-          y: combinedY,
-          opacity,
-          willChange: "transform, opacity",
-        }}
-      />
-    );
-  }
-
-  useEffect(() => {
-    const handleMove = (event: PointerEvent) => {
-      if (!containerRef.current) return;
-  
-      const rect =
-        containerRef.current.getBoundingClientRect();
-  
-      const isInside =
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom;
-  
-      if (!isInside) {
-        mouseX.set(Number.POSITIVE_INFINITY);
-        mouseY.set(Number.POSITIVE_INFINITY);
-        return;
       }
-  
-      mouseX.set(event.clientX - rect.left);
-      mouseY.set(event.clientY - rect.top);
+
+      ctx.restore();
+      animationFrameId = requestAnimationFrame(render);
     };
-  
-    window.addEventListener("pointermove", handleMove, {
-      passive: true,
-    });
-  
+
+    animationFrameId = requestAnimationFrame(render);
+
     return () => {
-      window.removeEventListener("pointermove", handleMove);
+      cancelAnimationFrame(animationFrameId);
+      resizeObserver.disconnect();
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
     };
-  }, [mouseX, mouseY]);
+  }, []);
 
   return (
     <div
       ref={containerRef}
+      aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
     >
-      {dots.map((dot) => (
-        <Particle
-          key={dot.id}
-          dot={dot}
-          mouseX={mouseX}
-          mouseY={mouseY}
-        />
-      ))}
+      <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
 }

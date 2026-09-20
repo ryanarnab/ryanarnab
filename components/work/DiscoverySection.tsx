@@ -183,7 +183,8 @@ export default function HoverImageReveal({
   };
 
   return (
-    <div
+    <section
+      id="work"
       ref={containerRef}
       onMouseMove={onMove}
       onMouseLeave={() => {
@@ -346,6 +347,6 @@ export default function HoverImageReveal({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

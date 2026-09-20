@@ -37,7 +37,9 @@ export default function ClickEffects({
     effectSize = 90,
     rotation = 2,
     showLabel = false,
-
+    labelText = "",
+    labelColor = "#ffffff",
+    labelFont,
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [rings, setRings] = useState<Effect[]>([]);
@@ -123,7 +125,6 @@ export default function ClickEffects({
                         whiteSpace: "nowrap",
                         pointerEvents: "none",
                         userSelect: "none",
-                        ...labelFont,
                         color: labelColor,
                     }}
                 >

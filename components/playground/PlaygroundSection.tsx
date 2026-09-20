@@ -35,10 +35,10 @@ export default function PlaygroundSection() {
       id="playground"
       className="relative w-full overflow-hidden bg-black text-white"
     >
-      <div className="mx-auto w-full max-w-[1400px] px-10 py-40">
+      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 py-24 sm:py-40">
 
         {/* HEADER */}
-        <div className="mb-24 flex items-center justify-between border-b border-white/10 pb-5">
+        <div className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5">
           <span className="text-xs uppercase tracking-[0.16em] text-white/35">
             Playground / Unfinished Signals
           </span>
@@ -66,14 +66,14 @@ export default function PlaygroundSection() {
             duration: 0.9,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="mb-32"
+          className="mb-20 sm:mb-32"
         >
-          <p className="mb-7 max-w-[380px] text-sm leading-6 text-white/40">
+          <p className="mb-7 max-w-[380px] text-xs sm:text-sm leading-relaxed text-white/40">
             Things made without a brief. Experiments, unfinished ideas and
             random curiosities that were interesting enough to follow.
           </p>
 
-          <h2 className="text-[clamp(80px,14vw,200px)] font-medium leading-[0.8] tracking-[-0.085em]">
+          <h2 className="text-[clamp(60px,14vw,200px)] font-medium leading-[0.8] tracking-[-0.085em]">
             PLAY
             <br />
             GROUND
@@ -106,20 +106,21 @@ export default function PlaygroundSection() {
                 group
                 grid
                 grid-cols-12
-                items-center
+                items-baseline sm:items-center
+                gap-y-2 sm:gap-y-0
                 border-t
                 border-white/10
-                py-8
+                py-6 sm:py-8
               "
             >
-              <span className="col-span-1 text-xs text-white/25">
+              <span className="col-span-2 sm:col-span-1 text-xs text-white/25">
                 {experiment.number}
               </span>
 
               <h3
                 className="
-                  col-span-6
-                  text-[clamp(32px,4vw,62px)]
+                  col-span-10 sm:col-span-6
+                  text-[clamp(24px,3.8vw,62px)]
                   font-medium
                   tracking-[-0.055em]
                   text-white/75
@@ -131,11 +132,11 @@ export default function PlaygroundSection() {
                 {experiment.title}
               </h3>
 
-              <span className="col-span-3 text-xs uppercase tracking-[0.12em] text-white/30">
+              <span className="col-span-8 sm:col-span-3 pl-0 sm:pl-0 text-[11px] sm:text-xs uppercase tracking-[0.12em] text-white/30">
                 {experiment.type}
               </span>
 
-              <span className="col-span-2 text-right text-xs text-white/30">
+              <span className="col-span-4 sm:col-span-2 text-right text-[11px] sm:text-xs text-white/30">
                 {experiment.year}
               </span>
             </motion.article>

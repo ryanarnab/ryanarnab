@@ -32,8 +32,8 @@ html {
 html,
 body {
   min-height: 100%;
-  background: #000;
-  color: #fff;
+  background: #000000;
+  color: #ffffff;
   overflow-x: hidden;
 }
 
@@ -41,14 +41,12 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Custom Cursor hidden only on precision pointer devices */
 @media (pointer: fine) {
-  body {
-    cursor: none;
-  }
-
-  a,
-  button {
-    cursor: none;
+  html,
+  body,
+  * {
+    cursor: none !important;
   }
 }
 
@@ -66,16 +64,11 @@ body {
   color: transparent;
 }
 
-html,
-body {
-  cursor: none;
-}
-
-* {
-  cursor: none !important;
-}
-
-body {
+/* Prevent unwanted selection on drag/canvas elements while keeping text selectable */
+canvas,
+button,
+nav,
+.no-select {
   user-select: none;
   -webkit-user-select: none;
 }

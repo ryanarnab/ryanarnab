@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
-import { CustomCursor } from "./components/CustomCursor";
-import { ExperienceProvider } from "./components/ExperienceProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,8 +14,8 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "RyanArnab",
-  description: "Curiosity Creates Better.",
+  title: "RyanArnab — Communication Designer",
+  description: "Curiosity Creates Better. Portfolio of Arnab Ghosh — visual identity, interaction, and motion design.",
 };
 
 export default function RootLayout({
@@ -30,11 +28,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <ExperienceProvider>
-          <CustomCursor />
-          {children}
-        </ExperienceProvider>
+      <body className="min-h-full flex flex-col bg-black text-white">
+        {children}
       </body>
     </html>
   );

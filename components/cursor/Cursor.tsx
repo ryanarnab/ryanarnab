@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { MousePointer2, Pencil, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ClickEffects from "./ClickEffects";
-import { label } from "framer-motion/client";
 
 type Point = {
   x: number;
