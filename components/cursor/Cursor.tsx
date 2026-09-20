@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MousePointer2, Pencil, Trash2 } from "lucide-react";
+import { MousePointer2, Sparkles, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ClickEffects from "./ClickEffects";
 
@@ -17,25 +17,20 @@ export default function Cursor() {
   const trailCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const cursorRef = useRef<HTMLDivElement>(null);
+  const planetRef = useRef<HTMLDivElement>(null);
   const satelliteRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLDivElement>(null);
 
   const mouse = useRef({
     x: -100,
     y: -100,
   });
 
-  const smoothMouse = useRef({
+  const satellitePos = useRef({
     x: -100,
     y: -100,
   });
 
-  const satelliteMouse = useRef({
-    x: -100,
-    y: -100,
-  });
-  
+  const orbitAngle = useRef(0);
   const trail = useRef<Point[]>([]);
   const lastMoveTime = useRef(0);
 
@@ -47,68 +42,83 @@ export default function Cursor() {
 
   const [mode, setMode] = useState<Mode>("normal");
   const [hasDrawings, setHasDrawings] = useState(false);
-  const [overText, setOverText] = useState(false);
-  const overTextRef = useRef(false);
   const [cursorLabel, setCursorLabel] = useState("");
+  const [isInteractive, setIsInteractive] = useState(false);
+  const [isFinePointer, setIsFinePointer] = useState(false);
 
-  /*
-    Keep ref synced without rebuilding event listeners.
-  */
+  const isInteractiveRef = useRef(false);
+  const cursorLabelRef = useRef("");
+
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
 
   useEffect(() => {
+    cursorLabelRef.current = cursorLabel;
+  }, [cursorLabel]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: fine)");
+    setIsFinePointer(mediaQuery.matches);
+
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setIsFinePointer(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleMediaChange);
+    return () => mediaQuery.removeEventListener("change", handleMediaChange);
+  }, []);
+
+  useEffect(() => {
     (window as any).setCursorLabel = setCursorLabel;
-  
     return () => {
       delete (window as any).setCursorLabel;
     };
   }, []);
 
   /*
-    POINTER EVENTS
+    ZERO-LATENCY DIRECT POINTER EVENTS
   */
   useEffect(() => {
+    if (!isFinePointer) return;
+
     const handleMove = (event: PointerEvent) => {
       const now = performance.now();
+      const clientX = event.clientX;
+      const clientY = event.clientY;
 
-      mouse.current.x = event.clientX;
-      mouse.current.y = event.clientY;
-
+      mouse.current.x = clientX;
+      mouse.current.y = clientY;
       lastMoveTime.current = now;
 
+      // DIRECT ZERO-LATENCY INSTANT UPDATE ON PLANET
+      if (planetRef.current) {
+        planetRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0) translate(-50%, -50%)`;
+      }
+
       trail.current.push({
-        x: event.clientX,
-        y: event.clientY,
+        x: clientX,
+        y: clientY,
         time: now,
       });
 
-      const element = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      );
-      
-      const isOverText =
-        element?.closest("[data-warp-text]") !== null;
-      
-      if (isOverText !== overTextRef.current) {
-        overTextRef.current = isOverText;
-        setOverText(isOverText);
+      const element = document.elementFromPoint(clientX, clientY);
+      const interactive =
+        element?.closest("a, button, [role='button'], input, textarea, [data-interactive]") !== null;
+
+      if (interactive !== isInteractiveRef.current) {
+        isInteractiveRef.current = interactive;
+        setIsInteractive(interactive);
       }
 
-      /*
-        Keep the trail short.
-        No React state update here.
-      */
-      if (trail.current.length > 12) {
+      if (trail.current.length > 16) {
         trail.current.shift();
       }
 
       if (drawingRef.current && modeRef.current === "draw") {
         currentStroke.current.push({
-          x: event.clientX,
-          y: event.clientY,
+          x: clientX,
+          y: clientY,
           time: now,
         });
       }
@@ -116,28 +126,21 @@ export default function Cursor() {
 
     const handleDown = () => {
       if (modeRef.current !== "draw") return;
-
       drawingRef.current = true;
       currentStroke.current = [];
     };
 
     const handleUp = () => {
       if (!drawingRef.current) return;
-
       drawingRef.current = false;
-
       if (currentStroke.current.length > 1) {
         strokes.current.push([...currentStroke.current]);
         setHasDrawings(true);
       }
-
       currentStroke.current = [];
     };
 
-    window.addEventListener("pointermove", handleMove, {
-      passive: true,
-    });
-
+    window.addEventListener("pointermove", handleMove, { passive: true });
     window.addEventListener("pointerdown", handleDown);
     window.addEventListener("pointerup", handleUp);
 
@@ -146,46 +149,37 @@ export default function Cursor() {
       window.removeEventListener("pointerdown", handleDown);
       window.removeEventListener("pointerup", handleUp);
     };
-  }, []);
+  }, [isFinePointer]);
 
   /*
-    CANVAS + CURSOR ANIMATION
-
-    One RAF loop handles:
-    - smooth cursor movement
-    - short tapered trail
-    - sketch rendering
+    ANIMATION LOOP: SATELLITE LAG + ORBIT + ACTION PILL MORPHING + STARDUST TRAIL
   */
   useEffect(() => {
+    if (!isFinePointer) return;
+
     const trailCanvas = trailCanvasRef.current;
     const drawCanvas = drawCanvasRef.current;
-    const cursor = cursorRef.current;
     const satellite = satelliteRef.current;
-    
-    if (!trailCanvas || !drawCanvas || !cursor || !satellite) return;
+
+    if (!trailCanvas || !drawCanvas || !satellite) return;
 
     const trailContext = trailCanvas.getContext("2d");
     const drawContext = drawCanvas.getContext("2d");
-
     if (!trailContext || !drawContext) return;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
       [trailCanvas, drawCanvas].forEach((canvas) => {
         canvas.width = window.innerWidth * dpr;
         canvas.height = window.innerHeight * dpr;
-
         canvas.style.width = `${window.innerWidth}px`;
         canvas.style.height = `${window.innerHeight}px`;
       });
-
       trailContext.setTransform(dpr, 0, 0, dpr, 0, 0);
       drawContext.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resize();
-
     window.addEventListener("resize", resize);
 
     let animationFrame = 0;
@@ -198,146 +192,83 @@ export default function Cursor() {
       const delta = Math.min((now - previousTime) / 1000, 0.05);
       previousTime = now;
 
-      const cursorSmoothness = 1 - Math.exp(-28 * delta);
-      const satelliteSmoothness = 1 - Math.exp(-10 * delta);
+      const mx = mouse.current.x;
+      const my = mouse.current.y;
+      const isMoving = now - lastMoveTime.current < 120;
+      const hasAction = !!cursorLabelRef.current || isInteractiveRef.current;
 
-      /*
-        MAIN CURSOR
-        Fast, smooth, responsive.
-      */
-      const follow = 1 - Math.exp(-38 * delta);
-
-      smoothMouse.current.x +=
-        (mouse.current.x - smoothMouse.current.x) * follow;
-      
-      smoothMouse.current.y +=
-        (mouse.current.y - smoothMouse.current.y) * follow;
-
-      cursor.style.transform = `translate3d(
-        ${smoothMouse.current.x}px,
-        ${smoothMouse.current.y}px,
-        0
-      ) translate(-50%, -50%)`;
-
-      /*
-        SATELLITE
-        Smoothly follows the main cursor with more inertia.
-      */
-      const orbit = 1 - Math.exp(-15 * delta);
-
-      satelliteMouse.current.x +=
-        (smoothMouse.current.x - satelliteMouse.current.x) * orbit;
-      
-      satelliteMouse.current.y +=
-        (smoothMouse.current.y - satelliteMouse.current.y) * orbit;
-
-      satellite.style.transform = `translate3d(
-        ${satelliteMouse.current.x}px,
-        ${satelliteMouse.current.y}px,
-        0
-      ) translate(-50%, -50%)`;
-
-      if (labelRef.current) {
-        labelRef.current.style.transform = `translate3d(
-          ${smoothMouse.current.x}px,
-          ${smoothMouse.current.y - 42}px,
-          0
-        ) translate(-50%, -50%)`;
-        labelRef.current.style.opacity = cursorLabel ? "1" : "0";
+      // SATELLITE ORBITAL LAG OR EXPANDED ACTION PILL OFFSET
+      if (hasAction) {
+        // Position smoothly next to the cursor like an orbital capsule
+        const targetX = mx + 24;
+        const targetY = my - 12;
+        const satFollow = 1 - Math.exp(-22 * delta);
+        satellitePos.current.x += (targetX - satellitePos.current.x) * satFollow;
+        satellitePos.current.y += (targetY - satellitePos.current.y) * satFollow;
+      } else {
+        orbitAngle.current += delta * (isMoving ? 2.0 : 2.8);
+        const orbitRadius = isMoving ? 16 : 20;
+        const targetX = mx + Math.cos(orbitAngle.current) * orbitRadius;
+        const targetY = my + Math.sin(orbitAngle.current) * orbitRadius;
+        const satFollow = 1 - Math.exp((isMoving ? -14 : -18) * delta);
+        satellitePos.current.x += (targetX - satellitePos.current.x) * satFollow;
+        satellitePos.current.y += (targetY - satellitePos.current.y) * satFollow;
       }
 
-      /*
-        TRAIL
-        Short, visible and tapered.
-      */
-      trail.current = trail.current.filter(
-        (point) => now - point.time < 130
-      );
+      satellite.style.transform = `translate3d(${satellitePos.current.x}px, ${satellitePos.current.y}px, 0) translate(-50%, -50%)`;
 
-      trailContext.clearRect(
-        0,
-        0,
-        window.innerWidth,
-        window.innerHeight
-      );
+      // STARDUST TRAIL (Cosmic stardust gradient stream)
+      trail.current = trail.current.filter((point) => now - point.time < 160);
+      trailContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      if (
-        now - lastMoveTime.current < 100 &&
-        trail.current.length > 1
-      ) {
+      if (trail.current.length > 1) {
         const points = trail.current;
-
         for (let i = 1; i < points.length; i++) {
-          const previous = points[i - 1];
-          const current = points[i];
-
+          const prev = points[i - 1];
+          const curr = points[i];
           const progress = i / (points.length - 1);
-
-          const opacity =
-            Math.pow(progress, 1.8) * 0.24;
-
-          const width =
-            0.3 + Math.pow(progress, 1.5) * 1.25;
+          const opacity = Math.pow(progress, 1.6) * 0.4;
+          const width = 0.5 + Math.pow(progress, 1.4) * 2;
 
           trailContext.beginPath();
-
-          trailContext.moveTo(
-            previous.x,
-            previous.y
-          );
-
-          trailContext.lineTo(
-            current.x,
-            current.y
-          );
-
-          trailContext.strokeStyle =
-            `rgba(255, 255, 255, ${opacity})`;
-
+          trailContext.moveTo(prev.x, prev.y);
+          trailContext.lineTo(curr.x, curr.y);
+          // Subtle celestial starlight cyan hue
+          trailContext.strokeStyle = `rgba(180, 230, 255, ${opacity})`;
           trailContext.lineWidth = width;
           trailContext.lineCap = "round";
-
           trailContext.stroke();
         }
       }
 
-      /*
-        DRAWING CANVAS
-      */
-      drawContext.clearRect(
-        0,
-        0,
-        window.innerWidth,
-        window.innerHeight
-      );
-
+      // CONSTELLATION DRAWING CANVAS
+      drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       drawContext.lineCap = "round";
       drawContext.lineJoin = "round";
-      drawContext.strokeStyle = "#ffffff";
-      drawContext.lineWidth = 2;
+      drawContext.strokeStyle = "rgba(192, 132, 252, 0.85)"; // Nebula violet starlight
+      drawContext.lineWidth = 1.5;
 
       const drawStroke = (stroke: Point[]) => {
         if (stroke.length < 2) return;
-
         drawContext.beginPath();
-
-        drawContext.moveTo(
-          stroke[0].x,
-          stroke[0].y
-        );
+        drawContext.moveTo(stroke[0].x, stroke[0].y);
 
         for (let i = 1; i < stroke.length; i++) {
-          drawContext.lineTo(
-            stroke[i].x,
-            stroke[i].y
-          );
+          drawContext.lineTo(stroke[i].x, stroke[i].y);
         }
-
         drawContext.stroke();
+
+        stroke.forEach((pt, idx) => {
+          if (idx % 4 === 0 || idx === stroke.length - 1) {
+            drawContext.fillStyle = "#38bdf8"; // Cosmic cyan star
+            drawContext.beginPath();
+            drawContext.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+            drawContext.fill();
+          }
+        });
       };
 
       strokes.current.forEach(drawStroke);
-
       if (drawingRef.current) {
         drawStroke(currentStroke.current);
       }
@@ -349,7 +280,7 @@ export default function Cursor() {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [isFinePointer]);
 
   const changeMode = (nextMode: Mode) => {
     setMode(nextMode);
@@ -361,117 +292,90 @@ export default function Cursor() {
     setHasDrawings(false);
   };
 
+  if (!isFinePointer) {
+    return null;
+  }
+
+  const activeLabel = cursorLabel || (isInteractive ? "EXPLORE" : "");
+
   return (
     <>
+      <ClickEffects />
 
-    <ClickEffects />
-    
-      {/* SUBTLE TAPERED TRAIL */}
+      {/* STARDUST TRAIL CANVAS */}
       <canvas
         ref={trailCanvasRef}
-        className="pointer-events-none fixed inset-0 z-[9997] mix-blend-exclusion"
+        className="pointer-events-none fixed inset-0 z-[9997]"
       />
 
-      {/* SKETCH CANVAS */}
+      {/* CONSTELLATION SKETCH CANVAS */}
       <canvas
         ref={drawCanvasRef}
         className="pointer-events-none fixed inset-0 z-[9996]"
       />
 
-      {/* MAIN CURSOR — actual pointer */}
-      <motion.div
-        ref={cursorRef}
-        initial={false}
-        className="
-          pointer-events-none
-          fixed
-          opacity-0
-          left-0
-          top-0
-          z-[10001]
-          rounded-full
-          border-white/40
-          mix-blend-exclusion
-          backdrop-blur-[1px]
-          will-change-transform
-        "
-      />
-
-      <motion.div
-        ref={labelRef}
-        animate={{
-          opacity: cursorLabel ? 1 : 0,
-          scale: cursorLabel ? 1 : 0.85,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 400,
-          damping: 30,
-        }}
-        className="
+      {/* 🪐 THE PLANET (Instant Zero-Latency Core Pointer) */}
+      <div
+        ref={planetRef}
+        className={`
           pointer-events-none
           fixed
           left-0
           top-0
           z-[10002]
-          px-3
-          py-1
           rounded-full
-          bg-white/10
-          border
-          border-white/15
-          backdrop-blur-md
-          text-white
-          text-[10px]
-          font-medium
-          uppercase
-          tracking-[0.18em]
-          whitespace-nowrap
-          mix-blend-normal
+          transition-[width,height,box-shadow,background-color]
+          duration-150
+          ease-out
           will-change-transform
-        "
-      >
-        {cursorLabel}
-      </motion.div>
+          ${
+            isInteractive
+              ? "h-3.5 w-3.5 bg-cyan-300 shadow-[0_0_14px_rgba(56,189,248,0.9)]"
+              : "h-2 w-2 bg-white shadow-[0_0_10px_rgba(255,255,255,1)]"
+          }
+        `}
+      />
 
-
-      {/* SATELLITE — decorative follower */}
+      {/* 🛰️ THE SATELLITE (Morphs from Orbiting Moon into Action Pill Capsule on Hover) */}
       <div
         ref={satelliteRef}
-        className="
+        className={`
           pointer-events-none
           fixed
           left-0
           top-0
-          z-[10000]
-          h-[4px]
-          w-[4px]
+          z-[10001]
+          flex
+          items-center
+          justify-center
           rounded-full
-          bg-white/70
-          mix-blend-exclusion
+          transition-all
+          duration-300
+          ease-out
           will-change-transform
-        "
-      />
+          ${
+            activeLabel
+              ? "px-3 py-1 bg-black/80 border border-cyan-400/40 text-cyan-200 shadow-[0_0_20px_rgba(56,189,248,0.25)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
+              : "h-1.5 w-1.5 bg-violet-300/90 shadow-[0_0_8px_rgba(192,132,252,0.8)]"
+          }
+        `}
+      >
+        {activeLabel && (
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
+            <span className="h-1 w-1 rounded-full bg-cyan-400 animate-ping" />
+            {activeLabel}
+          </span>
+        )}
+      </div>
 
-      {/* ONE VERTICAL PILL */}
+      {/* SPACE MODE HUD PILL (Explore vs Constellation Sketch) */}
       <motion.div
-        initial={{
-          opacity: 0,
-          x: 20,
-          scale: 0.94,
-        }}
-        animate={{
-          opacity: 1,
-          x: 0,
-          scale: 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 350,
-          damping: 28,
-          mass: 0.7,
-        }}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
         className="
+          hidden
+          md:block
           fixed
           right-6
           top-1/2
@@ -479,151 +383,97 @@ export default function Cursor() {
           -translate-y-1/2
         "
       >
-        <motion.div
-          layout
-          transition={{
-            layout: {
-              type: "spring",
-              stiffness: 500,
-              damping: 38,
-              mass: 0.7,
-            },
-          }}
+        <div
           className="
             flex
-            w-[52px]
+            w-[48px]
             flex-col
             items-center
-            gap-1
+            gap-1.5
             rounded-full
             border
             border-white/10
-            bg-black/60
+            bg-black/70
             p-1.5
             backdrop-blur-xl
+            shadow-[0_4px_24px_rgba(0,0,0,0.5)]
           "
         >
           {/* EXPLORE */}
-          <motion.button
-            layout
+          <button
             onClick={() => changeMode("normal")}
-            whileTap={{ scale: 0.88 }}
-            animate={{
-              backgroundColor:
-                mode === "normal"
-                  ? "rgba(255,255,255,1)"
-                  : "rgba(255,255,255,0)",
-
-              color:
-                mode === "normal"
-                  ? "rgba(0,0,0,1)"
-                  : "rgba(255,255,255,0.55)",
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 500,
-              damping: 35,
-            }}
-            className="
+            className={`
               flex
-              h-10
-              w-10
-              shrink-0
+              h-9
+              w-9
               items-center
               justify-center
               rounded-full
-            "
+              transition-all
+              ${
+                mode === "normal"
+                  ? "bg-white text-black shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+                  : "text-white/40 hover:text-white"
+              }
+            `}
+            title="Explore Mode"
             aria-label="Explore mode"
           >
-            <MousePointer2 size={15} />
-          </motion.button>
+            <MousePointer2 size={14} />
+          </button>
 
-          {/* SKETCH */}
-          <motion.button
-            layout
+          {/* CONSTELLATION SKETCH */}
+          <button
             onClick={() => changeMode("draw")}
-            whileTap={{ scale: 0.88 }}
-            animate={{
-              backgroundColor:
-                mode === "draw"
-                  ? "rgba(255,255,255,1)"
-                  : "rgba(255,255,255,0)",
-
-              color:
-                mode === "draw"
-                  ? "rgba(0,0,0,1)"
-                  : "rgba(255,255,255,0.55)",
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 500,
-              damping: 35,
-            }}
-            className="
+            className={`
               flex
-              h-10
-              w-10
-              shrink-0
+              h-9
+              w-9
               items-center
               justify-center
               rounded-full
-            "
-            aria-label="Sketch mode"
+              transition-all
+              ${
+                mode === "draw"
+                  ? "bg-violet-400 text-black shadow-[0_0_12px_rgba(192,132,252,0.6)]"
+                  : "text-white/40 hover:text-white"
+              }
+            `}
+            title="Constellation Sketch Mode"
+            aria-label="Constellation sketch mode"
           >
-            <Pencil size={15} />
-          </motion.button>
+            <Sparkles size={14} />
+          </button>
 
-          {/* CLEAR — ONLY WHEN USEFUL */}
-          <AnimatePresence initial={false}>
+          {/* CLEAR DRAWINGS */}
+          <AnimatePresence>
             {mode === "draw" && hasDrawings && (
               <motion.button
-                key="clear"
-                initial={{
-                  opacity: 0,
-                  scale: 0,
-                  height: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  height: 40,
-                }}
-                exit={{
-                  opacity: 0,
-                  scale: 0,
-                  height: 0,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 32,
-                }}
-                whileTap={{
-                  scale: 0.85,
-                }}
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
                 onClick={clearDrawings}
                 className="
                   flex
-                  w-10
+                  h-9
+                  w-9
                   items-center
                   justify-center
-                  overflow-hidden
                   rounded-full
-                  text-white/50
-                  transition-colors
+                  text-white/40
                   hover:bg-white/10
                   hover:text-white
+                  transition-colors
                 "
-                aria-label="Clear drawing"
+                title="Clear Constellations"
+                aria-label="Clear drawings"
               >
-                <Trash2 size={14} />
+                <Trash2 size={13} />
               </motion.button>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </motion.div>
     </>
-
-
   );
 }

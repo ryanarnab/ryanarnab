@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { gsap } from "gsap";
 
 type Effect = { id: string; x: number; y: number };
-type Particle = Effect & { angle: number; distance: number };
+type Particle = Effect & { angle: number; distance: number; color?: string };
 type InteractionMode =
     | "rings"
     | "burst"
@@ -64,6 +64,7 @@ export default function ClickEffects({
             } else if (interactionMode === "burst") {
                 setBursts((prev) => [...prev, { id, x, y }]);
             } else if (interactionMode === "particles") {
+                const COSMIC_COLORS = ["#38bdf8", "#c084fc", "#ffffff", "#67e8f9", "#e879f9", "#a5f3fc"];
                 const newParticles: Particle[] = Array.from(
                     { length: 8 },
                     (_, i) => ({
@@ -74,6 +75,7 @@ export default function ClickEffects({
                         distance:
                             effectSize * 0.2 +
                             Math.random() * (effectSize * 0.3),
+                        color: COSMIC_COLORS[i % COSMIC_COLORS.length],
                     })
                 );
                 setParticles((prev) => [...prev, ...newParticles]);
@@ -276,7 +278,7 @@ export default function ClickEffects({
                             top: particle.y - strokeWidth / 2,
                             width: strokeWidth,
                             height: strokeWidth,
-                            backgroundColor: color,
+                            backgroundColor: particle.color || color,
                             borderRadius: "50%",
                             pointerEvents: "none",
                             transform: `rotate(${rotation}deg)`,

@@ -1,6 +1,3 @@
-// Hover Image Reveal — Originkit
-// Using component defaults.
-
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
@@ -10,108 +7,60 @@ import {
   useSpring,
   type Transition as MotionTransition,
 } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 
-interface Item {
-  text?: string;
-  image?: { src?: string; srcSet?: string; alt?: string };
+interface ProjectItem {
+  id: string;
+  number: string;
+  text: string;
+  category: string;
+  year: string;
+  src: string;
   link?: string;
 }
 
-interface ItemsValue {
-  itemCount?: number;
-  [key: string]: unknown;
-}
-
-const MAX_ITEMS = 6;
-
-interface FontValue {
-  fontSize?: number | string;
-  letterSpacing?: number | string;
-  lineHeight?: number | string;
-  [key: string]: unknown;
-}
-
-interface HoverImageRevealProps {
-  items?: ItemsValue;
-  font?: FontValue;
-  textColor?: string;
-  dimColor?: string;
-  align?: "left" | "center" | "right";
-  rowGap?: number;
-  imageWidth?: number;
-  imageHeight?: number;
-  rounded?: number;
-  offsetX?: number;
-  offsetY?: number;
-  followStrength?: number;
-  transition?: MotionTransition;
-  backgroundColor?: string;
-  style?: CSSProperties;
-}
-
-const DEFAULT_ITEMS_DATA: { text: string; src: string }[] = [
+const PROJECTS: ProjectItem[] = [
   {
-    text: "PROJECT 1",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/8e0d22a8-ac82-4893-90d8-3403f80ec600/w=800",
+    id: "01",
+    number: "EXPEDITION // 01",
+    text: "CHRONO IDENTITY",
+    category: "IDENTITY · SPATIAL MOTION",
+    year: "2026",
+    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
   },
   {
-    text: "PROJECT 2",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/d6af07a0-4dc5-4de4-07b1-9d2ad6100000/w=800",
+    id: "02",
+    number: "EXPEDITION // 02",
+    text: "AURA INTERFACE",
+    category: "CREATIVE DEV · HAPTICS",
+    year: "2026",
+    src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop",
   },
   {
-    text: "PROJECT 3",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/c083d83a-f5a4-4434-989f-4eaa9bbe7500/w=800",
+    id: "03",
+    number: "EXPEDITION // 03",
+    text: "GRAVITY SYSTEMS",
+    category: "3D SIMULATION · CGI",
+    year: "2025",
+    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
   },
   {
-    text: "PROJECT 4",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/93bad0e0-e2ab-4e21-de9c-4cb54b028f00/w=800",
+    id: "04",
+    number: "EXPEDITION // 04",
+    text: "COSMIC FLUX",
+    category: "EXPERIENCE DESIGN · WEBGL",
+    year: "2025—26",
+    src: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=1000&auto=format&fit=crop",
   },
   {
-    text: "PROJECT 5",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/09a59a65-3c07-4500-f72c-68c824168c00/w=800",
-  },
-  {
-    text: "PROJECT 6",
-    src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/8e0d22a8-ac82-4893-90d8-3403f80ec600/w=800",
+    id: "05",
+    number: "EXPEDITION // 05",
+    text: "TELEMETRY LABS",
+    category: "TYPOGRAPHY · ART DIRECTION",
+    year: "2025",
+    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
   },
 ];
-
-const DEFAULT_ITEMS: ItemsValue = {
-  itemCount: 5,
-  item1: {
-    text: DEFAULT_ITEMS_DATA[0].text,
-    image: { src: DEFAULT_ITEMS_DATA[0].src },
-  },
-  item2: {
-    text: DEFAULT_ITEMS_DATA[1].text,
-    image: { src: DEFAULT_ITEMS_DATA[1].src },
-  },
-  item3: {
-    text: DEFAULT_ITEMS_DATA[2].text,
-    image: { src: DEFAULT_ITEMS_DATA[2].src },
-  },
-  item4: {
-    text: DEFAULT_ITEMS_DATA[3].text,
-    image: { src: DEFAULT_ITEMS_DATA[3].src },
-  },
-  item5: {
-    text: DEFAULT_ITEMS_DATA[4].text,
-    image: { src: DEFAULT_ITEMS_DATA[4].src },
-  },
-  item6: {
-    text: DEFAULT_ITEMS_DATA[5].text,
-    image: { src: DEFAULT_ITEMS_DATA[5].src },
-  },
-};
-
-const DEFAULT_FONT: FontValue = {
-  fontFamily: "Inter",
-  fontWeight: 400,
-  fontSize: 61,
-  lineHeight: "0.9em",
-  letterSpacing: "-0.05em",
-  textAlign: "left",
-};
 
 const DEFAULT_TRANSITION: MotionTransition = {
   type: "spring",
@@ -120,66 +69,23 @@ const DEFAULT_TRANSITION: MotionTransition = {
   mass: 1,
 };
 
-const alignToFlex: Record<string, CSSProperties["alignItems"]> = {
-  left: "flex-start",
-  center: "center",
-  right: "flex-end",
-};
-const alignToText: Record<string, CSSProperties["textAlign"]> = {
-  left: "left",
-  center: "center",
-  right: "right",
-};
-
-export default function HoverImageReveal({
-  items = DEFAULT_ITEMS,
-  font = DEFAULT_FONT,
-  textColor = "#FFFFFF",
-  dimColor = "#51565A",
-  align = "left",
-  rowGap = 90,
-  imageWidth = 300,
-  imageHeight = 600,
-  rounded = 16,
-  offsetX = 200,
-  offsetY = 0,
-  followStrength = 0,
-  transition = DEFAULT_TRANSITION,
-  backgroundColor = "#000000",
-  style,
-}: HoverImageRevealProps) {
+export default function DiscoverySection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState<number | null>(null);
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
-  const stiffness = 60 + followStrength * 5;
-  const springCfg = { stiffness, damping: 28, mass: 0.5 };
+  const springCfg = { stiffness: 70, damping: 28, mass: 0.5 };
   const x = useSpring(rawX, springCfg);
   const y = useSpring(rawY, springCfg);
 
-  const data = items || DEFAULT_ITEMS;
-  const count = Math.max(
-    1,
-    Math.min(MAX_ITEMS, (data.itemCount as number) || 5)
-  );
-  const list: Item[] = [];
-  for (let i = 1; i <= count; i++) {
-    const it = data[`item${i}`] as Item | undefined;
-    const fallback = DEFAULT_ITEMS_DATA[i - 1];
-    list.push({
-      text: it?.text ?? fallback?.text ?? `Item ${i}`,
-      image: it?.image ?? (fallback ? { src: fallback.src } : undefined),
-      link: it?.link,
-    });
-  }
-  const anyActive = hovered != null;
+  const anyActive = hovered !== null;
 
   const onMove = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    rawX.set(e.clientX - rect.left + offsetX);
-    rawY.set(e.clientY - rect.top + offsetY);
+    rawX.set(e.clientX - rect.left + 220);
+    rawY.set(e.clientY - rect.top);
   };
 
   return (
@@ -191,161 +97,159 @@ export default function HoverImageReveal({
         setHovered(null);
         (window as any).setCursorLabel?.("");
       }}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        backgroundColor,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: alignToFlex[align],
-        gap: `${rowGap}px`,
-        padding: "0 15vw",
-        boxSizing: "border-box",
-        cursor: "default",
-        ...(font as CSSProperties),
-        ...style,
-      }}
+      className="relative w-full overflow-hidden bg-black text-white px-6 sm:px-10 py-24 sm:py-36"
     >
-      <motion.div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          x,
-          y,
-          translateX: "-50%",
-          translateY: "-50%",
-          width: imageWidth,
-          height: imageHeight,
-          borderRadius: rounded,
-          overflow: "hidden",
-          pointerEvents: "none",
-          zIndex: 2,
-        }}
-        animate={{ opacity: anyActive ? 1 : 0 }}
-        transition={transition}
-      >
-        {list.map((item, i) => {
-          const src = item.image?.src;
-          const yPos =
-            hovered == null
-              ? "100%"
-              : i < hovered
-                ? "-100%"
-                : i > hovered
+      <div className="mx-auto w-full max-w-[1400px]">
+        
+        {/* SECTION HEADER */}
+        <div className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+            <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+              Expeditions / Selected Artifacts
+            </span>
+          </div>
+
+          <span className="text-xs font-mono tracking-widest text-white/30">
+            01
+          </span>
+        </div>
+
+        {/* DESKTOP HOVER REVEAL (Hidden on mobile/touch, visible on md+) */}
+        <div className="hidden md:block relative min-h-[560px]">
+          
+          {/* FLOATING IMAGE PORTAL */}
+          <motion.div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              x,
+              y,
+              translateX: "-50%",
+              translateY: "-50%",
+              width: 320,
+              height: 440,
+              borderRadius: 20,
+              overflow: "hidden",
+              pointerEvents: "none",
+              zIndex: 20,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
+            animate={{ opacity: anyActive ? 1 : 0, scale: anyActive ? 1 : 0.92 }}
+            transition={DEFAULT_TRANSITION}
+          >
+            {PROJECTS.map((item, i) => {
+              const yPos =
+                hovered === null
+                  ? "100%"
+                  : i < hovered
+                  ? "-100%"
+                  : i > hovered
                   ? "100%"
                   : "0%";
-          return (
-            <motion.div
-              key={i}
-              initial={false}
-              animate={{ y: yPos }}
-              transition={transition}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                overflow: "hidden",
-              }}
-            >
-              {src ? (
-                <img
-                  src={src}
-                  alt={item.image?.alt || item.text || ""}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    background: "linear-gradient(135deg,#333,#111)",
-                  }}
-                />
-              )}
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      <div
-        onMouseLeave={() => setHovered(null)}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: alignToFlex[align],
-          gap: `${rowGap}px`,
-        }}
-      >
-        {list.map((item, i) => {
-          const isHovered = hovered === i;
-          const color = anyActive ? (isHovered ? textColor : dimColor) : textColor;
-          const copyStyle: CSSProperties = {
-            display: "block",
-            color,
-            transition: "color 0.2s ease",
-            whiteSpace: "pre",
-            textAlign: alignToText[align],
-          };
-          const inner = (
-            <motion.div
-              style={{ position: "relative" }}
-              animate={{ y: isHovered ? "-100%" : "0%" }}
-              transition={transition}
-            >
-              <span style={copyStyle}>{item.text}</span>
-              <span
-                aria-hidden
-                style={{
-                  ...copyStyle,
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                }}
-              >
-                {item.text}
-              </span>
-            </motion.div>
-          );
-          return (
-            <div
-              key={i}
-              onMouseEnter={() => {
-                console.log("hover");
-                setHovered(i);
-                (window as any).setCursorLabel?.("OPEN");
-              }}
-              style={{
-                overflow: "hidden",
-                cursor: item.link ? "pointer" : "default",
-              }}
-            >
-              {item.link ? (
-                <a
-                  href={item.link}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                  }}
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={false}
+                  animate={{ y: yPos }}
+                  transition={DEFAULT_TRANSITION}
+                  className="absolute inset-0 h-full w-full overflow-hidden bg-zinc-900"
                 >
-                  {inner}
-                </a>
-              ) : (
-                inner
-              )}
+                  <img
+                    src={item.src}
+                    alt={item.text}
+                    className="h-full w-full object-cover grayscale contrast-125 transition-transform duration-700 hover:scale-105"
+                  />
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          {/* PROJECT LIST */}
+          <div
+            onMouseLeave={() => setHovered(null)}
+            className="flex flex-col gap-10 sm:gap-14"
+          >
+            {PROJECTS.map((item, i) => {
+              const isHovered = hovered === i;
+              const color = anyActive ? (isHovered ? "#ffffff" : "rgba(255,255,255,0.25)") : "#ffffff";
+
+              return (
+                <div
+                  key={item.id}
+                  onMouseEnter={() => {
+                    setHovered(i);
+                    (window as any).setCursorLabel?.("ORBIT // VIEW");
+                  }}
+                  className="group relative cursor-pointer border-b border-white/5 pb-8 transition-colors duration-300 hover:border-cyan-400/30"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline gap-6">
+                      <span className="font-mono text-xs uppercase tracking-widest text-white/30 group-hover:text-cyan-400/80 transition-colors">
+                        {item.number}
+                      </span>
+                      <h3
+                        style={{ color }}
+                        className="text-[clamp(38px,5vw,76px)] font-medium tracking-[-0.06em] leading-[0.9] transition-colors duration-300"
+                      >
+                        {item.text}
+                      </h3>
+                    </div>
+
+                    <div className="flex items-center gap-8 text-right">
+                      <span className="text-xs uppercase tracking-[0.16em] text-white/35 group-hover:text-cyan-300/70 transition-colors">
+                        {item.category}
+                      </span>
+                      <span className="font-mono text-xs text-white/30">
+                        {item.year}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* MOBILE / TABLET TOUCH-FRIENDLY CARDS (Visible on mobile/tablet) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:hidden gap-6">
+          {PROJECTS.map((project) => (
+            <div
+              key={project.id}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-all active:scale-[0.98] active:border-cyan-400/40 active:shadow-[0_0_20px_rgba(56,189,248,0.15)]"
+            >
+              {/* Image Preview */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-zinc-900">
+                <img
+                  src={project.src}
+                  alt={project.text}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-mono tracking-widest text-white/80 backdrop-blur-md">
+                  {project.id}
+                </div>
+              </div>
+
+              {/* Card Meta */}
+              <div className="mt-4 flex items-baseline justify-between">
+                <div>
+                  <h3 className="text-xl font-medium tracking-tight text-white">
+                    {project.text}
+                  </h3>
+                  <p className="mt-1 text-xs uppercase tracking-widest text-white/40">
+                    {project.category}
+                  </p>
+                </div>
+                <span className="font-mono text-xs text-white/30">
+                  {project.year}
+                </span>
+              </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
+
       </div>
     </section>
   );

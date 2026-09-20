@@ -68,19 +68,17 @@ function GravityLetter({
   );
   
   useEffect(() => {
-    const handleMove = (event: PointerEvent) => {
+    const handleMove = (clientX: number, clientY: number) => {
       if (!ref.current) return;
 
       const rect = ref.current.getBoundingClientRect();
-
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const dx = centerX - event.clientX;
-      const dy = centerY - event.clientY;
+      const dx = centerX - clientX;
+      const dy = centerY - clientY;
 
       const distance = Math.hypot(dx, dy);
-
       const radius = 220;
 
       if (distance > radius) {
@@ -104,20 +102,29 @@ function GravityLetter({
       aberration.set(strength * 0.7);
     };
 
-    window.addEventListener("pointermove", handleMove, {
-      passive: true,
-    });
+    const onPointerMove = (e: PointerEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
 
     return () => {
-      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("touchmove", onTouchMove);
     };
   }, [offsetX, offsetY, stretch]);
 
-  
   return (
     <motion.span
       ref={ref}
-      className="inline-block origin-center will-change-transform"
+      className="inline-block origin-center will-change-transform select-none"
       style={{
         x,
         y,
@@ -130,50 +137,47 @@ function GravityLetter({
   );
 }
 
-
 export default function Hero() {
   const progress = useScrollProgress();
 
   const heroY = useTransform(progress, [0, 1], [0, -420]);
-
   const heroOpacity = useTransform(progress, [0, 0.74], [1, 0]);
-
   const heroScale = useTransform(progress, [0, 1], [1, 0.82]);
-
-  const heroBlur = useTransform(
-    progress,
-    [0, 1],
-    ["blur(0px)", "blur(5px)"]
-  );
 
   return (
     <motion.section
       id="hero"
-      className="sticky top-0 flex h-screen w-full items-center overflow-hidden"
+      className="sticky top-0 flex min-h-screen w-full items-center overflow-hidden"
       style={{
         y: heroY,
         opacity: heroOpacity,
         scale: heroScale,
       }}   
-      
     >
-      {/* Background Particles */}
+      {/* Background Celestial Star Particles */}
       <BackgroundParticles />
 
       {/* Hero Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-end px-10">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-end px-6 sm:px-10 pt-20 sm:pt-0">
         <div className="max-w-[850px]">
+
+          {/* TELEMETRY TAG */}
+          <div className="mb-4 flex items-center justify-end gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/40">
+            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+            <span>Sector 01 // Orbital Station</span>
+          </div>
+
           <h1
             data-warp-text
             data-wrap-text
-            className="text-[clamp(68px,13.5vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-white"
+            className="text-[clamp(52px,13vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-white"
           >
             <GravityWord>RYAN</GravityWord>
             <GravityWord>ARNAB</GravityWord>
           </h1>
 
-          <p className="mt-8 ml-auto max-w-[280px] text-right text-xs sm:text-sm leading-relaxed text-white/60">
-            Communication Designer & Creative Developer exploring identity, interaction and motion.
+          <p className="mt-6 sm:mt-8 ml-auto max-w-[300px] text-right text-xs sm:text-sm leading-relaxed text-white/60">
+            Communication Designer & Creative Technologist exploring visual identity, interaction and motion in digital space.
           </p>
         </div>
       </div>

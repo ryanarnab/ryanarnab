@@ -1,30 +1,31 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 
 const experiments = [
   {
-    number: "01",
-    title: "MOTION STUDIES",
-    type: "MOTION · AFTER EFFECTS",
+    number: "EXP // 01",
+    title: "MOTION LABS",
+    type: "AFTER EFFECTS · KINETIC",
     year: "2026",
   },
   {
-    number: "02",
-    title: "3D EXPLORATIONS",
-    type: "BLENDER · CGI",
+    number: "EXP // 02",
+    title: "3D TOPOLOGY",
+    type: "BLENDER · SPATIAL CGI",
     year: "2025—26",
   },
   {
-    number: "03",
-    title: "BEATPULSE",
+    number: "EXP // 03",
+    title: "GRAVITON PULSE",
     type: "INTERACTION · HAPTICS",
     year: "2026",
   },
   {
-    number: "04",
-    title: "VISUAL FRAGMENTS",
-    type: "GRAPHICS · EXPERIMENTS",
+    number: "EXP // 04",
+    title: "COSMIC FRAGMENTS",
+    type: "CREATIVE CODE · SHADERS",
     year: "2024—26",
   },
 ];
@@ -33,17 +34,20 @@ export default function PlaygroundSection() {
   return (
     <section
       id="playground"
-      className="relative w-full overflow-hidden bg-black text-white"
+      className="relative w-full overflow-hidden bg-black text-white px-6 sm:px-10 py-24 sm:py-40"
     >
-      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 py-24 sm:py-40">
+      <div className="mx-auto w-full max-w-[1400px]">
 
         {/* HEADER */}
         <div className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5">
-          <span className="text-xs uppercase tracking-[0.16em] text-white/35">
-            Playground / Unfinished Signals
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+            <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+              Orbital Lab // Signal Experiments
+            </span>
+          </div>
 
-          <span className="text-xs text-white/25">
+          <span className="font-mono text-xs tracking-widest text-white/30">
             03
           </span>
         </div>
@@ -52,7 +56,7 @@ export default function PlaygroundSection() {
         <motion.div
           initial={{
             opacity: 0,
-            y: 60,
+            y: 50,
           }}
           whileInView={{
             opacity: 1,
@@ -66,14 +70,14 @@ export default function PlaygroundSection() {
             duration: 0.9,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="mb-20 sm:mb-32"
+          className="mb-16 sm:mb-28"
         >
-          <p className="mb-7 max-w-[380px] text-xs sm:text-sm leading-relaxed text-white/40">
-            Things made without a brief. Experiments, unfinished ideas and
-            random curiosities that were interesting enough to follow.
+          <p className="mb-6 max-w-[400px] text-xs sm:text-sm leading-relaxed text-white/45">
+            Artifacts built without formal constraints. Unfinished orbits, computational explorations,
+            and acoustic experiments interesting enough to preserve.
           </p>
 
-          <h2 className="text-[clamp(60px,14vw,200px)] font-medium leading-[0.8] tracking-[-0.085em]">
+          <h2 className="text-[clamp(52px,13vw,190px)] font-medium leading-[0.82] tracking-[-0.085em] text-white">
             PLAY
             <br />
             GROUND
@@ -81,13 +85,13 @@ export default function PlaygroundSection() {
         </motion.div>
 
         {/* EXPERIMENTS */}
-        <div>
+        <div className="divide-y divide-white/10 border-b border-white/10">
           {experiments.map((experiment, index) => (
             <motion.article
               key={experiment.number}
               initial={{
                 opacity: 0,
-                y: 30,
+                y: 25,
               }}
               whileInView={{
                 opacity: 1,
@@ -99,7 +103,7 @@ export default function PlaygroundSection() {
               }}
               transition={{
                 duration: 0.65,
-                delay: index * 0.04,
+                delay: index * 0.05,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="
@@ -108,19 +112,23 @@ export default function PlaygroundSection() {
                 grid-cols-12
                 items-baseline sm:items-center
                 gap-y-2 sm:gap-y-0
-                border-t
-                border-white/10
                 py-6 sm:py-8
+                transition-colors
+                duration-300
+                hover:bg-white/[0.02]
+                active:bg-white/[0.04]
+                px-2 sm:px-4
+                rounded-xl
               "
             >
-              <span className="col-span-2 sm:col-span-1 text-xs text-white/25">
+              <span className="col-span-12 sm:col-span-2 font-mono text-[11px] uppercase tracking-widest text-white/30">
                 {experiment.number}
               </span>
 
               <h3
                 className="
-                  col-span-10 sm:col-span-6
-                  text-[clamp(24px,3.8vw,62px)]
+                  col-span-12 sm:col-span-6
+                  text-[clamp(24px,3.8vw,56px)]
                   font-medium
                   tracking-[-0.055em]
                   text-white/75
@@ -132,17 +140,15 @@ export default function PlaygroundSection() {
                 {experiment.title}
               </h3>
 
-              <span className="col-span-8 sm:col-span-3 pl-0 sm:pl-0 text-[11px] sm:text-xs uppercase tracking-[0.12em] text-white/30">
+              <span className="col-span-8 sm:col-span-3 text-[11px] sm:text-xs uppercase tracking-[0.14em] text-white/35">
                 {experiment.type}
               </span>
 
-              <span className="col-span-4 sm:col-span-2 text-right text-[11px] sm:text-xs text-white/30">
+              <span className="col-span-4 sm:col-span-1 text-right font-mono text-[11px] sm:text-xs text-white/30">
                 {experiment.year}
               </span>
             </motion.article>
           ))}
-
-          <div className="border-t border-white/10" />
         </div>
 
       </div>

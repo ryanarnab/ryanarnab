@@ -11,6 +11,7 @@ type Dot = {
   currOpacity: number;
   seed: number;
   turbSeed: number;
+  color: string;
 };
 
 const DOT_SIZE = 2;
@@ -21,10 +22,19 @@ const FORCE = 95;
 const BASE_OPACITY = 0.40;
 const LERP_SPEED = 0.14;
 
+const SPACE_PALETTE = [
+  "rgba(255, 255, 255,",   // Pure Stardust
+  "rgba(180, 230, 255,",   // Cosmic Cyan
+  "rgba(216, 180, 254,",   // Nebula Violet
+  "rgba(255, 255, 255,",   // Pure Stardust
+];
+
 export default function BackgroundParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY });
+  const scrollVelocityRef = useRef(0);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -67,6 +77,7 @@ export default function BackgroundParticles() {
             currOpacity: BASE_OPACITY,
             seed: id * 0.73,
             turbSeed: id * 1.73,
+            color: SPACE_PALETTE[id % SPACE_PALETTE.length],
           });
         }
       }
@@ -99,19 +110,37 @@ export default function BackgroundParticles() {
       mouseRef.current.y = Number.NEGATIVE_INFINITY;
     };
 
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const deltaY = currentScrollY - lastScrollYRef.current;
+      lastScrollYRef.current = currentScrollY;
+      // Clamp velocity for aesthetic warp
+      scrollVelocityRef.current = Math.max(Math.min(deltaY * 0.8, 60), -60);
+    };
+
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
     window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    let previousTime = performance.now();
 
     const render = (time: number) => {
+      const delta = Math.min((time - previousTime) / 1000, 0.05);
+      previousTime = time;
+
       const t = time * 0.0005;
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
       const mouseActive = Number.isFinite(mx) && Number.isFinite(my);
 
+      // Smooth decay of scroll velocity (Hypertravel transition)
+      scrollVelocityRef.current *= Math.exp(-6 * delta);
+      const warpSpeed = scrollVelocityRef.current;
+      const isWarping = Math.abs(warpSpeed) > 1.5;
+
       ctx.save();
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = "#ffffff";
 
       for (let i = 0; i < dots.length; i++) {
         const dot = dots[i];
@@ -162,10 +191,25 @@ export default function BackgroundParticles() {
         dot.currOpacity += (targetOpacity - dot.currOpacity) * LERP_SPEED;
 
         if (dot.currOpacity > 0.01) {
-          ctx.globalAlpha = dot.currOpacity;
-          ctx.beginPath();
-          ctx.arc(dot.currX, dot.currY, DOT_SIZE / 2, 0, Math.PI * 2);
-          ctx.fill();
+          const alpha = dot.currOpacity * (isWarping ? 1.4 : 1.0);
+          ctx.fillStyle = `${dot.color} ${Math.min(alpha, 0.95)})`;
+          ctx.strokeStyle = `${dot.color} ${Math.min(alpha * 0.8, 0.9)})`;
+
+          if (isWarping) {
+            // Hypertravel star streak
+            const streakLen = warpSpeed * 0.75 * ((dot.id % 3) + 1);
+            ctx.lineWidth = DOT_SIZE * 0.9;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(dot.currX, dot.currY);
+            ctx.lineTo(dot.currX, dot.currY - streakLen);
+            ctx.stroke();
+          } else {
+            // Celestial star orb
+            ctx.beginPath();
+            ctx.arc(dot.currX, dot.currY, DOT_SIZE / 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
 
@@ -180,6 +224,7 @@ export default function BackgroundParticles() {
       resizeObserver.disconnect();
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

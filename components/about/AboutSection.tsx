@@ -3,19 +3,19 @@
 import { motion } from "framer-motion";
 
 const details = [
-  ["BASED IN", "GUWAHATI, INDIA"],
-  ["FOCUS", "VISUAL IDENTITY · DIGITAL · MOTION"],
-  ["CURRENTLY", "B.DES COMMUNICATION DESIGN"],
-  ["PHILOSOPHY", "CURIOSITY CREATES BETTER"],
+  ["ORBIT / BASE", "GUWAHATI, INDIA · 26.14°N 91.73°E"],
+  ["SPECTRUM", "VISUAL IDENTITY · DIGITAL INTERACTION · MOTION"],
+  ["CURRENT STATUS", "B.DES COMMUNICATION DESIGN"],
+  ["CORE PHILOSOPHY", "CURIOSITY CREATES BETTER"],
 ];
 
 export default function AboutSection() {
   return (
     <section
       id="about"
-      className="relative w-full overflow-hidden bg-black text-white"
+      className="relative w-full overflow-hidden bg-black text-white px-6 sm:px-10 py-24 sm:py-40"
     >
-      <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10 py-24 sm:py-40">
+      <div className="mx-auto w-full max-w-[1400px]">
 
         {/* SECTION LABEL */}
         <motion.div
@@ -25,20 +25,23 @@ export default function AboutSection() {
           transition={{ duration: 0.8 }}
           className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5"
         >
-          <span className="text-xs uppercase tracking-[0.16em] text-white/35">
-            About / The Observer
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+            <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+              Observatory // Spectral Analysis
+            </span>
+          </div>
 
-          <span className="text-xs text-white/25">
+          <span className="font-mono text-xs tracking-widest text-white/30">
             02
           </span>
         </motion.div>
 
-        {/* MASSIVE STATEMENT */}
+        {/* MASSIVE COSMIC STATEMENT */}
         <motion.h2
           initial={{
             opacity: 0,
-            y: 70,
+            y: 50,
           }}
           whileInView={{
             opacity: 1,
@@ -54,9 +57,9 @@ export default function AboutSection() {
           }}
           className="
             max-w-[1250px]
-            text-[clamp(44px,7.5vw,130px)]
+            text-[clamp(40px,7.5vw,130px)]
             font-medium
-            leading-[0.9]
+            leading-[0.92]
             tracking-[-0.075em]
           "
         >
@@ -72,7 +75,7 @@ export default function AboutSection() {
         </motion.h2>
 
         {/* INFO AREA */}
-        <div className="mt-20 sm:mt-36 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
+        <div className="mt-16 sm:mt-32 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 items-start">
 
           {/* PERSONAL COPY */}
           <motion.div
@@ -93,17 +96,17 @@ export default function AboutSection() {
               delay: 0.1,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="col-span-1 md:col-span-5 md:col-start-2"
+            className="col-span-1 md:col-span-6 lg:col-span-5 md:col-start-1 lg:col-start-2"
           >
-            <p className="max-w-[440px] text-lg sm:text-xl leading-relaxed sm:leading-8 text-white/70">
+            <p className="max-w-[460px] text-base sm:text-xl leading-relaxed text-white/70">
               I&apos;m Arnab, a communication designer exploring identity,
-              interaction and motion. I like building experiences that reward
-              curiosity — things that make you want to move, touch and discover
-              what happens next.
+              spatial interaction and motion. I craft digital experiences that reward
+              curiosity — environments that invite you to navigate, manipulate and discover
+              unexpected signals.
             </p>
           </motion.div>
 
-          {/* DETAILS */}
+          {/* TELEMETRY DETAILS */}
           <motion.div
             initial={{
               opacity: 0,
@@ -122,18 +125,18 @@ export default function AboutSection() {
               delay: 0.2,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="col-span-1 md:col-span-5 md:col-start-8"
+            className="col-span-1 md:col-span-6 lg:col-span-5 md:col-start-7 lg:col-start-8"
           >
             {details.map(([label, value]) => (
               <div
                 key={label}
-                className="flex items-start justify-between border-t border-white/10 py-5"
+                className="flex flex-col sm:flex-row sm:items-baseline justify-between border-t border-white/10 py-4 sm:py-5 gap-1 sm:gap-4"
               >
-                <span className="text-xs tracking-[0.12em] text-white/30">
+                <span className="text-[11px] font-mono tracking-[0.14em] text-white/35 uppercase">
                   {label}
                 </span>
 
-                <span className="max-w-[240px] text-right text-xs sm:text-sm text-white/65">
+                <span className="text-right text-xs sm:text-sm text-white/75 font-sans">
                   {value}
                 </span>
               </div>
