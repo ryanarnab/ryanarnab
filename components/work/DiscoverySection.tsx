@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import {
   motion,
   useMotionValue,
   useSpring,
   type Transition as MotionTransition,
 } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
 
 interface ProjectItem {
   id: string;
@@ -95,7 +95,7 @@ export default function DiscoverySection() {
       onMouseMove={onMove}
       onMouseLeave={() => {
         setHovered(null);
-        (window as any).setCursorLabel?.("");
+        window.setCursorLabel?.("");
       }}
       className="relative w-full overflow-hidden bg-black text-white px-6 sm:px-10 py-24 sm:py-36"
     >
@@ -104,13 +104,13 @@ export default function DiscoverySection() {
         {/* SECTION HEADER */}
         <div className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5">
           <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
-            <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
+            <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900]">
               Expeditions / Selected Artifacts
             </span>
           </div>
 
-          <span className="text-xs font-mono tracking-widest text-white/30">
+          <span className="text-xs font-mono tracking-widest text-[#ffd900]/70">
             01
           </span>
         </div>
@@ -134,8 +134,8 @@ export default function DiscoverySection() {
               overflow: "hidden",
               pointerEvents: "none",
               zIndex: 20,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.85), 0 0 35px rgba(255,217,0,0.25)",
+              border: "1px solid rgba(255,217,0,0.35)",
             }}
             animate={{ opacity: anyActive ? 1 : 0, scale: anyActive ? 1 : 0.92 }}
             transition={DEFAULT_TRANSITION}
@@ -157,10 +157,12 @@ export default function DiscoverySection() {
                   transition={DEFAULT_TRANSITION}
                   className="absolute inset-0 h-full w-full overflow-hidden bg-zinc-900"
                 >
-                  <img
+                  <Image
                     src={item.src}
                     alt={item.text}
-                    className="h-full w-full object-cover grayscale contrast-125 transition-transform duration-700 hover:scale-105"
+                    fill
+                    sizes="320px"
+                    className="object-cover contrast-125 transition-transform duration-700 hover:scale-105"
                   />
                 </motion.div>
               );
@@ -174,20 +176,20 @@ export default function DiscoverySection() {
           >
             {PROJECTS.map((item, i) => {
               const isHovered = hovered === i;
-              const color = anyActive ? (isHovered ? "#ffffff" : "rgba(255,255,255,0.25)") : "#ffffff";
+              const color = anyActive ? (isHovered ? "#ffd900" : "rgba(255,255,255,0.25)") : "#fffdf0";
 
               return (
                 <div
                   key={item.id}
                   onMouseEnter={() => {
                     setHovered(i);
-                    (window as any).setCursorLabel?.("ORBIT // VIEW");
+                    window.setCursorLabel?.("ORBIT // VIEW");
                   }}
-                  className="group relative cursor-pointer border-b border-white/5 pb-8 transition-colors duration-300 hover:border-cyan-400/30"
+                  className="group relative cursor-pointer border-b border-white/10 pb-8 transition-colors duration-300 hover:border-[#ffd900]/50"
                 >
                   <div className="flex items-baseline justify-between">
                     <div className="flex items-baseline gap-6">
-                      <span className="font-mono text-xs uppercase tracking-widest text-white/30 group-hover:text-cyan-400/80 transition-colors">
+                      <span className="font-mono text-xs uppercase tracking-widest text-white/40 group-hover:text-[#ffd900] transition-colors">
                         {item.number}
                       </span>
                       <h3
@@ -199,10 +201,10 @@ export default function DiscoverySection() {
                     </div>
 
                     <div className="flex items-center gap-8 text-right">
-                      <span className="text-xs uppercase tracking-[0.16em] text-white/35 group-hover:text-cyan-300/70 transition-colors">
+                      <span className="text-xs uppercase tracking-[0.16em] text-white/40 group-hover:text-[#ffd900]/80 transition-colors">
                         {item.category}
                       </span>
-                      <span className="font-mono text-xs text-white/30">
+                      <span className="font-mono text-xs text-white/40 group-hover:text-[#ffd900]">
                         {item.year}
                       </span>
                     </div>
@@ -222,10 +224,12 @@ export default function DiscoverySection() {
             >
               {/* Image Preview */}
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-zinc-900">
-                <img
+                <Image
                   src={project.src}
                   alt={project.text}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-mono tracking-widest text-white/80 backdrop-blur-md">
                   {project.id}

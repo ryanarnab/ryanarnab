@@ -7,12 +7,14 @@ import { ScrollProvider } from "@/components/scroll/ScrollProvider";
 import AboutSection from "@/components/about/AboutSection";
 import PlaygroundSection from "@/components/playground/PlaygroundSection";
 import ContactSection from "@/components/contact/ContactSection";
+import OrbitalSidebar from "@/components/navigation/OrbitalSidebar";
 
 export default function Home() {
   return (
     <ScrollProvider>
       <Preloader />
       <Cursor />
+      <OrbitalSidebar />
 
       <Navbar />
       <Hero />

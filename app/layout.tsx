@@ -18,6 +18,11 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "RyanArnab — Communication Designer",
   description: "Curiosity Creates Better. Portfolio of Arnab Ghosh — visual identity, interaction, and motion design.",
+  icons: {
+    icon: "/RyanArnab.svg",
+    shortcut: "/RyanArnab.svg",
+    apple: "/RyanArnab.svg",
+  },
 };
 
 export default function RootLayout({
@@ -28,6 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black text-white">

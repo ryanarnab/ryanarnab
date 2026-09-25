@@ -6,7 +6,6 @@ import Cursor from "@/components/cursor/Cursor";
 import { ScrollProvider } from "@/components/scroll/ScrollProvider";
 import ContactSection from "@/components/contact/ContactSection";
 import { motion } from "framer-motion";
-import { Sparkles, Play, RefreshCw, Layers } from "lucide-react";
 
 interface Toy {
   id: string;

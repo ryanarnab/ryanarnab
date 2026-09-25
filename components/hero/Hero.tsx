@@ -7,6 +7,7 @@ import {
   useTransform,
 } from "framer-motion";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { useScrollProgress } from "../scroll/ScrollProvider";
 import BackgroundParticles from "./BackgroundParticles";
@@ -119,7 +120,7 @@ function GravityLetter({
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("touchmove", onTouchMove);
     };
-  }, [offsetX, offsetY, stretch]);
+  }, [offsetX, offsetY, stretch, aberration]);
 
   return (
     <motion.span
@@ -158,26 +159,41 @@ export default function Hero() {
       <BackgroundParticles />
 
       {/* Hero Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-end px-6 sm:px-10 pt-20 sm:pt-0">
-        <div className="max-w-[850px]">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-between items-end px-6 sm:px-10 pt-24 sm:pt-0">
+        
+        {/* BRAND EMBLEM STAMP */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.3 }}
+          className="hidden md:flex flex-col items-start gap-3 pb-6"
+        >
+          <div className="relative group cursor-pointer flex items-center justify-center h-24 w-24 rounded-3xl bg-[#ffd900]/10 border border-[#ffd900]/30 p-4 backdrop-blur-xl shadow-[0_0_40px_rgba(255,217,0,0.25)] transition-all duration-500 hover:scale-105 hover:bg-[#ffd900]/20 hover:border-[#ffd900] hover:shadow-[0_0_50px_rgba(255,217,0,0.5)]">
+            <Image src="/RyanArnab.svg" alt="RyanArnab Monogram" width={64} height={64} className="h-full w-full object-contain filter drop-shadow-[0_0_12px_rgba(255,217,0,0.8)]" />
+          </div>
+          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ffd900]/80">Brand Signature</span>
+        </motion.div>
+
+        <div className="max-w-[850px] text-right ml-auto">
 
           {/* TELEMETRY TAG */}
-          <div className="mb-4 flex items-center justify-end gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/40">
-            <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-            <span>Sector 01 // Orbital Station</span>
+          <div className="mb-4 flex items-center justify-end gap-2.5 text-[10px] sm:text-xs uppercase tracking-[0.22em] text-white/50">
+            <Image src="/RyanArnab.svg" alt="" width={14} height={14} className="h-3.5 w-auto" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
+            <span className="text-[#ffd900]">Sector 01 // Orbital Station</span>
           </div>
 
           <h1
             data-warp-text
             data-wrap-text
-            className="text-[clamp(52px,13vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-white"
+            className="text-[clamp(52px,13vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-[#fffdf0]"
           >
             <GravityWord>RYAN</GravityWord>
             <GravityWord>ARNAB</GravityWord>
           </h1>
 
-          <p className="mt-6 sm:mt-8 ml-auto max-w-[300px] text-right text-xs sm:text-sm leading-relaxed text-white/60">
-            Communication Designer & Creative Technologist exploring visual identity, interaction and motion in digital space.
+          <p className="mt-6 sm:mt-8 ml-auto max-w-[340px] text-right text-xs sm:text-sm leading-relaxed text-[#fffdf0]/70">
+            Communication Designer & Creative Technologist exploring <span className="text-[#ffd900] font-medium">visual identity</span>, interaction and motion in digital space.
           </p>
         </div>
       </div>

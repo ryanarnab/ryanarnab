@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { MousePointer2, Sparkles, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ClickEffects from "./ClickEffects";
@@ -12,6 +12,23 @@ type Point = {
 };
 
 type Mode = "normal" | "draw";
+
+declare global {
+  interface Window {
+    setCursorLabel?: (label: string) => void;
+  }
+}
+
+const emptySubscribe = () => () => {};
+
+const subscribePointerFine = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  const mediaQuery = window.matchMedia("(pointer: fine)");
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+};
+const getPointerFineSnapshot = () => window.matchMedia("(pointer: fine)").matches;
+const getServerPointerFineSnapshot = () => false;
 
 export default function Cursor() {
   const trailCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,7 +68,12 @@ export default function Cursor() {
   const [hasDrawings, setHasDrawings] = useState(false);
   const [cursorLabel, setCursorLabel] = useState("");
   const [isInteractive, setIsInteractive] = useState(false);
-  const [isFinePointer, setIsFinePointer] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isFinePointer = useSyncExternalStore(
+    subscribePointerFine,
+    getPointerFineSnapshot,
+    getServerPointerFineSnapshot
+  );
 
   const isInteractiveRef = useRef(false);
   const cursorLabelRef = useRef("");
@@ -65,21 +87,9 @@ export default function Cursor() {
   }, [cursorLabel]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(pointer: fine)");
-    setIsFinePointer(mediaQuery.matches);
-
-    const handleMediaChange = (e: MediaQueryListEvent) => {
-      setIsFinePointer(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleMediaChange);
-    return () => mediaQuery.removeEventListener("change", handleMediaChange);
-  }, []);
-
-  useEffect(() => {
-    (window as any).setCursorLabel = setCursorLabel;
+    window.setCursorLabel = setCursorLabel;
     return () => {
-      delete (window as any).setCursorLabel;
+      delete window.setCursorLabel;
     };
   }, []);
 
@@ -267,14 +277,14 @@ export default function Cursor() {
           const prev = points[i - 1];
           const curr = points[i];
           const progress = i / (points.length - 1);
-          const opacity = Math.pow(progress, 1.6) * 0.45;
-          const width = 0.5 + Math.pow(progress, 1.4) * 2;
+          const opacity = Math.pow(progress, 1.6) * 0.55;
+          const width = 0.5 + Math.pow(progress, 1.4) * 2.5;
 
           trailContext.beginPath();
           trailContext.moveTo(prev.x, prev.y);
           trailContext.lineTo(curr.x, curr.y);
-          // Warm Martian solar amber trail
-          trailContext.strokeStyle = `rgba(251, 191, 36, ${opacity})`;
+          // Electric yellow solar trail
+          trailContext.strokeStyle = `rgba(255, 217, 0, ${opacity})`;
           trailContext.lineWidth = width;
           trailContext.lineCap = "round";
           trailContext.stroke();
@@ -285,8 +295,8 @@ export default function Cursor() {
       drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       drawContext.lineCap = "round";
       drawContext.lineJoin = "round";
-      drawContext.strokeStyle = "rgba(245, 158, 11, 0.85)"; // Mars gold
-      drawContext.lineWidth = 1.5;
+      drawContext.strokeStyle = "rgba(255, 217, 0, 0.9)"; // Electric yellow
+      drawContext.lineWidth = 1.8;
 
       const drawStroke = (stroke: Point[]) => {
         if (stroke.length < 2) return;
@@ -300,9 +310,9 @@ export default function Cursor() {
 
         stroke.forEach((pt, idx) => {
           if (idx % 4 === 0 || idx === stroke.length - 1) {
-            drawContext.fillStyle = "#fb923c"; // Orange star
+            drawContext.fillStyle = "#ffd900"; // Electric yellow star
             drawContext.beginPath();
-            drawContext.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+            drawContext.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
             drawContext.fill();
           }
         });
@@ -332,7 +342,7 @@ export default function Cursor() {
     setHasDrawings(false);
   };
 
-  if (!isFinePointer) {
+  if (!mounted || !isFinePointer) {
     return null;
   }
 
@@ -340,7 +350,7 @@ export default function Cursor() {
 
   return (
     <>
-      <ClickEffects />
+      <ClickEffects color="#ffd900" />
 
       {/* STARDUST TRAIL CANVAS */}
       <canvas
@@ -370,8 +380,8 @@ export default function Cursor() {
           will-change-transform
           ${
             isInteractive
-              ? "h-3.5 w-3.5 bg-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.9)]"
-              : "h-2 w-2 bg-white shadow-[0_0_10px_rgba(255,255,255,1)]"
+              ? "h-4 w-4 bg-[#ffd900] shadow-[0_0_18px_rgba(255,217,0,1)]"
+              : "h-2 w-2 bg-[#ffd900] shadow-[0_0_10px_rgba(255,217,0,0.9)]"
           }
         `}
       />
@@ -395,14 +405,14 @@ export default function Cursor() {
           will-change-transform
           ${
             activeLabel
-              ? "px-3.5 py-1 bg-black/90 border border-amber-500/40 text-amber-200 shadow-[0_0_24px_rgba(245,158,11,0.3)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
-              : "h-1.5 w-1.5 bg-amber-400/90 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
+              ? "px-3.5 py-1 bg-black/95 border border-[#ffd900]/50 text-[#ffd900] shadow-[0_0_24px_rgba(255,217,0,0.4)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
+              : "h-1.5 w-1.5 bg-[#ffd900] shadow-[0_0_10px_rgba(255,217,0,0.9)]"
           }
         `}
       >
         {activeLabel && (
           <span className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
             {activeLabel}
           </span>
         )}
@@ -432,11 +442,11 @@ export default function Cursor() {
             gap-1.5
             rounded-full
             border
-            border-white/10
-            bg-black/70
+            border-[#ffd900]/20
+            bg-black/80
             p-1.5
             backdrop-blur-xl
-            shadow-[0_4px_24px_rgba(0,0,0,0.5)]
+            shadow-[0_4px_24px_rgba(0,0,0,0.6)]
           "
         >
           {/* EXPLORE */}
@@ -452,7 +462,7 @@ export default function Cursor() {
               transition-all
               ${
                 mode === "normal"
-                  ? "bg-amber-400 text-black shadow-[0_0_12px_rgba(245,158,11,0.5)]"
+                  ? "bg-[#ffd900] text-black shadow-[0_0_16px_rgba(255,217,0,0.6)] font-bold"
                   : "text-white/40 hover:text-white"
               }
             `}
@@ -475,7 +485,7 @@ export default function Cursor() {
               transition-all
               ${
                 mode === "draw"
-                  ? "bg-orange-500 text-white shadow-[0_0_12px_rgba(234,88,12,0.6)]"
+                  ? "bg-[#ffd900] text-black shadow-[0_0_16px_rgba(255,217,0,0.6)] font-bold"
                   : "text-white/40 hover:text-white"
               }
             `}

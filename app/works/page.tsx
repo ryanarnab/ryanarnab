@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Cursor from "@/components/cursor/Cursor";
 import { ScrollProvider } from "@/components/scroll/ScrollProvider";
 import ContactSection from "@/components/contact/ContactSection";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Sparkles } from "lucide-react";
 
 interface Project {
   id: string;
@@ -95,18 +95,18 @@ export default function WorksPage() {
           
           {/* HEADER */}
           <div className="mb-14 sm:mb-20">
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-amber-400/80 mb-4">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#ffd900] mb-4">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
               <span>Sector 01 // Expedition Archive</span>
             </div>
 
-            <h1 className="text-[clamp(44px,8vw,110px)] font-medium leading-[0.9] tracking-[-0.075em] text-white">
+            <h1 className="text-[clamp(44px,8vw,110px)] font-medium leading-[0.9] tracking-[-0.075em] text-[#fffdf0]">
               DISCOVERED
               <br />
-              <span className="text-amber-500/50">ARTIFACTS.</span>
+              <span className="text-[#ffd900]/50">ARTIFACTS.</span>
             </h1>
 
-            <p className="mt-6 max-w-[500px] text-sm sm:text-base leading-relaxed text-white/60">
+            <p className="mt-6 max-w-[500px] text-sm sm:text-base leading-relaxed text-[#fffdf0]/70">
               A curated catalog of communication design, visual identity systems, spatial interfaces,
               and motion explorations built to provoke curiosity.
             </p>
@@ -120,8 +120,8 @@ export default function WorksPage() {
                 onClick={() => setActiveFilter(cat)}
                 className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all ${
                   activeFilter === cat
-                    ? "bg-amber-400 text-black font-semibold shadow-[0_0_16px_rgba(245,158,11,0.4)]"
-                    : "border border-white/10 bg-white/5 text-white/60 hover:text-white hover:border-white/25"
+                    ? "bg-[#ffd900] text-black font-bold shadow-[0_0_16px_rgba(255,217,0,0.5)]"
+                    : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#ffd900]/40"
                 }`}
               >
                 {cat}
@@ -140,16 +140,18 @@ export default function WorksPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.5 }}
                   key={project.id}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-amber-400/40 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#ffd900]/50 hover:shadow-[0_0_30px_rgba(255,217,0,0.2)]"
                 >
                   {/* IMAGE FRAME */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-zinc-900">
-                    <img
+                    <Image
                       src={project.src}
                       alt={project.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-mono tracking-widest text-amber-300/90 backdrop-blur-md border border-white/10">
+                    <div className="absolute top-3 left-3 rounded-full bg-black/80 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#ffd900] backdrop-blur-md border border-[#ffd900]/30 z-10">
                       {project.id}
                     </div>
                   </div>
@@ -157,16 +159,16 @@ export default function WorksPage() {
                   {/* CONTENT */}
                   <div className="mt-5 flex flex-col flex-1 justify-between">
                     <div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-white/40 mb-2">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#ffd900]/70 mb-2">
                         <span>{project.category}</span>
                         <span>{project.year}</span>
                       </div>
 
-                      <h3 className="text-xl font-medium tracking-tight text-white group-hover:text-amber-200 transition-colors">
+                      <h3 className="text-xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
                         {project.title}
                       </h3>
 
-                      <p className="mt-2 text-xs leading-relaxed text-white/55">
+                      <p className="mt-2 text-xs leading-relaxed text-[#fffdf0]/60">
                         {project.description}
                       </p>
                     </div>
@@ -176,7 +178,7 @@ export default function WorksPage() {
                       {project.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/40"
+                          className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#ffd900]/30 border border-transparent transition-colors"
                         >
                           {tag}
                         </span>

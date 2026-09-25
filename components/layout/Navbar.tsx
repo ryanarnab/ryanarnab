@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Radio } from "lucide-react";
 
@@ -38,24 +39,28 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 sm:px-10 py-5 sm:py-8">
         
         {/* LOGO & MARS TELEMETRY */}
-        <div className="flex items-center gap-3 pointer-events-auto">
+        <div className="flex items-center gap-4 pointer-events-auto">
           <Link
             href="/"
             onClick={() => scrollToSection("hero")}
-            className="flex items-center gap-2 text-sm font-medium tracking-tight text-white transition hover:opacity-80 focus:outline-none"
+            className="group flex items-center gap-3 text-sm font-medium tracking-tight text-white transition hover:opacity-90 focus:outline-none"
             aria-label="Ryan Arnab Home"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
-            </span>
-            <span className="font-semibold tracking-[-0.03em] text-white">ryanarnab</span>
+            {/* BRAND LOGO SVG */}
+            <div className="relative flex items-center justify-center h-8 w-8 rounded-lg bg-[#ffd900]/10 border border-[#ffd900]/30 p-1.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-[#ffd900]/20 group-hover:border-[#ffd900] group-hover:shadow-[0_0_16px_rgba(255,217,0,0.5)]">
+              <Image src="/RyanArnab.svg" alt="RyanArnab Logo" width={24} height={24} className="h-full w-full object-contain" />
+            </div>
+
+            <div className="flex flex-col">
+              <span className="font-bold tracking-[-0.03em] text-[#fffdf0] text-base leading-none group-hover:text-[#ffd900] transition-colors">ryanarnab</span>
+              <span className="text-[9px] font-mono tracking-[0.16em] uppercase text-[#ffd900]/70 leading-tight">Design & Tech</span>
+            </div>
           </Link>
 
           {/* TELEMETRY BADGE */}
-          <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-white/10 text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
-            <Radio size={11} className="text-amber-400 animate-pulse" />
-            <span className="text-amber-400/80">MARS SECTOR</span>
+          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-white/10 text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
+            <Radio size={11} className="text-[#ffd900] animate-pulse" />
+            <span className="text-[#ffd900]">ORBITAL SECTOR</span>
             <span className="text-white/20">·</span>
             <span>26.14°N 91.73°E</span>
             <span className="text-white/20">·</span>
@@ -65,15 +70,15 @@ export default function Navbar() {
 
         {/* NAVIGATION PILL */}
         <nav className="pointer-events-auto">
-          <ul className="flex items-center gap-1 sm:gap-2 rounded-full border border-white/10 bg-black/75 px-3 sm:px-4 py-1.5 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.6)] text-xs sm:text-sm">
+          <ul className="flex items-center gap-1 sm:gap-2 rounded-full border border-[#ffd900]/20 bg-black/80 px-3 sm:px-4 py-1.5 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.7)] text-xs sm:text-sm">
             <li>
               <Link
                 href="/"
                 onClick={() => scrollToSection("hero")}
                 className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
                   pathname === "/"
-                    ? "bg-amber-400/15 text-amber-300 font-medium shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
+                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
                 }`}
               >
                 Origin
@@ -84,8 +89,8 @@ export default function Navbar() {
                 href="/works"
                 className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
                   pathname === "/works"
-                    ? "bg-amber-400/15 text-amber-300 font-medium shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
+                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
                 }`}
               >
                 Works
@@ -96,8 +101,8 @@ export default function Navbar() {
                 href="/about"
                 className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
                   pathname === "/about"
-                    ? "bg-amber-400/15 text-amber-300 font-medium shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
+                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
                 }`}
               >
                 Observatory
@@ -108,8 +113,8 @@ export default function Navbar() {
                 href="/playground"
                 className={`hidden sm:inline-block px-2.5 sm:px-3 py-1 rounded-full transition-all ${
                   pathname === "/playground"
-                    ? "bg-amber-400/15 text-amber-300 font-medium shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
+                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
                 }`}
               >
                 Lab
@@ -123,20 +128,20 @@ export default function Navbar() {
           {pathname === "/" ? (
             <button
               onClick={() => scrollToSection("contact")}
-              className="group flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-amber-200 backdrop-blur-md transition hover:border-amber-400 hover:bg-amber-500/20 hover:text-white hover:shadow-[0_0_16px_rgba(245,158,11,0.3)]"
+              className="group flex items-center gap-2 rounded-full border border-[#ffd900]/40 bg-[#ffd900]/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#ffd900] backdrop-blur-md transition hover:border-[#ffd900] hover:bg-[#ffd900]/25 hover:text-white hover:shadow-[0_0_20px_rgba(255,217,0,0.45)]"
             >
               <span className="hidden sm:inline">Transmit</span>
               <span>Let&apos;s talk</span>
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-amber-400">→</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-[#ffd900]">→</span>
             </button>
           ) : (
             <Link
               href="/#contact"
-              className="group flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-amber-200 backdrop-blur-md transition hover:border-amber-400 hover:bg-amber-500/20 hover:text-white hover:shadow-[0_0_16px_rgba(245,158,11,0.3)]"
+              className="group flex items-center gap-2 rounded-full border border-[#ffd900]/40 bg-[#ffd900]/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#ffd900] backdrop-blur-md transition hover:border-[#ffd900] hover:bg-[#ffd900]/25 hover:text-white hover:shadow-[0_0_20px_rgba(255,217,0,0.45)]"
             >
               <span className="hidden sm:inline">Transmit</span>
               <span>Let&apos;s talk</span>
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-amber-400">→</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-[#ffd900]">→</span>
             </Link>
           )}
         </div>

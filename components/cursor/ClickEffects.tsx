@@ -39,7 +39,6 @@ export default function ClickEffects({
     showLabel = false,
     labelText = "",
     labelColor = "#ffffff",
-    labelFont,
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [rings, setRings] = useState<Effect[]>([]);
