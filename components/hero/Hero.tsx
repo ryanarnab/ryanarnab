@@ -10,12 +10,15 @@ import {
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { useScrollProgress } from "../scroll/ScrollProvider";
-import BackgroundParticles from "./BackgroundParticles";
 
 function GravityWord({
   children,
+  zeroG = true,
+  wordIndex = 0,
 }: {
   children: string;
+  zeroG?: boolean;
+  wordIndex?: number;
 }) {
   return (
     <span className="block">
@@ -23,6 +26,8 @@ function GravityWord({
         <GravityLetter
           key={`${letter}-${index}`}
           letter={letter}
+          index={wordIndex * 10 + index}
+          zeroG={zeroG}
         />
       ))}
     </span>
@@ -31,8 +36,12 @@ function GravityWord({
 
 function GravityLetter({
   letter,
+  index,
+  zeroG = true,
 }: {
   letter: string;
+  index: number;
+  zeroG?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -122,81 +131,182 @@ function GravityLetter({
     };
   }, [offsetX, offsetY, stretch, aberration]);
 
+  // Individual zero-gravity buoyant wave parameters per letter
+  const floatDuration = 3.6 + ((index * 7) % 5) * 0.45;
+  const floatY = 7 + ((index * 3) % 4) * 2.5;
+  const floatX = (index % 2 === 0 ? 1 : -1) * (1.5 + ((index * 2) % 3));
+  const floatRotate = (index % 2 === 0 ? 1 : -1) * (1.2 + ((index * 5) % 3) * 0.6);
+  const delay = (index * 0.22) % 1.6;
+
   return (
     <motion.span
-      ref={ref}
       className="inline-block origin-center will-change-transform select-none"
-      style={{
-        x,
-        y,
-        scaleX,
-        textShadow,
-      }}
+      animate={
+        zeroG
+          ? {
+              y: [-floatY, floatY * 1.15, -floatY],
+              x: [-floatX, floatX, -floatX],
+              rotate: [-floatRotate, floatRotate, -floatRotate],
+            }
+          : {
+              y: 0,
+              x: 0,
+              rotate: 0,
+            }
+      }
+      transition={
+        zeroG
+          ? {
+              duration: floatDuration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay,
+            }
+          : {
+              duration: 0.5,
+              ease: "easeOut",
+            }
+      }
     >
-      {letter}
+      <motion.span
+        ref={ref}
+        className="inline-block origin-center will-change-transform select-none"
+        style={{
+          x,
+          y,
+          scaleX,
+          textShadow,
+        }}
+      >
+        {letter}
+      </motion.span>
     </motion.span>
   );
 }
 
+import { useState } from "react";
+import { ArrowDown, Orbit, Sparkles } from "lucide-react";
+
 export default function Hero() {
   const progress = useScrollProgress();
+  const [zeroG, setZeroG] = useState(true);
 
   const heroY = useTransform(progress, [0, 1], [0, -420]);
   const heroOpacity = useTransform(progress, [0, 0.74], [1, 0]);
   const heroScale = useTransform(progress, [0, 1], [1, 0.82]);
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <motion.section
       id="hero"
-      className="sticky top-0 flex min-h-screen w-full items-center overflow-hidden"
+      className="sticky top-0 flex min-h-screen w-full items-center justify-center overflow-hidden"
       style={{
         y: heroY,
         opacity: heroOpacity,
         scale: heroScale,
       }}   
     >
-      {/* Background Celestial Star Particles */}
-      <BackgroundParticles />
-
-      {/* Hero Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-[1400px] justify-between items-end px-6 sm:px-10 pt-24 sm:pt-0">
-        
-        {/* BRAND EMBLEM STAMP */}
+      {/* Hero Structural Stage with smooth Zoom-in entrance on load */}
+      <motion.div 
+        initial={{ scale: 0.86, opacity: 0, filter: "blur(10px)" }}
+        animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 1.35, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 mx-auto flex w-full max-w-[1260px] flex-col items-center justify-center text-center px-4 sm:px-8 pt-28 sm:pt-20 pb-16"
+      >
+        {/* PLAYFUL COSMIC STATUS PILL (Liquid Glass Capsule) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.3 }}
-          className="hidden md:flex flex-col items-start gap-3 pb-6"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="mb-6 sm:mb-8"
         >
-          <div className="relative group cursor-pointer flex items-center justify-center h-24 w-24 rounded-3xl bg-[#ffd900]/10 border border-[#ffd900]/30 p-4 backdrop-blur-xl shadow-[0_0_40px_rgba(255,217,0,0.25)] transition-all duration-500 hover:scale-105 hover:bg-[#ffd900]/20 hover:border-[#ffd900] hover:shadow-[0_0_50px_rgba(255,217,0,0.5)]">
-            <Image src="/RyanArnab.svg" alt="RyanArnab Monogram" width={64} height={64} className="h-full w-full object-contain filter drop-shadow-[0_0_12px_rgba(255,217,0,0.8)]" />
+          <div 
+            data-cursor-label="telemetry: guwahati 📍"
+            className="liquid-glass rounded-full px-4 py-1.5 flex items-center gap-2.5 text-xs text-[#fffdf0]/90 transition-transform duration-200 hover:scale-[1.02]"
+          >
+            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-[#ffd900]/15 text-[#ffd900]">
+              <Orbit size={12} className={zeroG ? "animate-spin" : "animate-pulse"} />
+            </div>
+            <span className="font-mono text-[11px] tracking-wide text-white/80">
+              Orbiting somewhere curious
+            </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)]" />
+            <span className="text-[10px] font-mono text-[#ffd900] font-semibold">
+              Guwahati, IN
+            </span>
           </div>
-          <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ffd900]/80">Brand Signature</span>
         </motion.div>
 
-        <div className="max-w-[850px] text-right ml-auto">
-
-          {/* TELEMETRY TAG */}
-          <div className="mb-4 flex items-center justify-end gap-2.5 text-[10px] sm:text-xs uppercase tracking-[0.22em] text-white/50">
-            <Image src="/RyanArnab.svg" alt="" width={14} height={14} className="h-3.5 w-auto" />
-            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
-            <span className="text-[#ffd900]">Sector 01 // Orbital Station</span>
-          </div>
-
+        {/* CENTERED TITANIC TYPOGRAPHY WITH INDIVIDUAL ZERO-G FLOATING LETTERS */}
+        <div className="w-full text-center">
           <h1
             data-warp-text
-            data-wrap-text
-            className="text-[clamp(52px,13vw,180px)] font-medium leading-[0.88] tracking-[-0.08em] text-[#fffdf0]"
+            data-cursor-label="gravity pull 🧲"
+            className="text-[clamp(56px,14vw,185px)] font-medium leading-[0.88] tracking-[-0.08em] text-[#fffdf0] text-center select-none"
           >
-            <GravityWord>RYAN</GravityWord>
-            <GravityWord>ARNAB</GravityWord>
+            <GravityWord zeroG={zeroG} wordIndex={0}>RYAN</GravityWord>
+            <GravityWord zeroG={zeroG} wordIndex={1}>ARNAB</GravityWord>
           </h1>
-
-          <p className="mt-6 sm:mt-8 ml-auto max-w-[340px] text-right text-xs sm:text-sm leading-relaxed text-[#fffdf0]/70">
-            Communication Designer & Creative Technologist exploring <span className="text-[#ffd900] font-medium">visual identity</span>, interaction and motion in digital space.
-          </p>
         </div>
-      </div>
+
+        {/* PLAYFUL CENTERED SUBTITLE */}
+        <p 
+          data-cursor-label="curiosity creates better ✦"
+          className="mt-6 sm:mt-8 max-w-[580px] text-center text-xs sm:text-base leading-relaxed text-[#fffdf0]/75"
+        >
+          Communication Designer & Creative Technologist crafting playful <span className="text-[#ffd900] font-medium">brand identities</span>, tactile interfaces, and kinetic digital systems.
+        </p>
+
+        {/* TACTILE LIQUID METAL & LIQUID GLASS CONTROLS */}
+        <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          
+          {/* Primary Action: Explore Works */}
+          <motion.button
+            whileTap={{ scale: 0.95, y: 1 }}
+            transition={{ type: "spring", stiffness: 600, damping: 25 }}
+            onClick={() => scrollToSection("work")}
+            data-cursor-label="explore expeditions ↓"
+            className="tactile-switch-accent rounded-xl px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide flex items-center gap-2 cursor-pointer"
+          >
+            <span>Explore Expeditions</span>
+            <ArrowDown size={14} className="animate-bounce" />
+          </motion.button>
+
+          {/* Secondary Action: Transmit Signal */}
+          <motion.button
+            whileTap={{ scale: 0.95, y: 1 }}
+            transition={{ type: "spring", stiffness: 600, damping: 25 }}
+            onClick={() => scrollToSection("contact")}
+            data-cursor-label="transmit signal ⚡"
+            className="tactile-switch rounded-xl px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-[#fffdf0] tracking-wide flex items-center gap-2 cursor-pointer"
+          >
+            <span className="h-2 w-2 rounded-full bg-[#ffd900] animate-ping" />
+            <span>Transmit Signal</span>
+          </motion.button>
+
+          {/* Fun Space Toy: Zero-G Physics Switch */}
+          <motion.button
+            whileTap={{ scale: 0.95, y: 1 }}
+            transition={{ type: "spring", stiffness: 600, damping: 25 }}
+            onClick={() => setZeroG(!zeroG)}
+            data-cursor-label={zeroG ? "restore gravity 🧲" : "zero-g float 🎈"}
+            className={`tactile-switch rounded-xl px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-mono tracking-wider uppercase transition-colors cursor-pointer flex items-center gap-2 ${
+              zeroG ? "border-[#ffd900]/80 text-[#ffd900] bg-[#ffd900]/15 shadow-[0_0_18px_rgba(255,217,0,0.25)]" : "text-white/70"
+            }`}
+            title="Toggle Zero-G float state"
+          >
+            <Sparkles size={13} className={zeroG ? "text-[#ffd900] animate-spin" : "text-white/40"} />
+            <span>{zeroG ? "Zero-G: Float" : "Gravity: 1.0G"}</span>
+          </motion.button>
+
+        </div>
+      </motion.div>
     </motion.section>
   );
 }

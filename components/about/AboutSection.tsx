@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Eye, Layers, Cpu, Compass } from "lucide-react";
+import { Eye, Layers, Cpu, Compass, Orbit, Radio, Sparkles } from "lucide-react";
 
 const CAPABILITIES = [
   {
@@ -31,19 +31,19 @@ const CAPABILITIES = [
 ];
 
 const METRICS = [
-  ["ORBIT / BASE", "GUWAHATI, INDIA · 26.14°N 91.73°E"],
-  ["DISCIPLINE", "COMMUNICATION DESIGN & CREATIVE TECHNOLOGY"],
-  ["EDUCATION", "B.DES COMMUNICATION DESIGN"],
-  ["CORE PHILOSOPHY", "CURIOSITY CREATES BETTER"],
+  { label: "ORBIT / BASE", value: "Guwahati, IN · 26.14°N 91.73°E" },
+  { label: "DISCIPLINE", value: "Communication Design & Creative Tech" },
+  { label: "EDUCATION", value: "B.Des Communication Design" },
+  { label: "CORE PHILOSOPHY", value: "Curiosity Creates Better" },
 ];
 
 export default function AboutSection() {
   return (
     <section
       id="about"
-      className="relative w-full overflow-hidden bg-[#080808] text-white px-6 sm:px-10 py-24 sm:py-40"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 py-24 sm:py-36"
     >
-      <div className="mx-auto w-full max-w-[1400px]">
+      <div className="mx-auto w-full max-w-[1440px]">
 
         {/* SECTION LABEL */}
         <motion.div
@@ -51,108 +51,162 @@ export default function AboutSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.8 }}
-          className="mb-16 sm:mb-24 flex items-center justify-between border-b border-white/10 pb-5"
+          className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 gap-4"
         >
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
-            <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-semibold">
-              Sector 02 // The Observatory Deck
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-mono font-semibold">
+                Sector 02 // The Observatory Deck
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#fffdf0]">
+              Observation & Manifesto
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <span className="text-xs font-mono tracking-widest text-white/50">
+              ORBITAL RADAR ALIGNED
+            </span>
+            <span className="font-mono text-xs tracking-widest text-[#ffd900]/70">
+              02
             </span>
           </div>
-
-          <span className="font-mono text-xs tracking-widest text-[#ffd900]/70">
-            02
-          </span>
         </motion.div>
 
-        {/* MASSIVE STATEMENT */}
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-[1250px] text-[clamp(38px,7.2vw,120px)] font-medium leading-[0.92] tracking-[-0.075em] text-[#fffdf0]"
-        >
-          I DESIGN BECAUSE
-          <br />
-          I&apos;M <span className="text-[#ffd900]">CURIOUS</span> ABOUT
-          <br />
-          HOW THINGS COULD
-          <br />
-          <span className="text-[#ffd900]/40">FEEL DIFFERENT.</span>
-        </motion.h2>
-
-        {/* BIOGRAPHY & TELEMETRY ROW */}
-        <div className="mt-16 sm:mt-24 grid grid-cols-1 md:grid-cols-12 gap-10 items-start">
+        {/* BENTO GRID: ROW 1 (MANIFESTO + TELEMETRY CARD) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8">
           
-          <div className="md:col-span-6 lg:col-span-6">
-            <p className="text-lg sm:text-2xl leading-relaxed text-[#fffdf0]/85 font-normal">
-              I&apos;m <span className="text-[#ffd900] font-bold">Arnab Ghosh</span>, a communication designer and creative technologist. I build identity systems, kinetic motion, and spatial interfaces engineered to reward curiosity — creating environments where visitors actively discover unexpected signals.
-            </p>
-          </div>
-
-          <div className="md:col-span-6 lg:col-span-6 space-y-4">
-            {METRICS.map(([label, value]) => (
-              <div
-                key={label}
-                className="flex flex-col sm:flex-row sm:items-baseline justify-between border-t border-white/10 py-3.5 sm:py-4 gap-1 sm:gap-4 hover:border-[#ffd900]/40 transition-colors"
-              >
-                <span className="text-[11px] font-mono tracking-[0.14em] text-[#ffd900]/80 uppercase">
-                  {label}
-                </span>
-                <span className="text-right text-xs sm:text-sm text-[#fffdf0]/90 font-mono">
-                  {value}
+          {/* MANIFESTO CARD (8 COLS) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            data-cursor-label="manifesto ✦"
+            className="lg:col-span-8 flex flex-col justify-between rounded-3xl liquid-glass p-8 sm:p-12 hover:border-[#ffd900]/30 transition-all"
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles size={14} className="text-[#ffd900]" />
+                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+                  Core Philosophy
                 </span>
               </div>
-            ))}
-          </div>
+
+              <h3 className="text-[clamp(32px,5vw,70px)] font-medium leading-[0.94] tracking-[-0.06em] text-[#fffdf0] mb-8">
+                I DESIGN BECAUSE
+                <br />
+                I&apos;M <span className="text-[#ffd900]">CURIOUS</span> ABOUT
+                <br />
+                HOW THINGS COULD
+                <br />
+                <span className="text-[#ffd900]/45">FEEL DIFFERENT.</span>
+              </h3>
+            </div>
+
+            <div className="pt-6 border-t border-white/10">
+              <p className="text-base sm:text-lg leading-relaxed text-[#fffdf0]/80 font-normal max-w-2xl">
+                I&apos;m <span className="text-[#ffd900] font-semibold">Arnab Ghosh</span>, a communication designer and creative technologist based in Guwahati. I treat interfaces as tactile cosmic sandboxes — engineering environments where kinetic motion, typography, and interactive physics reward curiosity.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* TELEMETRY MATRIX CARD (4 COLS) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            data-cursor-label="orbital telemetry 🛰️"
+            className="lg:col-span-4 flex flex-col justify-between rounded-3xl liquid-glass p-6 sm:p-8 hover:border-[#ffd900]/30 transition-all"
+          >
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+                <div className="flex items-center gap-2">
+                  <Radio size={14} className="text-[#ffd900] animate-pulse" />
+                  <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+                    Deck Telemetry
+                  </span>
+                </div>
+                <span className="h-2 w-2 rounded-full bg-[#ffd900] shadow-[0_0_8px_#ffd900]" />
+              </div>
+
+              <div className="space-y-4">
+                {METRICS.map((m) => (
+                  <div key={m.label} className="border-b border-white/5 pb-3">
+                    <span className="text-[10px] font-mono tracking-widest text-[#ffd900]/70 uppercase block mb-1">
+                      {m.label}
+                    </span>
+                    <span className="text-xs sm:text-sm font-mono text-white/90 font-medium block">
+                      {m.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/40">
+              <span className="flex items-center gap-1.5">
+                <Orbit size={12} className="animate-spin text-[#ffd900]" />
+                RADAR: SYNCHRONIZED
+              </span>
+              <span>2026.09</span>
+            </div>
+          </motion.div>
 
         </div>
 
-        {/* CAPABILITIES SPECTRUM GRID */}
-        <div className="mt-24 sm:mt-32">
-          <div className="mb-10 flex items-center justify-between border-b border-white/10 pb-4">
+        {/* BENTO GRID: ROW 2 (4 CORE MISSION DISCIPLINES) */}
+        <div>
+          <div className="mb-6 flex items-center justify-between px-1">
             <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#ffd900]">
-              CORE MISSION DISCIPLINES
+              CORE MISSION DISCIPLINES // SPECTRUM
             </span>
             <span className="text-[11px] font-mono text-white/40">
-              SPECTRUM // MATRIX
+              4 TILES
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CAPABILITIES.map((cap) => {
+            {CAPABILITIES.map((cap, i) => {
               const Icon = cap.icon;
               return (
-                <div
+                <motion.div
                   key={cap.title}
-                  className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#ffd900]/50 hover:bg-[#ffd900]/[0.03] hover:shadow-[0_0_24px_rgba(255,217,0,0.12)]"
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  data-cursor-label={`spec: ${cap.title.toLowerCase()} ✦`}
+                  className="group relative flex flex-col justify-between rounded-3xl liquid-glass p-6 sm:p-7 transition-all duration-300 hover:scale-[1.02] hover:border-[#ffd900]/40"
                 >
                   <div>
-                    <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffd900]/10 text-[#ffd900] border border-[#ffd900]/30 shadow-[0_0_14px_rgba(255,217,0,0.2)]">
-                      <Icon size={18} />
+                    <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#ffd900] border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105">
+                      <Icon size={20} />
                     </div>
 
-                    <h3 className="text-lg font-bold tracking-tight text-[#fffdf0] mb-2 group-hover:text-[#ffd900] transition-colors">
+                    <h3 className="text-lg font-semibold tracking-tight text-[#fffdf0] mb-2.5 group-hover:text-[#ffd900] transition-colors">
                       {cap.title}
                     </h3>
 
-                    <p className="text-xs leading-relaxed text-white/60 mb-6">
+                    <p className="text-xs leading-relaxed text-white/65 mb-6">
                       {cap.desc}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex flex-wrap gap-1.5">
+                  <div className="pt-4 border-t border-white/10 flex flex-wrap gap-1.5">
                     {cap.tools.map((t) => (
                       <span
                         key={t}
-                        className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono text-white/50 group-hover:text-[#ffd900]/80 transition-colors"
+                        className="rounded-md bg-white/10 px-2.5 py-1 text-[10px] font-mono text-white/70 group-hover:text-white transition-colors"
                       >
                         {t}
                       </span>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

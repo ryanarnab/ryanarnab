@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ArrowUpRight, Copy, Check, Radio, Send, Globe } from "lucide-react";
-import { useScrollController } from "../scroll/ScrollProvider";
+import { ArrowUpRight, Copy, Check, Radio, Send, Globe, Sparkles, Orbit } from "lucide-react";
 
 interface SocialChannel {
   name: string;
@@ -45,8 +44,8 @@ const PRESETS = [
 
 export default function ContactSection() {
   const [copied, setCopied] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [time, setTime] = useState("");
-  const { scrollTo } = useScrollController();
   const email = "ryanarnab.design@gmail.com";
 
   useEffect(() => {
@@ -69,211 +68,199 @@ export default function ContactSection() {
     setTimeout(() => setCopied(false), 2600);
   };
 
+  const getMailtoHref = () => {
+    const subject = selectedPreset
+      ? encodeURIComponent(selectedPreset)
+      : encodeURIComponent("Mission Inquiry / Collaboration");
+    return `mailto:${email}?subject=${subject}`;
+  };
+
   return (
     <footer
       id="contact"
-      className="relative min-h-screen w-full overflow-hidden bg-[#080808] text-white px-6 sm:px-10 pb-12 pt-24 sm:pt-36 border-t border-[#ffd900]/20"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 pt-24 sm:pt-36 pb-12 border-t border-white/10"
     >
-      {/* BACKGROUND GRAPHICAL RADAR GRID */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-30">
-        {/* Concentric radar rings */}
-        <div className="absolute -bottom-48 left-1/2 -translate-x-1/2 h-[700px] w-[700px] sm:h-[900px] sm:w-[900px] rounded-full border border-[#ffd900]/20 flex items-center justify-center">
-          <div className="h-[75%] w-[75%] rounded-full border border-dashed border-[#ffd900]/25 flex items-center justify-center">
-            <div className="h-[60%] w-[60%] rounded-full border border-[#ffd900]/30 flex items-center justify-center">
-              <div className="h-[40%] w-[40%] rounded-full border border-dashed border-[#ffd900]/40" />
-            </div>
-          </div>
-        </div>
-
-        {/* Ambient solar transmission glow */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[350px] w-[600px] bg-gradient-to-t from-[#ffd900]/15 via-transparent to-transparent blur-3xl" />
-      </div>
-
-      <div className="relative z-10 mx-auto flex min-h-[85vh] w-full max-w-[1400px] flex-col justify-between">
+      <div className="mx-auto w-full max-w-[1440px]">
         
-        {/* TOP TELEMETRY STRIP */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#ffd900]/10 border border-[#ffd900]/30 p-1">
-              <Image src="/RyanArnab.svg" alt="RyanArnab" width={18} height={18} className="h-full w-full object-contain" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#ffd900] animate-ping" />
-              <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#ffd900] font-semibold">
-                Sector 04 // Transmission Terminal
+        {/* SECTION HEADER */}
+        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
+              <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-mono font-semibold">
+                Sector 04 // Deep Space Transmission
               </span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] font-mono text-white/40">
-            <span className="text-[#ffd900]/80">BAND: KU-24GHZ</span>
-            <span>·</span>
-            <span>STATUS: OPEN FOR MISSIONS</span>
-            <span>·</span>
-            <span className="text-[#fffdf0]/80">{time || "TRANSMITTER READY"}</span>
-          </div>
-        </div>
-
-        {/* MAIN GRAPHICAL TERMINAL INTERFACE */}
-        <div className="py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          
-          {/* LEFT: MASSIVE INVITATION & DIRECT ACTION */}
-          <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#ffd900]/30 bg-[#ffd900]/10 px-3.5 py-1 text-xs font-mono tracking-wider text-[#ffd900] mb-6">
-              <Radio size={12} className="animate-pulse" />
-              <span>DIRECT SATELLITE UPLINK</span>
-            </div>
-
-            <h2 className="text-[clamp(44px,7.8vw,120px)] font-medium leading-[0.9] tracking-[-0.075em] text-[#fffdf0]">
-              READY TO LAUNCH
-              <br />
-              <span className="text-[#ffd900]">YOUR NEXT SIGNAL?</span>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#fffdf0]">
+              Initialize Contact
             </h2>
-
-            <p className="mt-6 max-w-[500px] text-sm sm:text-base leading-relaxed text-[#fffdf0]/70">
-              Whether you need a world-class visual identity system, interactive spatial digital experiences, or kinetic motion direction — open a transmission below.
-            </p>
-
-            {/* HIGH-IMPACT EMAIL TRANSMITTER BOX */}
-            <div className="mt-10 max-w-[620px] rounded-2xl border border-[#ffd900]/30 bg-black/80 p-5 sm:p-6 backdrop-blur-xl shadow-[0_0_40px_rgba(255,217,0,0.12)]">
-              <div className="flex items-center justify-between text-[11px] font-mono text-white/40 mb-3">
-                <span>PRIMARY COMMS FREQUENCY</span>
-                <span className="text-[#ffd900]">FAST DISPATCH</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
-                <a
-                  href={`mailto:${email}`}
-                  className="text-lg sm:text-2xl font-semibold tracking-tight text-[#fffdf0] hover:text-[#ffd900] transition-colors truncate"
-                >
-                  {email}
-                </a>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={copyEmail}
-                    className="flex items-center gap-2 rounded-xl border border-[#ffd900]/40 bg-[#ffd900]/10 px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-[#ffd900] transition-all hover:bg-[#ffd900] hover:text-black font-bold shadow-[0_0_16px_rgba(255,217,0,0.25)]"
-                    title="Copy email address"
-                  >
-                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                    <span>{copied ? "Copied!" : "Copy"}</span>
-                  </button>
-
-                  <a
-                    href={`mailto:${email}`}
-                    className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-mono uppercase tracking-wider text-white hover:border-white/30 transition-all"
-                  >
-                    <Send size={13} />
-                    <span>Send</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* QUICK LAUNCH INTENT PRESETS */}
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 mr-1">
-                  Topic:
-                </span>
-                {PRESETS.map((preset) => (
-                  <a
-                    key={preset.label}
-                    href={`mailto:${email}?subject=${encodeURIComponent(preset.subject)}`}
-                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70 transition-all hover:border-[#ffd900]/50 hover:bg-[#ffd900]/10 hover:text-[#ffd900]"
-                  >
-                    {preset.label} →
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: GRAPHICAL NETWORK CHANNELS & BASE TELEMETRY */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="text-xs font-mono uppercase tracking-[0.2em] text-[#ffd900] mb-2 flex items-center gap-2">
-              <Globe size={13} />
-              <span>ORBITAL TRANSMISSION NODES</span>
-            </div>
-
-            {/* CHANNEL TILES */}
-            <div className="grid grid-cols-1 gap-3.5">
-              {SOCIAL_CHANNELS.map((channel) => (
-                <a
-                  key={channel.name}
-                  href={channel.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-black/60 p-5 backdrop-blur-md transition-all duration-300 hover:border-[#ffd900]/50 hover:bg-[#ffd900]/[0.03] hover:shadow-[0_0_25px_rgba(255,217,0,0.15)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono tracking-widest text-[#ffd900]/80">
-                      {channel.tag}
-                    </span>
-                    <ArrowUpRight
-                      size={18}
-                      className="text-white/40 transition-transform duration-300 group-hover:rotate-45 group-hover:text-[#ffd900]"
-                    />
-                  </div>
-
-                  <div className="mt-3">
-                    <h3 className="text-xl font-bold tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
-                      {channel.name}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-white/50 leading-relaxed">
-                      {channel.desc}
-                    </p>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-white/40">
-                    <span>{channel.handle}</span>
-                    <span className="text-[#ffd900]/60 group-hover:text-[#ffd900]">UPLINK ACTIVE ↗</span>
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            {/* BASE STATION DECK TELEMETRY CARD */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-xs font-mono text-white/50 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-white/30 uppercase tracking-widest">Base Coordinates</span>
-                <span className="text-[#ffd900]">26.14°N 91.73°E · GUWAHATI</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-white/30 uppercase tracking-widest">Availability</span>
-                <span className="text-emerald-400 font-semibold">Q1/Q2 2026 MISSIONS</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* BOTTOM LAUNCHPAD BAR */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-white/10 pt-8">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[#ffd900]/10 border border-[#ffd900]/30 p-2 flex items-center justify-center">
-              <Image src="/RyanArnab.svg" alt="RyanArnab Monogram" width={24} height={24} className="h-full w-full object-contain" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-[#fffdf0] tracking-tight">
-                Arnab Ghosh
-              </p>
-              <p className="text-xs font-mono tracking-wider text-[#ffd900]/80">
-                Communication Designer & Creative Technologist
-              </p>
-            </div>
           </div>
 
           <div className="flex items-center gap-6">
-            <span className="text-xs font-mono text-white/40">
-              © {new Date().getFullYear()} RYAN ARNAB · ALL ORBITS RESERVED
+            <span className="text-xs font-mono tracking-widest text-white/50">
+              SATELLITE WAVES PROPAGATING
             </span>
+            <span className="font-mono text-xs tracking-widest text-[#ffd900]/70">
+              04
+            </span>
+          </div>
+        </div>
 
-            {/* LAUNCH TO ORIGIN BUTTON */}
-            <button
-              onClick={() => scrollTo("#hero")}
-              className="flex items-center gap-2 rounded-full border border-[#ffd900]/40 bg-[#ffd900]/10 px-4 py-2 text-xs font-mono uppercase tracking-widest text-[#ffd900] transition-all hover:bg-[#ffd900] hover:text-black font-bold shadow-[0_0_16px_rgba(255,217,0,0.2)]"
+        {/* BENTO GRID: TRANSMISSION MATRIX */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8">
+          
+          {/* CARD 1: PRIMARY DISPATCH TERMINAL (7 COLS) */}
+          <div className="lg:col-span-7 flex flex-col justify-between rounded-3xl liquid-glass p-8 sm:p-12 hover:border-[#ffd900]/30 transition-all">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <Send size={15} className="text-[#ffd900]" />
+                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+                  Direct Comms Channel
+                </span>
+              </div>
+
+              <h3 className="text-[clamp(32px,5vw,64px)] font-medium leading-[0.95] tracking-[-0.06em] text-[#fffdf0] mb-6">
+                HAVE AN IDEA OR MISSION IN MIND?
+                <br />
+                <span className="text-[#ffd900]">LET&apos;S TALK.</span>
+              </h3>
+
+              <p className="text-sm sm:text-base leading-relaxed text-[#fffdf0]/70 max-w-lg mb-8">
+                Currently open for select brand identity commissions, spatial motion systems, and creative technology collaborations.
+              </p>
+            </div>
+
+            {/* Email dispatch strip */}
+            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex-1 flex items-center justify-between rounded-2xl bg-white/5 px-4 sm:px-5 py-3 border border-white/10">
+                <span className="font-mono text-xs sm:text-sm text-[#ffd900] truncate">
+                  {email}
+                </span>
+                <button
+                  onClick={copyEmail}
+                  data-cursor-label={copied ? "copied! ✓" : "copy email 📋"}
+                  className="ml-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 transition-colors cursor-pointer"
+                  title="Copy email to clipboard"
+                >
+                  {copied ? <Check size={14} className="text-[#ffd900]" /> : <Copy size={14} />}
+                </button>
+              </div>
+
+              <a
+                href={getMailtoHref()}
+                data-cursor-label="open mail client ✉️"
+                className="tactile-switch-accent rounded-2xl px-6 py-3.5 text-xs sm:text-sm font-semibold tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-transform group"
+              >
+                <span>Transmit Signal</span>
+                <Send size={14} className="transition-transform group-hover:translate-x-0.5" />
+              </a>
+            </div>
+          </div>
+
+          {/* CARD 2: MISSION PRESET SELECTOR (5 COLS) */}
+          <div className="lg:col-span-5 flex flex-col justify-between rounded-3xl liquid-glass p-8 hover:border-[#ffd900]/30 transition-all">
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+                  Transmission Frequency
+                </span>
+                <Sparkles size={14} className="text-[#ffd900]" />
+              </div>
+
+              <p className="text-xs font-mono text-white/60 mb-5">
+                Select an operational focus to auto-configure transmission parameters:
+              </p>
+
+              <div className="space-y-3">
+                {PRESETS.map((preset) => {
+                  const isSelected = selectedPreset === preset.subject;
+                  return (
+                    <button
+                      key={preset.label}
+                      onClick={() => setSelectedPreset(isSelected ? null : preset.subject)}
+                      data-cursor-label="select preset ✦"
+                      className={`w-full text-left rounded-2xl p-4 transition-all duration-200 border cursor-pointer ${
+                        isSelected
+                          ? "liquid-metal border-[#ffd900]/60 text-[#ffd900] shadow-[0_0_16px_rgba(255,217,0,0.2)]"
+                          : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-white/25"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{preset.label}</span>
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900]" />
+                      </div>
+                      <span className="text-[11px] font-mono text-white/50 block">
+                        {preset.subject}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/10 text-[11px] font-mono text-white/40 flex items-center justify-between">
+              <span>ACTIVE FREQUENCY: {selectedPreset ? "CUSTOM LOCKED" : "GENERAL DISPATCH"}</span>
+              <Orbit size={13} className="animate-spin text-[#ffd900]" />
+            </div>
+          </div>
+
+        </div>
+
+        {/* BENTO GRID: ROW 2 (ORBITAL UPLINKS & EARTH STATION) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {SOCIAL_CHANNELS.map((social) => (
+            <a
+              key={social.name}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor-label={`open ${social.name.toLowerCase()} ↗`}
+              className="group flex flex-col justify-between rounded-3xl liquid-glass p-6 sm:p-7 transition-all duration-300 hover:scale-[1.02] hover:border-[#ffd900]/40"
             >
-              <span>▲ RETURN TO ORBIT 00</span>
-            </button>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-mono tracking-widest text-[#ffd900] uppercase">
+                    {social.tag}
+                  </span>
+                  <ArrowUpRight size={15} className="text-white/40 group-hover:text-[#ffd900] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </div>
+
+                <h4 className="text-xl font-medium tracking-tight text-[#fffdf0] mb-1 group-hover:text-[#ffd900] transition-colors">
+                  {social.name}
+                </h4>
+                <span className="font-mono text-xs text-white/50 block mb-3">
+                  {social.handle}
+                </span>
+
+                <p className="text-xs leading-relaxed text-white/65">
+                  {social.desc}
+                </p>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-white/40">
+                <span>CHANNEL: ONLINE</span>
+                <span className="text-[#ffd900]">CONNECT →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* FOOTER BAR & TELEMETRY */}
+        <div className="mt-16 sm:mt-24 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/50">
+          <div className="flex items-center gap-3">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/10 p-1">
+              <Image src="/RyanArnab.svg" alt="RyanArnab" width={16} height={16} className="h-full w-full object-contain" />
+            </div>
+            <span>© 2026 RYAN ARNAB · ALL RIGHTS RESERVED</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="flex items-center gap-1.5">
+              <Radio size={11} className="text-[#ffd900] animate-pulse" />
+              GUWAHATI 26.14°N 91.73°E
+            </span>
+            <span>·</span>
+            <span>{time || "UTC CLOCK"}</span>
           </div>
         </div>
 

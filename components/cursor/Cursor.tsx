@@ -16,6 +16,7 @@ type Mode = "normal" | "draw";
 declare global {
   interface Window {
     setCursorLabel?: (label: string) => void;
+    __starfieldMorphBlend?: number;
   }
 }
 
@@ -29,6 +30,94 @@ const subscribePointerFine = (callback: () => void) => {
 };
 const getPointerFineSnapshot = () => window.matchMedia("(pointer: fine)").matches;
 const getServerPointerFineSnapshot = () => false;
+
+// Contextual label resolver — decides what the cursor pill should say
+function resolveContextualLabel(
+  element: Element | null,
+  interactiveEl: Element | null,
+  morphBlend: number,
+  cursorX: number,
+  viewportWidth: number
+): string {
+  // Check if user is currently on the hero screen
+  const isHeroScreen =
+    typeof window !== "undefined" &&
+    window.scrollY < (window.innerHeight || 800) * 0.55 &&
+    (window.location.pathname === "/" || window.location.pathname === "");
+
+  // --- 1. STARFIELD MORPH LABELS (STRICTLY HERO SCREEN ONLY) ---
+  if (isHeroScreen) {
+    if (morphBlend >= 0.72) {
+      return "arnab ☞";
+    }
+    if (morphBlend > 0.05) {
+      return "move more ☞";
+    }
+  }
+
+  // --- 2. EXPLICIT data-cursor-label attribute ---
+  if (interactiveEl) {
+    const explicit = interactiveEl.getAttribute("data-cursor-label");
+    if (explicit) return explicit;
+
+    const parent = interactiveEl.closest("[data-cursor-label]");
+    if (parent) {
+      const parentLabel = parent.getAttribute("data-cursor-label");
+      if (parentLabel) return parentLabel;
+    }
+  }
+
+  // --- 3. SPECIAL INTERACTIVE SELECTORS ---
+  if (element?.closest("[data-warp-text]")) {
+    return "gravity pull 🧲";
+  }
+
+  if (!interactiveEl) return "";
+
+  // --- 4. SMART CONTEXTUAL DETECTION FOR UNLABELLED ELEMENTS ---
+  const tag = interactiveEl.tagName.toLowerCase();
+  const role = interactiveEl.getAttribute("role");
+  const href = interactiveEl.getAttribute("href");
+  const text = interactiveEl.textContent?.trim().toLowerCase() || "";
+
+  // Links
+  if (tag === "a" || role === "link") {
+    if (href?.startsWith("mailto:")) return "send transmission ✉";
+    if (href?.startsWith("tel:")) return "call ✆";
+    if (text.includes("behance")) return "behance ↗";
+    if (text.includes("linkedin")) return "linkedin ↗";
+    if (text.includes("instagram")) return "instagram ↗";
+    if (href?.startsWith("http") && !href?.includes(window.location.hostname)) return "open link ↗";
+    if (href === "/" || text.includes("home") || text.includes("origin")) return "home ✦";
+    if (text.includes("work") || text.includes("project") || text.includes("expedition")) return "expeditions ✦";
+    if (text.includes("about") || text.includes("observatory")) return "observatory ✦";
+    if (text.includes("lab") || text.includes("playground")) return "research lab 🧪";
+    if (text.includes("contact") || text.includes("talk") || text.includes("transmit")) return "transmit signal ⚡";
+    return "explore ↗";
+  }
+
+  // Buttons
+  if (tag === "button" || role === "button") {
+    if (text.includes("explore") || text.includes("expedition")) return "explore expeditions ↓";
+    if (text.includes("transmit") || text.includes("signal") || text.includes("contact") || text.includes("talk")) return "transmit signal ⚡";
+    if (text.includes("zero") || text.includes("gravity") || text.includes("float")) return "zero-g float 🎈";
+    if (text.includes("draw") || text.includes("sketch")) return "sketch stars ✨";
+    if (text.includes("clear") || text.includes("erase")) return "clear sky 🗑";
+    if (text.includes("copy")) return "copy address 📋";
+    if (text.includes("send") || text.includes("submit")) return "send transmission ↗";
+    if (text.includes("return") || text.includes("top") || text.includes("orbit 00")) return "warp to top 🚀";
+    return "press ✦";
+  }
+
+  // Input / Textarea
+  if (tag === "input" || tag === "textarea") {
+    const placeholder = interactiveEl.getAttribute("placeholder");
+    if (placeholder) return `type: ${placeholder.substring(0, 16)}`;
+    return "type ⌨";
+  }
+
+  return "inspect ✦";
+}
 
 export default function Cursor() {
   const trailCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,13 +210,28 @@ export default function Cursor() {
 
       const element = document.elementFromPoint(clientX, clientY);
       const interactiveEl = element?.closest(
-        "a, button, [role='button'], input, textarea, [data-interactive], [data-warp-text]"
+        "a, button, [role='button'], input, textarea, [data-interactive], [data-warp-text], [data-cursor-label]"
       );
       const interactive = interactiveEl !== null;
+
+      // Resolve contextual label
+      const morphBlend = (window as any).__starfieldMorphBlend || 0;
+      const resolved = resolveContextualLabel(
+        element,
+        interactiveEl ?? null,
+        morphBlend,
+        clientX,
+        window.innerWidth
+      );
 
       if (interactive !== isInteractiveRef.current) {
         isInteractiveRef.current = interactive;
         setIsInteractive(interactive);
+      }
+
+      if (resolved !== cursorLabelRef.current) {
+        cursorLabelRef.current = resolved;
+        setCursorLabel(resolved);
       }
 
       if (interactiveEl) {
@@ -135,16 +239,13 @@ export default function Cursor() {
         hoveredElementRect.current = rect;
 
         // DYNAMIC COLLISION AVOIDANCE CALCULATION:
-        // Position the pill safely away from the element boundary and cursor tip
         let pillX = clientX + 32;
-        let pillY = rect.top - 24; // Float above element
+        let pillY = rect.top - 24;
 
-        // If too close to the top screen edge, float below the element
         if (pillY < 40) {
           pillY = rect.bottom + 24;
         }
 
-        // If too close to the right screen edge, float to the left
         if (clientX > window.innerWidth - 160) {
           pillX = rect.left - 48;
         }
@@ -152,6 +253,15 @@ export default function Cursor() {
         targetPillOffset.current = { x: pillX, y: pillY };
       } else {
         hoveredElementRect.current = null;
+        let pillX = clientX + 28;
+        let pillY = clientY - 26;
+        if (clientX > window.innerWidth - 150) {
+          pillX = clientX - 85;
+        }
+        if (pillY < 50) {
+          pillY = clientY + 28;
+        }
+        targetPillOffset.current = { x: pillX, y: pillY };
       }
 
       if (trail.current.length > 16) {
@@ -267,7 +377,7 @@ export default function Cursor() {
 
       satellite.style.transform = `translate3d(${satellitePos.current.x}px, ${satellitePos.current.y}px, 0) translate(-50%, -50%)`;
 
-      // WARM SOLAR STARDUST TRAIL
+      // STARDUST TRAIL (soft shimmer)
       trail.current = trail.current.filter((point) => now - point.time < 160);
       trailContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
@@ -277,14 +387,13 @@ export default function Cursor() {
           const prev = points[i - 1];
           const curr = points[i];
           const progress = i / (points.length - 1);
-          const opacity = Math.pow(progress, 1.6) * 0.55;
-          const width = 0.5 + Math.pow(progress, 1.4) * 2.5;
+          const opacity = Math.pow(progress, 1.6) * 0.4;
+          const width = 0.5 + Math.pow(progress, 1.4) * 2;
 
           trailContext.beginPath();
           trailContext.moveTo(prev.x, prev.y);
           trailContext.lineTo(curr.x, curr.y);
-          // Electric yellow solar trail
-          trailContext.strokeStyle = `rgba(255, 217, 0, ${opacity})`;
+          trailContext.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
           trailContext.lineWidth = width;
           trailContext.lineCap = "round";
           trailContext.stroke();
@@ -295,7 +404,7 @@ export default function Cursor() {
       drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
       drawContext.lineCap = "round";
       drawContext.lineJoin = "round";
-      drawContext.strokeStyle = "rgba(255, 217, 0, 0.9)"; // Electric yellow
+      drawContext.strokeStyle = "rgba(255, 255, 255, 0.8)";
       drawContext.lineWidth = 1.8;
 
       const drawStroke = (stroke: Point[]) => {
@@ -310,7 +419,7 @@ export default function Cursor() {
 
         stroke.forEach((pt, idx) => {
           if (idx % 4 === 0 || idx === stroke.length - 1) {
-            drawContext.fillStyle = "#ffd900"; // Electric yellow star
+            drawContext.fillStyle = "rgba(255, 255, 255, 0.9)";
             drawContext.beginPath();
             drawContext.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
             drawContext.fill();
@@ -346,11 +455,14 @@ export default function Cursor() {
     return null;
   }
 
-  const activeLabel = cursorLabel || (isInteractive ? "EXPLORE" : "");
+  const activeLabel = cursorLabel;
+  // Morph blend for styling the cursor differently during portrait mode
+  const morphBlend = typeof window !== "undefined" ? ((window as any).__starfieldMorphBlend || 0) : 0;
+  const isMorphing = morphBlend > 0.3;
 
   return (
     <>
-      <ClickEffects color="#ffd900" />
+      <ClickEffects color="rgba(255,255,255,0.85)" />
 
       {/* STARDUST TRAIL CANVAS */}
       <canvas
@@ -364,7 +476,7 @@ export default function Cursor() {
         className="pointer-events-none fixed inset-0 z-[9996]"
       />
 
-      {/* 🪐 THE PLANET (Instant Zero-Latency Core Pointer) */}
+      {/* THE PLANET (Instant Zero-Latency Core Pointer) */}
       <div
         ref={planetRef}
         className={`
@@ -380,13 +492,13 @@ export default function Cursor() {
           will-change-transform
           ${
             isInteractive
-              ? "h-4 w-4 bg-[#ffd900] shadow-[0_0_18px_rgba(255,217,0,1)]"
-              : "h-2 w-2 bg-[#ffd900] shadow-[0_0_10px_rgba(255,217,0,0.9)]"
+              ? "h-3.5 w-3.5 bg-white shadow-[0_0_16px_rgba(255,255,255,0.9),0_0_24px_rgba(255,217,0,0.5)]"
+              : "h-2 w-2 bg-white/95 shadow-[0_0_10px_rgba(255,255,255,0.7)]"
           }
         `}
       />
 
-      {/* 🛰️ THE DYNAMIC SATELLITE (Smart Collision Avoidance & Morphing Action Pill) */}
+      {/* THE SATELLITE (Liquid Glass Action Pill with Personality) */}
       <div
         ref={satelliteRef}
         className={`
@@ -400,25 +512,41 @@ export default function Cursor() {
           justify-center
           rounded-full
           transition-all
-          duration-300
+          duration-200
           ease-out
           will-change-transform
           ${
             activeLabel
-              ? "px-3.5 py-1 bg-black/95 border border-[#ffd900]/50 text-[#ffd900] shadow-[0_0_24px_rgba(255,217,0,0.4)] backdrop-blur-md text-[10px] font-mono tracking-[0.18em] uppercase"
-              : "h-1.5 w-1.5 bg-[#ffd900] shadow-[0_0_10px_rgba(255,217,0,0.9)]"
+              ? activeLabel.includes("arnab")
+                ? "glass-cursor-pill border-[#ffd900]/70 bg-black/90 px-4 py-1.5 shadow-[0_0_24px_rgba(255,217,0,0.35),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                : "glass-cursor-pill px-3.5 py-1 text-[11px] font-medium tracking-[0.06em]"
+              : "h-2 w-2 bg-white/70 shadow-[0_0_8px_rgba(255,255,255,0.6)] rounded-full"
           }
         `}
       >
         {activeLabel && (
-          <span className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
-            {activeLabel}
-          </span>
+          activeLabel.includes("arnab") ? (
+            <span className="flex items-center gap-2 whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)] animate-ping" />
+              <span className="font-mono text-xs font-bold text-[#ffd900] tracking-wider uppercase">arnab</span>
+              <span className="text-sm select-none animate-pulse">👉</span>
+            </span>
+          ) : activeLabel.includes("move more") ? (
+            <span className="flex items-center gap-2 whitespace-nowrap text-white/95 text-[11px] font-mono">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
+              <span className="tracking-wide">move more</span>
+              <span className="text-xs select-none">👉</span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 whitespace-nowrap text-white/90 text-[11px] font-mono">
+              <span className="h-1 w-1 rounded-full bg-[#ffd900] shadow-[0_0_6px_rgba(255,217,0,0.9)]" />
+              <span>{activeLabel}</span>
+            </span>
+          )
         )}
       </div>
 
-      {/* SPACE MODE HUD PILL (Explore vs Constellation Sketch) */}
+      {/* MODE HUD PILL (Liquid Glass Dock) */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -436,63 +564,63 @@ export default function Cursor() {
         <div
           className="
             flex
-            w-[48px]
+            w-[46px]
             flex-col
             items-center
-            gap-1.5
+            gap-1
             rounded-full
-            border
-            border-[#ffd900]/20
-            bg-black/80
+            glass-dock
             p-1.5
-            backdrop-blur-xl
-            shadow-[0_4px_24px_rgba(0,0,0,0.6)]
           "
         >
           {/* EXPLORE */}
           <button
             onClick={() => changeMode("normal")}
+            data-cursor-label="explore mode ✦"
             className={`
               flex
-              h-9
-              w-9
+              h-8
+              w-8
               items-center
               justify-center
               rounded-full
               transition-all
+              duration-200
               ${
                 mode === "normal"
-                  ? "bg-[#ffd900] text-black shadow-[0_0_16px_rgba(255,217,0,0.6)] font-bold"
-                  : "text-white/40 hover:text-white"
+                  ? "bg-white/20 text-white shadow-[0_0_12px_rgba(255,255,255,0.25)] backdrop-blur-sm"
+                  : "text-white/30 hover:text-white/70 hover:bg-white/5"
               }
             `}
             title="Explore Mode"
             aria-label="Explore mode"
           >
-            <MousePointer2 size={14} />
+            <MousePointer2 size={13} />
           </button>
 
           {/* CONSTELLATION SKETCH */}
           <button
             onClick={() => changeMode("draw")}
+            data-cursor-label="sketch constellations ✨"
             className={`
               flex
-              h-9
-              w-9
+              h-8
+              w-8
               items-center
               justify-center
               rounded-full
               transition-all
+              duration-200
               ${
                 mode === "draw"
-                  ? "bg-[#ffd900] text-black shadow-[0_0_16px_rgba(255,217,0,0.6)] font-bold"
-                  : "text-white/40 hover:text-white"
+                  ? "bg-white/20 text-white shadow-[0_0_12px_rgba(255,255,255,0.25)] backdrop-blur-sm"
+                  : "text-white/30 hover:text-white/70 hover:bg-white/5"
               }
             `}
             title="Constellation Sketch Mode"
             aria-label="Constellation sketch mode"
           >
-            <Sparkles size={14} />
+            <Sparkles size={13} />
           </button>
 
           {/* CLEAR DRAWINGS */}
@@ -503,22 +631,24 @@ export default function Cursor() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.7 }}
                 onClick={clearDrawings}
+                data-cursor-label="clear sky 🗑"
                 className="
                   flex
-                  h-9
-                  w-9
+                  h-8
+                  w-8
                   items-center
                   justify-center
                   rounded-full
-                  text-white/40
+                  text-white/30
                   hover:bg-white/10
-                  hover:text-white
+                  hover:text-white/70
                   transition-colors
+                  duration-200
                 "
                 title="Clear Constellations"
                 aria-label="Clear drawings"
               >
-                <Trash2 size={13} />
+                <Trash2 size={12} />
               </motion.button>
             )}
           </AnimatePresence>

@@ -8,6 +8,7 @@ import { Radio } from "lucide-react";
 
 export default function Navbar() {
   const [time, setTime] = useState<string>("");
+  const [scrolled, setScrolled] = useState<boolean>(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -24,43 +25,72 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
+  // Show navbar only after scrolling past the hero section
+  useEffect(() => {
+    const handleScroll = () => {
+      const threshold = (window.innerHeight || 800) * 0.35;
+      setScrolled(window.scrollY > threshold);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const scrollToSection = (id: string) => {
-    if (pathname === "/") {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
+  const handleNavClick = (e: React.MouseEvent, sectionId: string, href: string) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      scrollToSection(sectionId);
+    }
+  };
+
+  const isVisible = pathname !== "/" || scrolled;
+
   return (
-    <header className="fixed top-0 left-0 z-50 w-full pointer-events-none transition-all">
-      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 sm:px-10 py-5 sm:py-8">
+    <header
+      className={`fixed top-0 left-0 z-50 w-full pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] pt-6 sm:pt-8 md:pt-10 ${
+        isVisible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 -translate-y-10"
+      }`}
+    >
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 sm:px-12 md:px-16 py-2">
         
         {/* LOGO & MARS TELEMETRY */}
-        <div className="flex items-center gap-4 pointer-events-auto">
+        <div className={`flex items-center gap-5 ${isVisible ? "pointer-events-auto" : "pointer-events-none"}`}>
           <Link
             href="/"
-            onClick={() => scrollToSection("hero")}
-            className="group flex items-center gap-3 text-sm font-medium tracking-tight text-white transition hover:opacity-90 focus:outline-none"
+            onClick={(e) => {
+              if (pathname === "/") {
+                e.preventDefault();
+                scrollToSection("hero");
+              }
+            }}
+            className="group flex items-center gap-3.5 text-sm font-medium tracking-tight text-white transition hover:opacity-90 focus:outline-none"
             aria-label="Ryan Arnab Home"
           >
             {/* BRAND LOGO SVG */}
-            <div className="relative flex items-center justify-center h-8 w-8 rounded-lg bg-[#ffd900]/10 border border-[#ffd900]/30 p-1.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-[#ffd900]/20 group-hover:border-[#ffd900] group-hover:shadow-[0_0_16px_rgba(255,217,0,0.5)]">
+            <div className="relative flex items-center justify-center h-10 w-10 rounded-xl liquid-glass p-2 transition-all duration-300 group-hover:scale-105 group-hover:border-white/40">
               <Image src="/RyanArnab.svg" alt="RyanArnab Logo" width={24} height={24} className="h-full w-full object-contain" />
             </div>
 
             <div className="flex flex-col">
               <span className="font-bold tracking-[-0.03em] text-[#fffdf0] text-base leading-none group-hover:text-[#ffd900] transition-colors">ryanarnab</span>
-              <span className="text-[9px] font-mono tracking-[0.16em] uppercase text-[#ffd900]/70 leading-tight">Design & Tech</span>
+              <span className="text-[10px] font-mono tracking-[0.16em] uppercase text-white/50 leading-tight mt-1">Design & Tech</span>
             </div>
           </Link>
 
           {/* TELEMETRY BADGE */}
-          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-white/10 text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
+          <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-white/10 text-[10px] font-mono uppercase tracking-[0.18em] text-white/40">
             <Radio size={11} className="text-[#ffd900] animate-pulse" />
-            <span className="text-[#ffd900]">ORBITAL SECTOR</span>
+            <span className="text-[#ffd900]">ORBITAL</span>
             <span className="text-white/20">·</span>
             <span>26.14°N 91.73°E</span>
             <span className="text-white/20">·</span>
@@ -68,80 +98,101 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* NAVIGATION PILL */}
-        <nav className="pointer-events-auto">
-          <ul className="flex items-center gap-1 sm:gap-2 rounded-full border border-[#ffd900]/20 bg-black/80 px-3 sm:px-4 py-1.5 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.7)] text-xs sm:text-sm">
+        {/* NAVIGATION PILL (Liquid Glass Floating Dock with Comfortable Space) */}
+        <nav className={isVisible ? "pointer-events-auto" : "pointer-events-none"}>
+          <ul className="flex items-center gap-2 sm:gap-2.5 rounded-full liquid-glass p-2 sm:p-2.5 text-xs sm:text-[13px] shadow-[0_16px_48px_rgba(0,0,0,0.75)]">
             <li>
               <Link
                 href="/"
-                onClick={() => scrollToSection("hero")}
-                className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
+                onClick={(e) => handleNavClick(e, "hero", "/")}
+                data-cursor-label="home ✦"
+                className={`px-5 sm:px-6 py-2.5 rounded-full font-mono tracking-wider transition-all duration-200 cursor-pointer ${
                   pathname === "/"
-                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
-                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
+                    ? "liquid-metal text-white border-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_16px_rgba(255,255,255,0.15)] font-semibold"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Origin
+                <span className="flex items-center gap-2">
+                  {pathname === "/" && <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)]" />}
+                  Origin
+                </span>
               </Link>
             </li>
             <li>
               <Link
                 href="/works"
-                className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
+                onClick={(e) => handleNavClick(e, "work", "/works")}
+                data-cursor-label="expeditions ✦"
+                className={`px-5 sm:px-6 py-2.5 rounded-full font-mono tracking-wider transition-all duration-200 cursor-pointer ${
                   pathname === "/works"
-                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
-                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
+                    ? "liquid-metal text-white border-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_16px_rgba(255,255,255,0.15)] font-semibold"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Works
+                <span className="flex items-center gap-2">
+                  {pathname === "/works" && <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)]" />}
+                  Works
+                </span>
               </Link>
             </li>
             <li>
               <Link
                 href="/about"
-                className={`px-2.5 sm:px-3 py-1 rounded-full transition-all ${
+                onClick={(e) => handleNavClick(e, "about", "/about")}
+                data-cursor-label="observatory ✦"
+                className={`px-5 sm:px-6 py-2.5 rounded-full font-mono tracking-wider transition-all duration-200 cursor-pointer ${
                   pathname === "/about"
-                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
-                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
+                    ? "liquid-metal text-white border-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_16px_rgba(255,255,255,0.15)] font-semibold"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Observatory
+                <span className="flex items-center gap-2">
+                  {pathname === "/about" && <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)]" />}
+                  Observatory
+                </span>
               </Link>
             </li>
             <li>
               <Link
                 href="/playground"
-                className={`hidden sm:inline-block px-2.5 sm:px-3 py-1 rounded-full transition-all ${
+                onClick={(e) => handleNavClick(e, "playground", "/playground")}
+                data-cursor-label="research lab 🧪"
+                className={`hidden sm:inline-flex px-5 sm:px-6 py-2.5 rounded-full font-mono tracking-wider transition-all duration-200 cursor-pointer ${
                   pathname === "/playground"
-                    ? "bg-[#ffd900]/20 text-[#ffd900] font-semibold shadow-[0_0_14px_rgba(255,217,0,0.35)]"
-                    : "text-white/70 hover:text-[#fffdf0] hover:bg-white/5"
+                    ? "liquid-metal text-white border-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_16px_rgba(255,255,255,0.15)] font-semibold"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
-                Lab
+                <span className="flex items-center gap-2">
+                  {pathname === "/playground" && <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)]" />}
+                  Lab
+                </span>
               </Link>
             </li>
           </ul>
         </nav>
 
-        {/* CTA */}
-        <div className="flex justify-end pointer-events-auto">
+        {/* CTA (Tactile Liquid Metal Capsule) */}
+        <div className={`flex justify-end ${isVisible ? "pointer-events-auto" : "pointer-events-none"}`}>
           {pathname === "/" ? (
             <button
               onClick={() => scrollToSection("contact")}
-              className="group flex items-center gap-2 rounded-full border border-[#ffd900]/40 bg-[#ffd900]/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#ffd900] backdrop-blur-md transition hover:border-[#ffd900] hover:bg-[#ffd900]/25 hover:text-white hover:shadow-[0_0_20px_rgba(255,217,0,0.45)]"
+              data-cursor-label="transmit signal ⚡"
+              className="tactile-switch-accent rounded-full px-6 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide flex items-center gap-2.5 cursor-pointer transition-transform group"
             >
               <span className="hidden sm:inline">Transmit</span>
               <span>Let&apos;s talk</span>
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-[#ffd900]">→</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
             </button>
           ) : (
             <Link
               href="/#contact"
-              className="group flex items-center gap-2 rounded-full border border-[#ffd900]/40 bg-[#ffd900]/10 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#ffd900] backdrop-blur-md transition hover:border-[#ffd900] hover:bg-[#ffd900]/25 hover:text-white hover:shadow-[0_0_20px_rgba(255,217,0,0.45)]"
+              data-cursor-label="transmit signal ⚡"
+              className="tactile-switch-accent rounded-full px-6 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide flex items-center gap-2.5 cursor-pointer transition-transform group"
             >
               <span className="hidden sm:inline">Transmit</span>
               <span>Let&apos;s talk</span>
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5 text-[#ffd900]">→</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
             </Link>
           )}
         </div>

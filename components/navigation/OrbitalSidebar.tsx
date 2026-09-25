@@ -79,19 +79,19 @@ export default function OrbitalSidebar() {
         </span>
       </div>
 
-      {/* DOCKED VERTICAL RAIL */}
-      <div className="relative h-[220px] w-8 flex items-center justify-center">
+      {/* DOCKED VERTICAL RAIL (Liquid Glass Telemetry Pod) */}
+      <div className="relative h-[230px] w-9 liquid-glass rounded-full flex items-center justify-center p-1">
         {/* Background track line */}
-        <div className="absolute top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-white/10 via-[#ffd900]/25 to-white/10 rounded-full" />
+        <div className="absolute top-4 bottom-4 w-[1px] bg-gradient-to-b from-white/10 via-white/20 to-white/10 rounded-full" />
 
         {/* Dynamic active trail fill */}
         <motion.div
-          className="absolute top-0 w-[2px] bg-gradient-to-b from-[#ffd900] to-yellow-300 shadow-[0_0_12px_rgba(255,217,0,0.8)] rounded-full origin-top"
+          className="absolute top-4 w-[2px] bg-gradient-to-b from-[#ffd900] to-yellow-300 shadow-[0_0_12px_rgba(255,217,0,0.8)] rounded-full origin-top"
           style={{ height: probeY }}
         />
 
         {/* CLICKABLE SECTOR TICK NODES */}
-        <div className="absolute inset-0 flex flex-col justify-between py-1">
+        <div className="absolute inset-0 flex flex-col justify-between py-4">
           {SECTORS.map((sector) => {
             const isActive = activeSector === sector.id;
             const isHovered = hoveredSector === sector.id;
@@ -99,6 +99,7 @@ export default function OrbitalSidebar() {
             return (
               <div
                 key={sector.id}
+                data-cursor-label={`orbit // ${sector.label.toLowerCase()}`}
                 className="relative flex items-center justify-center cursor-pointer group"
                 onMouseEnter={() => setHoveredSector(sector.id)}
                 onMouseLeave={() => setHoveredSector(null)}
@@ -109,7 +110,7 @@ export default function OrbitalSidebar() {
                   className={`h-2.5 w-2.5 rounded-full border transition-all duration-300 flex items-center justify-center ${
                     isActive
                       ? "border-[#ffd900] bg-[#ffd900] shadow-[0_0_12px_rgba(255,217,0,1)] scale-110"
-                      : "border-white/30 bg-black hover:border-[#ffd900] hover:scale-125"
+                      : "border-white/30 bg-black/60 hover:border-white hover:scale-125"
                   }`}
                 >
                   <span
@@ -119,9 +120,9 @@ export default function OrbitalSidebar() {
                   />
                 </div>
 
-                {/* HOVER FLYOUT TOOLTIP */}
+                {/* HOVER FLYOUT TOOLTIP (Liquid Glass Flyout) */}
                 <div
-                  className={`absolute left-7 flex items-center gap-2 rounded-full border border-[#ffd900]/30 bg-black/90 px-2.5 py-1 backdrop-blur-md transition-all duration-200 pointer-events-none whitespace-nowrap shadow-[0_0_20px_rgba(0,0,0,0.8)] ${
+                  className={`absolute left-8 flex items-center gap-2 rounded-full liquid-glass px-3 py-1 backdrop-blur-xl transition-all duration-200 pointer-events-none whitespace-nowrap shadow-[0_4px_24px_rgba(0,0,0,0.8)] ${
                     isHovered
                       ? "opacity-100 translate-x-0"
                       : "opacity-0 -translate-x-2"
