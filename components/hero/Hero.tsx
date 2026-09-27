@@ -8,7 +8,7 @@ import {
 } from "framer-motion";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useScrollProgress } from "../scroll/ScrollProvider";
 
 function GravityWord({
@@ -184,12 +184,109 @@ function GravityLetter({
   );
 }
 
-import { useState } from "react";
-import { ArrowDown, Orbit, Sparkles } from "lucide-react";
+import { ArrowDown, Orbit, Sparkles, Smartphone, RotateCcw } from "lucide-react";
 
 export default function Hero() {
   const progress = useScrollProgress();
   const [zeroG, setZeroG] = useState(true);
+
+  // Mobile Hardware Morph & Swipe-to-Reveal State
+  const [isSwipedAway, setIsSwipedAway] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
+  const [isMorphActive, setIsMorphActive] = useState(false);
+  const [gyroInfo, setGyroInfo] = useState<{
+    gamma: number;
+    beta: number;
+    available: boolean;
+    denied: boolean;
+  }>({ gamma: 0, beta: 0, available: false, denied: false });
+
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+
+  useEffect(() => {
+    const handleGyroTelemetry = (e: Event) => {
+      const custom = e as CustomEvent<{
+        gamma?: number;
+        beta?: number;
+        available?: boolean;
+        denied?: boolean;
+      }>;
+      if (custom.detail) {
+        setGyroInfo((prev) => ({
+          gamma: custom.detail.gamma !== undefined ? custom.detail.gamma : prev.gamma,
+          beta: custom.detail.beta !== undefined ? custom.detail.beta : prev.beta,
+          available: custom.detail.available !== undefined ? custom.detail.available : prev.available,
+          denied: custom.detail.denied !== undefined ? custom.detail.denied : prev.denied,
+        }));
+      }
+    };
+
+    const handleMorphTrigger = (e: Event) => {
+      const custom = e as CustomEvent<{ active?: boolean }>;
+      if (custom.detail) {
+        setIsMorphActive(!!custom.detail.active);
+      }
+    };
+
+    window.addEventListener("gyro-telemetry", handleGyroTelemetry);
+    window.addEventListener("face-morph-trigger", handleMorphTrigger);
+
+    // Periodically check global blend for synchronization
+    const syncInterval = setInterval(() => {
+      const blend = (window as unknown as { __starfieldMorphBlend?: number }).__starfieldMorphBlend || 0;
+      setIsMorphActive(blend > 0.5);
+    }, 150);
+
+    return () => {
+      window.removeEventListener("gyro-telemetry", handleGyroTelemetry);
+      window.removeEventListener("face-morph-trigger", handleMorphTrigger);
+      clearInterval(syncInterval);
+    };
+  }, []);
+
+  // Handle touch swipe on hero text
+  const onTextTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const onTextTouchEnd = (e: React.TouchEvent) => {
+    if (e.changedTouches.length === 1) {
+      const dx = e.changedTouches[0].clientX - touchStartXRef.current;
+      const dy = e.changedTouches[0].clientY - touchStartYRef.current;
+
+      // Detect horizontal swipe gesture
+      if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        const dir = dx > 0 ? 1 : -1;
+        setSwipeDirection(dir);
+        const nextSwiped = !isSwipedAway;
+        setIsSwipedAway(nextSwiped);
+
+        if (typeof window !== "undefined" && window.__triggerFaceMorph) {
+          window.__triggerFaceMorph(nextSwiped);
+        }
+      }
+    }
+  };
+
+  const handleToggleOrRestore = () => {
+    if (isSwipedAway) {
+      setIsSwipedAway(false);
+      if (window.__triggerFaceMorph) {
+        window.__triggerFaceMorph(false);
+      }
+    } else {
+      if (window.__requestGyroPermission) {
+        window.__requestGyroPermission();
+      }
+      if (window.__triggerFaceMorph) {
+        window.__triggerFaceMorph();
+      }
+    }
+  };
 
   const heroY = useTransform(progress, [0, 1], [0, -420]);
   const heroOpacity = useTransform(progress, [0, 0.74], [1, 0]);
@@ -224,7 +321,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-8"
         >
           <div 
             data-cursor-label="telemetry: guwahati 📍"
@@ -243,16 +340,86 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* CENTERED TITANIC TYPOGRAPHY WITH INDIVIDUAL ZERO-G FLOATING LETTERS */}
-        <div className="w-full text-center">
-          <h1
-            data-warp-text
-            data-cursor-label="gravity pull 🧲"
-            className="text-[clamp(56px,14vw,185px)] font-medium leading-[0.88] tracking-[-0.08em] text-[#fffdf0] text-center select-none"
+        {/* MOBILE HARDWARE TELEMETRY & GESTURE TRIGGER BADGE */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.35, duration: 0.5 }}
+          className="block sm:hidden mb-5 z-20"
+        >
+          <button
+            onClick={handleToggleOrRestore}
+            className={`liquid-glass rounded-full px-3.5 py-1.5 flex items-center gap-2 text-[10px] font-mono tracking-wider transition-all duration-300 ${
+              isMorphActive 
+                ? "border-[#ffd900]/80 bg-[#ffd900]/20 text-[#ffd900] shadow-[0_0_15px_rgba(255,217,0,0.3)]" 
+                : "text-white/85"
+            }`}
           >
-            <GravityWord zeroG={zeroG} wordIndex={0}>RYAN</GravityWord>
-            <GravityWord zeroG={zeroG} wordIndex={1}>ARNAB</GravityWord>
-          </h1>
+            <Smartphone size={12} className={gyroInfo.available ? "text-[#ffd900] animate-pulse" : "text-white/60"} />
+            {isMorphActive ? (
+              <span className="font-semibold flex items-center gap-1.5">
+                ✦ 3D FACE POINT-CLOUD ACTIVE [60 FPS]
+                <RotateCcw size={10} className="ml-1 opacity-70" />
+              </span>
+            ) : gyroInfo.denied ? (
+              <span className="text-amber-200/90">
+                ⚡ GYRO BLOCKED • HOLD SKY (500MS) OR DOUBLE-TAP
+              </span>
+            ) : gyroInfo.available ? (
+              <span>
+                TILT: <strong className={gyroInfo.gamma > 20 ? "text-[#ffd900]" : "text-white"}>
+                  {gyroInfo.gamma > 0 ? `+${gyroInfo.gamma}°` : `${gyroInfo.gamma}°`}
+                </strong> {gyroInfo.gamma >= 25 ? "⚡ [SNAPPED]" : "☞ TILT &gt;25° RIGHT"}
+              </span>
+            ) : (
+              <span>
+                ⚡ TILT PHONE &gt;25° RIGHT OR SWIPE TEXT
+              </span>
+            )}
+          </button>
+        </motion.div>
+
+        {/* CENTERED TITANIC TYPOGRAPHY WITH SWIPE-TO-REVEAL & ZERO-G FLOAT */}
+        <div className="w-full text-center relative">
+          <motion.div
+            onTouchStart={onTextTouchStart}
+            onTouchEnd={onTextTouchEnd}
+            animate={{
+              x: isSwipedAway ? swipeDirection * 155 : 0,
+              opacity: isSwipedAway ? 0.28 : 1,
+              scale: isSwipedAway ? 0.94 : 1,
+            }}
+            transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            className="cursor-grab active:cursor-grabbing touch-pan-y"
+          >
+            <h1
+              data-warp-text
+              data-cursor-label={isSwipedAway ? "tap to restore text ↺" : "gravity pull 🧲"}
+              onClick={() => {
+                if (isSwipedAway) {
+                  handleToggleOrRestore();
+                }
+              }}
+              className="text-[clamp(56px,14vw,185px)] font-medium leading-[0.88] tracking-[-0.08em] text-[#fffdf0] text-center select-none transition-opacity duration-300"
+            >
+              <GravityWord zeroG={zeroG} wordIndex={0}>RYAN</GravityWord>
+              <GravityWord zeroG={zeroG} wordIndex={1}>ARNAB</GravityWord>
+            </h1>
+          </motion.div>
+
+          {/* Contextual notice when text is swiped out of the way */}
+          {isSwipedAway && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              onClick={handleToggleOrRestore}
+              className="sm:hidden mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono text-[#ffd900] bg-black/60 border border-[#ffd900]/40 backdrop-blur-md"
+            >
+              <RotateCcw size={11} />
+              <span>Tap to restore text</span>
+            </motion.button>
+          )}
         </div>
 
         {/* PLAYFUL CENTERED SUBTITLE */}
