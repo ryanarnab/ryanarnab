@@ -32,25 +32,37 @@ export default function OrbitalSidebar() {
     mass: 0.4,
   });
 
-  // Calculate probe Y position on the vertical rail (0px to 220px)
-  const probeY = useTransform(smoothProgress, [0, 1], [0, 220]);
+  // Calculate probe Y position on the vertical rail (clamped strictly within tick centers: 21px to 209px)
+  const probeY = useTransform(smoothProgress, [0, 1], [21, 209], { clamp: true });
+  const trailHeight = useTransform(smoothProgress, [0, 1], [0, 188], { clamp: true });
 
-  // Dynamic simulated orbital altitude: 140 km (LEO) -> 920 km (Deep Orbit)
-  const altitudeKm = useTransform(smoothProgress, [0, 1], [140, 920]);
+  // Dynamic simulated orbital altitude: 140 km (LEO) -> 920 km (Deep Orbit), strictly clamped
+  const altitudeKm = useTransform(smoothProgress, [0, 1], [140, 920], { clamp: true });
   const [displayedAltitude, setDisplayedAltitude] = useState(140);
 
   useEffect(() => {
+    let lastAlt = 140;
     const unsubAlt = altitudeKm.on("change", (val) => {
-      setDisplayedAltitude(Math.round(val));
+      const rounded = Math.round(val);
+      if (rounded !== lastAlt) {
+        lastAlt = rounded;
+        setDisplayedAltitude(rounded);
+      }
     });
 
+    let lastSector = "hero";
     const unsubProg = documentProgress.on("change", (val) => {
       // Find current active sector based on scroll threshold
+      let current = "hero";
       for (let i = SECTORS.length - 1; i >= 0; i--) {
         if (val >= SECTORS[i].threshold - 0.08) {
-          setActiveSector(SECTORS[i].id);
+          current = SECTORS[i].id;
           break;
         }
+      }
+      if (current !== lastSector) {
+        lastSector = current;
+        setActiveSector(current);
       }
     });
 
@@ -67,7 +79,7 @@ export default function OrbitalSidebar() {
   return (
     <aside
       aria-label="Orbital Telemetry Navigation"
-      className="hidden lg:flex fixed left-6 sm:left-8 top-1/2 -translate-y-1/2 z-40 flex-col items-center select-none pointer-events-auto"
+      className="hidden lg:flex fixed left-6 sm:left-8 xl:left-10 top-1/2 -translate-y-1/2 z-40 flex-col items-center select-none pointer-events-auto"
     >
       {/* TOP TELEMETRY STATUS */}
       <div className="mb-3 flex flex-col items-center">
@@ -80,14 +92,14 @@ export default function OrbitalSidebar() {
       </div>
 
       {/* DOCKED VERTICAL RAIL (Liquid Glass Telemetry Pod) */}
-      <div className="relative h-[230px] w-9 liquid-glass rounded-full flex items-center justify-center p-1">
+      <div className="relative h-[230px] w-9 liquid-glass rounded-full flex items-center justify-center p-1 overflow-hidden">
         {/* Background track line */}
-        <div className="absolute top-4 bottom-4 w-[1px] bg-gradient-to-b from-white/10 via-white/20 to-white/10 rounded-full" />
+        <div className="absolute top-[21px] bottom-[21px] w-[1px] bg-gradient-to-b from-white/10 via-white/20 to-white/10 rounded-full" />
 
         {/* Dynamic active trail fill */}
         <motion.div
-          className="absolute top-4 w-[2px] bg-gradient-to-b from-[#ffd900] to-yellow-300 shadow-[0_0_12px_rgba(255,217,0,0.8)] rounded-full origin-top"
-          style={{ height: probeY }}
+          className="absolute top-[21px] w-[2px] bg-gradient-to-b from-[#ffd900] to-yellow-300 shadow-[0_0_12px_rgba(255,217,0,0.8)] rounded-full origin-top pointer-events-none"
+          style={{ height: trailHeight }}
         />
 
         {/* CLICKABLE SECTOR TICK NODES */}
@@ -140,9 +152,9 @@ export default function OrbitalSidebar() {
           })}
         </div>
 
-        {/* 🛰️ ORBITAL SATELLITE PROBE RETICLE (Glides with scroll progress) */}
+        {/* 🛰️ ORBITAL SATELLITE PROBE RETICLE (Glides with scroll progress, centered on nodes) */}
         <motion.div
-          className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-10 flex items-center justify-center"
+          className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center justify-center"
           style={{ top: probeY }}
         >
           <div className="relative flex items-center justify-center h-4 w-4">

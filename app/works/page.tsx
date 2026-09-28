@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Cursor from "@/components/cursor/Cursor";
 import { ScrollProvider } from "@/components/scroll/ScrollProvider";
 import ContactSection from "@/components/contact/ContactSection";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import ProjectDossierModal from "@/components/modals/ProjectDossierModal";
+import DossierResumeModal from "@/components/modals/DossierResumeModal";
+import { useSound } from "@/components/sound/SoundProvider";
+import { triggerLightHaptic } from "@/lib/haptics";
 
 interface Project {
   id: string;
+  dossierId: string;
   title: string;
   category: "Identity" | "Motion" | "Spatial" | "Creative Dev";
   year: string;
@@ -21,6 +27,7 @@ interface Project {
 const ALL_PROJECTS: Project[] = [
   {
     id: "EXP-01",
+    dossierId: "01",
     title: "CHRONO IDENTITY SYSTEM",
     category: "Identity",
     year: "2026",
@@ -30,6 +37,7 @@ const ALL_PROJECTS: Project[] = [
   },
   {
     id: "EXP-02",
+    dossierId: "02",
     title: "AURA HAPTIC INTERFACE",
     category: "Creative Dev",
     year: "2026",
@@ -39,6 +47,7 @@ const ALL_PROJECTS: Project[] = [
   },
   {
     id: "EXP-03",
+    dossierId: "03",
     title: "GRAVITY SYSTEMS SIMULATION",
     category: "Spatial",
     year: "2025",
@@ -48,6 +57,7 @@ const ALL_PROJECTS: Project[] = [
   },
   {
     id: "EXP-04",
+    dossierId: "04",
     title: "COSMIC FLUX EXPERIENCES",
     category: "Motion",
     year: "2025—26",
@@ -57,6 +67,7 @@ const ALL_PROJECTS: Project[] = [
   },
   {
     id: "EXP-05",
+    dossierId: "05",
     title: "TELEMETRY LABS ARCHIVE",
     category: "Identity",
     year: "2025",
@@ -66,6 +77,7 @@ const ALL_PROJECTS: Project[] = [
   },
   {
     id: "EXP-06",
+    dossierId: "02", // Aura fallback
     title: "SOLARIS SOUND MATRIX",
     category: "Creative Dev",
     year: "2026",
@@ -79,6 +91,42 @@ const CATEGORIES = ["All", "Identity", "Motion", "Spatial", "Creative Dev"] as c
 
 export default function WorksPage() {
   const [activeFilter, setActiveFilter] = useState<string>("All");
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  const { playWarp, playClick } = useSound();
+
+  useEffect(() => {
+    const handleDossierOpen = () => setIsDossierOpen(true);
+
+    window.addEventListener("trigger-dossier-open", handleDossierOpen);
+
+    return () => {
+      window.removeEventListener("trigger-dossier-open", handleDossierOpen);
+    };
+  }, []);
+
+  const isAnyModalOpen = !!activeProjectId || isDossierOpen;
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = isAnyModalOpen ? "hidden" : "";
+      window.dispatchEvent(
+        new CustomEvent("modal-visibility-change", { detail: { isOpen: isAnyModalOpen } })
+      );
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, [isAnyModalOpen]);
+
+  const handleInspect = (dossierId: string) => {
+    playWarp();
+    triggerLightHaptic();
+    setActiveProjectId(dossierId);
+  };
 
   const filteredProjects =
     activeFilter === "All"
@@ -117,8 +165,11 @@ export default function WorksPage() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all ${
+                onClick={() => {
+                  playClick();
+                  setActiveFilter(cat);
+                }}
+                className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                   activeFilter === cat
                     ? "bg-[#ffd900] text-black font-bold shadow-[0_0_16px_rgba(255,217,0,0.5)]"
                     : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#ffd900]/40"
@@ -140,7 +191,8 @@ export default function WorksPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.5 }}
                   key={project.id}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#ffd900]/50 hover:shadow-[0_0_30px_rgba(255,217,0,0.2)]"
+                  onClick={() => handleInspect(project.dossierId)}
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#ffd900]/50 hover:shadow-[0_0_30px_rgba(255,217,0,0.2)] cursor-pointer"
                 >
                   {/* IMAGE FRAME */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-zinc-900">
@@ -173,16 +225,22 @@ export default function WorksPage() {
                       </p>
                     </div>
 
-                    {/* TAGS */}
-                    <div className="mt-6 flex flex-wrap gap-1.5 pt-4 border-t border-white/10">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#ffd900]/30 border border-transparent transition-colors"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                    {/* ACTION & TAGS */}
+                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.tags.slice(0, 2).map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#ffd900]/30 border border-transparent transition-colors"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs font-mono text-white/70 group-hover:text-[#ffd900] flex items-center gap-1 transition-colors">
+                        <span>Dossier</span>
+                        <ArrowUpRight size={13} />
+                      </span>
                     </div>
                   </div>
                 </motion.article>
@@ -194,6 +252,17 @@ export default function WorksPage() {
       </main>
 
       <ContactSection />
+
+      {/* Global Modals */}
+      <ProjectDossierModal
+        projectId={activeProjectId}
+        onClose={() => setActiveProjectId(null)}
+      />
+
+      <DossierResumeModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+      />
     </ScrollProvider>
   );
 }

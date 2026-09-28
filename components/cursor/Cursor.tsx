@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { MousePointer2, Sparkles, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import ClickEffects from "./ClickEffects";
 
 type Point = {
   x: number;
@@ -39,18 +38,22 @@ function resolveContextualLabel(
   cursorX: number,
   viewportWidth: number
 ): string {
+  const isModalOpen = typeof document !== "undefined" && document.body.style.overflow === "hidden";
   // Check if user is currently on the hero screen
   const isHeroScreen =
+    !isModalOpen &&
     typeof window !== "undefined" &&
     window.scrollY < (window.innerHeight || 800) * 0.55 &&
     (window.location.pathname === "/" || window.location.pathname === "");
 
-  // --- 1. STARFIELD MORPH LABELS (STRICTLY HERO SCREEN ONLY) ---
-  if (isHeroScreen) {
-    if (morphBlend >= 0.72) {
+  // --- 1. STARFIELD MORPH LABELS (STRICTLY HERO SCREEN & 60/40 SPLIT) ---
+  // Starts only in the right 40% of the screen (cursorX >= viewportWidth * 0.60)
+  const isRightZone = viewportWidth > 0 && cursorX >= viewportWidth * 0.60;
+  if (isHeroScreen && isRightZone && !interactiveEl) {
+    if (morphBlend >= 0.65) {
       return "arnab ☞";
     }
-    if (morphBlend > 0.05) {
+    if (morphBlend > 0.04) {
       return "move more ☞";
     }
   }
@@ -166,6 +169,7 @@ export default function Cursor() {
 
   const isInteractiveRef = useRef(false);
   const cursorLabelRef = useRef("");
+  const inspectingRef = useRef(false);
 
   useEffect(() => {
     modeRef.current = mode;
@@ -208,60 +212,46 @@ export default function Cursor() {
         time: now,
       });
 
-      const element = document.elementFromPoint(clientX, clientY);
-      const interactiveEl = element?.closest(
-        "a, button, [role='button'], input, textarea, [data-interactive], [data-warp-text], [data-cursor-label]"
-      );
-      const interactive = interactiveEl !== null;
-
-      // Resolve contextual label
-      const morphBlend = (window as any).__starfieldMorphBlend || 0;
-      const resolved = resolveContextualLabel(
-        element,
-        interactiveEl ?? null,
-        morphBlend,
-        clientX,
-        window.innerWidth
-      );
-
-      if (interactive !== isInteractiveRef.current) {
-        isInteractiveRef.current = interactive;
-        setIsInteractive(interactive);
+      const element = event.target as Element | null;
+      let pillX = clientX + 28;
+      let pillY = clientY - 26;
+      if (clientX > window.innerWidth - 150) {
+        pillX = clientX - 85;
       }
-
-      if (resolved !== cursorLabelRef.current) {
-        cursorLabelRef.current = resolved;
-        setCursorLabel(resolved);
+      if (pillY < 50) {
+        pillY = clientY + 28;
       }
+      targetPillOffset.current = { x: pillX, y: pillY };
 
-      if (interactiveEl) {
-        const rect = interactiveEl.getBoundingClientRect();
-        hoveredElementRect.current = rect;
+      if (!inspectingRef.current) {
+        inspectingRef.current = true;
+        requestAnimationFrame(() => {
+          inspectingRef.current = false;
+          const interactiveEl = element?.closest(
+            "a, button, [role='button'], input, textarea, [data-interactive], [data-warp-text], [data-cursor-label]"
+          );
+          const interactive = interactiveEl !== null;
 
-        // DYNAMIC COLLISION AVOIDANCE CALCULATION:
-        let pillX = clientX + 32;
-        let pillY = rect.top - 24;
+          // Resolve contextual label
+          const morphBlend = (window as unknown as { __starfieldMorphBlend?: number }).__starfieldMorphBlend || 0;
+          const resolved = resolveContextualLabel(
+            element,
+            interactiveEl ?? null,
+            morphBlend,
+            clientX,
+            window.innerWidth
+          );
 
-        if (pillY < 40) {
-          pillY = rect.bottom + 24;
-        }
+          if (interactive !== isInteractiveRef.current) {
+            isInteractiveRef.current = interactive;
+            setIsInteractive(interactive);
+          }
 
-        if (clientX > window.innerWidth - 160) {
-          pillX = rect.left - 48;
-        }
-
-        targetPillOffset.current = { x: pillX, y: pillY };
-      } else {
-        hoveredElementRect.current = null;
-        let pillX = clientX + 28;
-        let pillY = clientY - 26;
-        if (clientX > window.innerWidth - 150) {
-          pillX = clientX - 85;
-        }
-        if (pillY < 50) {
-          pillY = clientY + 28;
-        }
-        targetPillOffset.current = { x: pillX, y: pillY };
+          if (resolved !== cursorLabelRef.current) {
+            cursorLabelRef.current = resolved;
+            setCursorLabel(resolved);
+          }
+        });
       }
 
       if (trail.current.length > 16) {
@@ -377,59 +367,65 @@ export default function Cursor() {
 
       satellite.style.transform = `translate3d(${satellitePos.current.x}px, ${satellitePos.current.y}px, 0) translate(-50%, -50%)`;
 
-      // STARDUST TRAIL (soft shimmer)
-      trail.current = trail.current.filter((point) => now - point.time < 160);
-      trailContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      // STARDUST TRAIL (only redraw when active points exist)
+      const hadTrail = trail.current.length > 0;
+      trail.current = trail.current.filter((point) => now - point.time < 140);
 
-      if (trail.current.length > 1) {
-        const points = trail.current;
-        for (let i = 1; i < points.length; i++) {
-          const prev = points[i - 1];
-          const curr = points[i];
-          const progress = i / (points.length - 1);
-          const opacity = Math.pow(progress, 1.6) * 0.4;
-          const width = 0.5 + Math.pow(progress, 1.4) * 2;
+      if (hadTrail || trail.current.length > 0) {
+        trailContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-          trailContext.beginPath();
-          trailContext.moveTo(prev.x, prev.y);
-          trailContext.lineTo(curr.x, curr.y);
-          trailContext.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-          trailContext.lineWidth = width;
-          trailContext.lineCap = "round";
-          trailContext.stroke();
+        if (trail.current.length > 1) {
+          const points = trail.current;
+          for (let i = 1; i < points.length; i++) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const progress = i / (points.length - 1);
+            const opacity = Math.pow(progress, 1.6) * 0.4;
+            const width = 0.5 + Math.pow(progress, 1.4) * 2;
+
+            trailContext.beginPath();
+            trailContext.moveTo(prev.x, prev.y);
+            trailContext.lineTo(curr.x, curr.y);
+            trailContext.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+            trailContext.lineWidth = width;
+            trailContext.lineCap = "round";
+            trailContext.stroke();
+          }
         }
       }
 
-      // CONSTELLATION DRAWING CANVAS
-      drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      drawContext.lineCap = "round";
-      drawContext.lineJoin = "round";
-      drawContext.strokeStyle = "rgba(255, 255, 255, 0.8)";
-      drawContext.lineWidth = 1.8;
+      // CONSTELLATION DRAWING CANVAS (only active in draw mode)
+      if (modeRef.current === "draw" || strokes.current.length > 0) {
+        drawContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        drawContext.lineCap = "round";
+        drawContext.lineJoin = "round";
+        drawContext.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        drawContext.lineWidth = 1.8;
 
-      const drawStroke = (stroke: Point[]) => {
-        if (stroke.length < 2) return;
-        drawContext.beginPath();
-        drawContext.moveTo(stroke[0].x, stroke[0].y);
+        const drawStroke = (stroke: Point[]) => {
+          if (stroke.length < 2) return;
+          drawContext.beginPath();
+          drawContext.moveTo(stroke[0].x, stroke[0].y);
 
-        for (let i = 1; i < stroke.length; i++) {
-          drawContext.lineTo(stroke[i].x, stroke[i].y);
-        }
-        drawContext.stroke();
-
-        stroke.forEach((pt, idx) => {
-          if (idx % 4 === 0 || idx === stroke.length - 1) {
-            drawContext.fillStyle = "rgba(255, 255, 255, 0.9)";
-            drawContext.beginPath();
-            drawContext.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
-            drawContext.fill();
+          for (let i = 1; i < stroke.length; i++) {
+            drawContext.lineTo(stroke[i].x, stroke[i].y);
           }
-        });
-      };
+          drawContext.stroke();
 
-      strokes.current.forEach(drawStroke);
-      if (drawingRef.current) {
-        drawStroke(currentStroke.current);
+          stroke.forEach((pt, idx) => {
+            if (idx % 4 === 0 || idx === stroke.length - 1) {
+              drawContext.fillStyle = "rgba(255, 255, 255, 0.9)";
+              drawContext.beginPath();
+              drawContext.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+              drawContext.fill();
+            }
+          });
+        };
+
+        strokes.current.forEach(drawStroke);
+        if (drawingRef.current) {
+          drawStroke(currentStroke.current);
+        }
       }
     };
 
@@ -457,12 +453,11 @@ export default function Cursor() {
 
   const activeLabel = cursorLabel;
   // Morph blend for styling the cursor differently during portrait mode
-  const morphBlend = typeof window !== "undefined" ? ((window as any).__starfieldMorphBlend || 0) : 0;
+  const morphBlend = typeof window !== "undefined" ? ((window as unknown as { __starfieldMorphBlend?: number }).__starfieldMorphBlend || 0) : 0;
   const isMorphing = morphBlend > 0.3;
 
   return (
     <>
-      <ClickEffects color="rgba(255,255,255,0.85)" />
 
       {/* STARDUST TRAIL CANVAS */}
       <canvas

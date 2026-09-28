@@ -76,8 +76,19 @@ export function ScrollProvider({
 
     animationFrame = requestAnimationFrame(raf);
 
+    const handleModalVisibility = (e: Event) => {
+      const custom = e as CustomEvent<{ isOpen?: boolean }>;
+      if (custom.detail?.isOpen) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    };
+    window.addEventListener("modal-visibility-change", handleModalVisibility);
+
     return () => {
       cancelAnimationFrame(animationFrame);
+      window.removeEventListener("modal-visibility-change", handleModalVisibility);
       lenis.destroy();
       lenisRef.current = null;
     };

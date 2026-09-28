@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowUpRight, FlaskConical, Play, Sparkles, Activity, Layers, Cpu, Atom } from "lucide-react";
+import { ArrowUpRight, FlaskConical, Activity, Layers, Cpu, Atom } from "lucide-react";
 
 interface Experiment {
   number: string;
@@ -11,7 +11,7 @@ interface Experiment {
   year: string;
   status: string;
   desc: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   tags: string[];
 }
 

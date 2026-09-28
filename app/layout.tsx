@@ -3,6 +3,7 @@ import { Geist, Instrument_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { SoundProvider } from "@/components/sound/SoundProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black text-white">
-        {children}
+        <SoundProvider>
+          {children}
+        </SoundProvider>
         <Analytics />
         <SpeedInsights />
       </body>

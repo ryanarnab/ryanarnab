@@ -3,7 +3,9 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Compass, Sparkles, Orbit, Layers } from "lucide-react";
+import { ArrowUpRight, Compass, Sparkles, Orbit } from "lucide-react";
+import { useSound } from "@/components/sound/SoundProvider";
+import { triggerLightHaptic } from "@/lib/haptics";
 
 interface ProjectItem {
   id: string;
@@ -69,7 +71,25 @@ const PROJECTS: ProjectItem[] = [
   },
 ];
 
-export default function DiscoverySection() {
+interface DiscoverySectionProps {
+  onOpenProject?: (id: string) => void;
+}
+
+export default function DiscoverySection({ onOpenProject }: DiscoverySectionProps) {
+  const { playWarp } = useSound();
+
+  const handleOpen = (id: string) => {
+    playWarp();
+    triggerLightHaptic();
+    if (onOpenProject) {
+      onOpenProject(id);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("open-project-dossier", { detail: { id } })
+      );
+    }
+  };
+
   const p1 = PROJECTS[0];
   const p2 = PROJECTS[1];
   const p3 = PROJECTS[2];
@@ -168,13 +188,13 @@ export default function DiscoverySection() {
 
             <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
               <span className="text-xs font-mono text-white/40">STATUS: ARCHIVED · READY</span>
-              <Link
-                href="/works"
-                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50"
+              <button
+                onClick={() => handleOpen(p1.id)}
+                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50 cursor-pointer"
               >
-                <span>Inspect Artifact</span>
-                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
+                <span>Inspect Dossier</span>
+                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#ffd900]" />
+              </button>
             </div>
           </motion.div>
 
@@ -233,13 +253,13 @@ export default function DiscoverySection() {
 
             <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
               <span className="text-xs font-mono text-white/40">HAPTIC: VERIFIED</span>
-              <Link
-                href="/works"
-                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50"
+              <button
+                onClick={() => handleOpen(p2.id)}
+                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50 cursor-pointer"
               >
-                <span>Inspect</span>
-                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
+                <span>Inspect Dossier</span>
+                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#ffd900]" />
+              </button>
             </div>
           </motion.div>
 
@@ -295,13 +315,13 @@ export default function DiscoverySection() {
                     </span>
                   ))}
                 </div>
-                <Link
-                  href="/works"
-                  className="text-xs font-mono text-white/70 hover:text-[#ffd900] flex items-center gap-1 transition-colors"
+                <button
+                  onClick={() => handleOpen(project.id)}
+                  className="text-xs font-mono text-white/70 hover:text-[#ffd900] flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <span>Inspect</span>
                   <ArrowUpRight size={13} />
-                </Link>
+                </button>
               </div>
             </motion.div>
           ))}

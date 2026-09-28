@@ -28,6 +28,7 @@ attribute float a_colorIndex;   // Palette color index
 attribute float a_isPortrait;   // 1.0 = portrait pixel, 0.0 = background
 
 uniform vec2 u_resolution;      // Canvas size in CSS pixels
+uniform vec2 u_portCenter;      // Portrait center coordinates (desktop right edge, phone middle)
 uniform float u_time;           // Time in seconds
 uniform float u_morph;          // Morph factor (0.0 to 1.0)
 uniform float u_section;        // Current scroll section (0.0 to 4.0)
@@ -73,12 +74,8 @@ void main() {
         port3D.x += sin(t * 0.3 + a_seed.x) * 1.5 * (1.0 - u_morph);
         port3D.y += cos(t * 0.4 + a_seed.x) * 1.2 * (1.0 - u_morph);
 
-        // Portrait center: centered on mobile for cinematic impact, right side on desktop
-        vec2 portCenter = u_isMobile > 0.5 
-            ? vec2(center.x, u_resolution.y * 0.44) 
-            : vec2(u_resolution.x * 0.72, u_resolution.y * 0.5);
-
-        // 3D vector relative to face center
+        // Dynamic 3D rotation centered on exact computed portrait position
+        vec2 portCenter = u_portCenter;
         vec3 rel = port3D - vec3(portCenter, 0.0);
 
         // Real-time 3D rotation from device orientation (hardware gamma and beta)
@@ -98,9 +95,9 @@ void main() {
         float rz2 = rel.y * sinX + rz1 * cosX;
 
         // True 3D perspective projection for structured point cloud
-        float camDist = 500.0;
-        float perspective = camDist / max(camDist - rz2, 80.0);
-        perspective = clamp(perspective, 0.65, 1.9);
+        float camDist = 520.0;
+        float perspective = camDist / max(camDist - rz2, 70.0);
+        perspective = clamp(perspective, 0.65, 1.85);
 
         port3D.xy = portCenter + vec2(rx1, ry2) * perspective;
         port3D.z = rz2;
@@ -109,7 +106,7 @@ void main() {
     // Smooth particle interpolation between Starfield & 3D Portrait
     vec3 currentSec0 = mix(sec0, port3D, u_morph);
     if (a_isPortrait > 0.5) {
-        // Face points become glowing Martian solar gold
+        // Face points become solid radiant Martian solar gold
         sec0Opacity = mix(sec0Opacity, 0.96, u_morph);
     } else {
         // Starfield background subtly dims to enhance portrait contrast
@@ -184,7 +181,7 @@ void main() {
     // Color Selection
     vec3 c;
     if (u_morph > 0.3 && a_isPortrait > 0.5) {
-        c = vec3(1.0, 0.84, 0.15); // Vibrant Solar Gold #ffd626
+        c = vec3(1.0, 0.84, 0.15); // Vibrant Solid Solar Gold #ffd626
     } else if (a_colorIndex < 0.5) {
         c = vec3(1.0, 1.0, 1.0);    // Pure Stardust
     } else if (a_colorIndex < 1.5) {
@@ -307,6 +304,7 @@ export default function BackgroundParticles() {
 
     // Uniform locations
     const u_resolutionLoc = gl.getUniformLocation(program, "u_resolution");
+    const u_portCenterLoc = gl.getUniformLocation(program, "u_portCenter");
     const u_timeLoc = gl.getUniformLocation(program, "u_time");
     const u_morphLoc = gl.getUniformLocation(program, "u_morph");
     const u_sectionLoc = gl.getUniformLocation(program, "u_section");
@@ -350,6 +348,9 @@ export default function BackgroundParticles() {
     let scrollVelocity = 0;
     let lastScrollY = 0;
 
+    // Computed portrait center coordinates (desktop right edge, phone middle)
+    let portCenter = { x: 0, y: 0 };
+
     // Mouse coordinates (desktop hover)
     const mouse = { x: -1000, y: -1000 };
 
@@ -370,8 +371,8 @@ export default function BackgroundParticles() {
     let facePixels: FacePixel[] = [];
     let portraitReady = false;
 
-    // Load portrait brightness data (sampled at 96x96 for crisp point-cloud resolution)
-    loadImageBrightness("/images/myself.png", 96, 96).then(({ data, w, h }) => {
+    // Load portrait brightness data (sampled at 88x88 for clean, solid, steady 3D face structure)
+    loadImageBrightness("/images/myself.png", 88, 88).then(({ data, w, h }) => {
       if (data.length > 0) {
         const pixels: FacePixel[] = [];
         for (let py = 0; py < h; py++) {
@@ -382,10 +383,12 @@ export default function BackgroundParticles() {
             const b = data[idx + 2];
             const a = data[idx + 3];
             const bright = r * 0.299 + g * 0.587 + b * 0.114;
+
             // Feature pixels with contrast and opacity
             if (bright < 185 && a > 80) {
               const nx = (px / w - 0.5) * 2.0;
               const ny = (py / h - 0.5) * 2.0;
+
               // True 3D depth curvature dome
               const dome = Math.max(0.0, 1.0 - (nx * nx * 1.15 + ny * ny * 0.95));
               const featureRelief = (1.0 - bright / 255) * 0.35;
@@ -419,13 +422,9 @@ export default function BackgroundParticles() {
     function rebuildBuffers() {
       if (width === 0 || height === 0) return;
 
-      const SPACING = width < 768 ? 24 : 30;
-      const cols = Math.ceil(width / SPACING) + 1;
-      const rows = Math.ceil(height / SPACING) + 1;
-      const gridCount = cols * rows;
-
-      // Particle count is the max of grid dots or face pixels (minimum 5,000 for rich cloud)
-      particleCount = Math.max(gridCount, facePixels.length, 5500);
+      // Particle count optimized for 120 FPS buttery smooth performance
+      const targetCount = width < 768 ? 1100 : 1800;
+      particleCount = Math.max(targetCount, facePixels.length);
 
       const basePosData = new Float32Array(particleCount * 3);
       const portraitPosData = new Float32Array(particleCount * 3);
@@ -439,13 +438,33 @@ export default function BackgroundParticles() {
 
       const isMobile = width < 768;
 
-      // Portrait layout geometry
-      const portraitAreaW = isMobile ? Math.min(width * 0.84, 380) : Math.min(width * 0.38, 480);
+      // Stratified 2D grid covering 100% of width and 100% of height evenly across the entire viewport
+      const aspect = (width || 1) / (height || 1);
+      const cols = Math.max(1, Math.round(Math.sqrt(particleCount * aspect)));
+      const rows = Math.max(1, Math.ceil(particleCount / cols));
+      const cellW = width / cols;
+      const cellH = height / rows;
+
+      // Portrait layout geometry:
+      // Desktop: Anchored near the RIGHT EDGE of the screen with generous negative space from center typography
+      // Mobile: Centered in the middle of the phone screen
+      const portraitAreaW = isMobile
+        ? Math.min(width * 0.82, 350)
+        : Math.min(width * 0.28, 400);
       const portraitAreaH = isMobile ? portraitAreaW : portraitAreaW * 1.15;
-      const portraitLeft = isMobile ? (width - portraitAreaW) / 2 : width * 0.58;
+
+      const rightMargin = Math.max(width * 0.05, 54);
+      const portraitLeft = isMobile
+        ? (width - portraitAreaW) / 2
+        : width - portraitAreaW - rightMargin;
       const portraitTop = isMobile
-        ? Math.max((height - portraitAreaH) / 2 - 25, height * 0.16)
+        ? Math.max((height - portraitAreaH) / 2 - 20, height * 0.16)
         : (height - portraitAreaH) / 2;
+
+      portCenter = {
+        x: portraitLeft + portraitAreaW * 0.5,
+        y: portraitTop + portraitAreaH * 0.5,
+      };
 
       // Work section viewfinder box
       const boxLeft = width * 0.08;
@@ -454,12 +473,12 @@ export default function BackgroundParticles() {
       const boxBottom = height * 0.88;
 
       for (let i = 0; i < particleCount; i++) {
-        // 1. Base Starfield coordinates
-        const gx = (i % cols) * SPACING;
-        const gy = Math.floor(i / cols) * SPACING;
-        const bx = (gx + (Math.random() - 0.5) * SPACING * 0.9) % width;
-        const by = (gy + (Math.random() - 0.5) * SPACING * 0.9) % height;
-        const bz = (Math.random() - 0.5) * 160.0;
+        // 1. Base Starfield coordinates — 100% full screen coverage with Poisson-jittered stratified grid
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const bx = Math.min(width, Math.max(0, (col + Math.random()) * cellW));
+        const by = Math.min(height, Math.max(0, (row + Math.random()) * cellH));
+        const bz = (Math.random() - 0.5) * 180.0;
 
         basePosData[i * 3] = bx;
         basePosData[i * 3 + 1] = by;
@@ -573,17 +592,18 @@ export default function BackgroundParticles() {
       gl.vertexAttribPointer(a_isPortraitLoc, 1, gl.FLOAT, false, 0, 0);
     }
 
-    // Resize handling
+    // Resize handling — strictly viewport aware
     const resize = () => {
-      const rect = container.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = rect.width;
-      height = rect.height;
+      const w = window.innerWidth || document.documentElement.clientWidth || 1920;
+      const h = window.innerHeight || document.documentElement.clientHeight || 1080;
+      width = w;
+      height = h;
+      dpr = Math.min(window.devicePixelRatio || 1, w < 768 ? 1.5 : 1.25);
 
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
 
       gl.viewport(0, 0, canvas.width, canvas.height);
       rebuildBuffers();
@@ -592,6 +612,7 @@ export default function BackgroundParticles() {
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
+    window.addEventListener("resize", resize);
 
     // Desktop pointer tracking
     const handlePointerMove = (e: PointerEvent) => {
@@ -606,12 +627,33 @@ export default function BackgroundParticles() {
       mouse.y = -1000;
     };
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const deltaY = currentScrollY - lastScrollY;
-      lastScrollY = currentScrollY;
-      scrollVelocity = Math.max(Math.min(deltaY * 0.05, 5), -5);
+    let cachedTargetSec = 0;
+    const updateTargetSection = () => {
+      const scrollY = window.scrollY;
+      const totalH = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const ratio = scrollY / totalH;
+      if (ratio < 0.16) cachedTargetSec = 0;
+      else if (ratio < 0.42) cachedTargetSec = 1;
+      else if (ratio < 0.68) cachedTargetSec = 2;
+      else if (ratio < 0.86) cachedTargetSec = 3;
+      else cachedTargetSec = 4;
     };
+
+    let scrollTicking = false;
+    const handleScroll = () => {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        scrollTicking = false;
+        const currentScrollY = window.scrollY;
+        const deltaY = currentScrollY - lastScrollY;
+        lastScrollY = currentScrollY;
+        scrollVelocity = Math.max(Math.min(deltaY * 0.05, 5), -5);
+        updateTargetSection();
+      });
+    };
+
+    updateTargetSection();
 
     // --- MOBILE HARDWARE GYROSCOPE (DeviceOrientation API) ---
     const handleOrientation = (e: DeviceOrientationEvent) => {
@@ -821,38 +863,30 @@ export default function BackgroundParticles() {
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
+    let isTabVisible = true;
+    let isModalOpen = false;
     let previousTime = performance.now();
+
+    const handleModalChange = (e: Event) => {
+      const custom = e as CustomEvent<{ isOpen?: boolean }>;
+      isModalOpen = !!custom.detail?.isOpen;
+      if (!isModalOpen && isTabVisible) {
+        previousTime = performance.now();
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+    window.addEventListener("modal-visibility-change", handleModalChange);
 
     // --- 60FPS GPU RENDER LOOP ---
     const render = (time: number) => {
+      if (!isTabVisible || isModalOpen) return;
       const delta = Math.min((time - previousTime) / 1000, 0.05);
       previousTime = time;
 
       const isMobile = width < 768;
 
-      // Section calculation based on actual section DOM elements
-      const midY = window.innerHeight * 0.45;
-      const secElements = [
-        document.getElementById("hero"),
-        document.getElementById("work"),
-        document.getElementById("about"),
-        document.getElementById("playground"),
-        document.getElementById("contact"),
-      ];
-
-      let targetSec = 0;
-      for (let s = secElements.length - 1; s >= 0; s--) {
-        const el = secElements[s];
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= midY) {
-            targetSec = s;
-            break;
-          }
-        }
-      }
-
-      currentSection += (targetSec - currentSection) * 0.035;
+      currentSection += (cachedTargetSec - currentSection) * 0.035;
       const isHero = currentSection < 0.35 && window.scrollY < height * 0.55;
 
       // Smooth gyro tilt damping for natural 3D parallax
@@ -869,11 +903,16 @@ export default function BackgroundParticles() {
         gyroTargetMorph = 0.0;
       }
 
-      // 2. Desktop cursor hover trigger
+      // 2. Desktop cursor hover trigger (60/40 screen split: starts at 60% of screen width)
       let mouseTargetMorph = 0;
       if (!isMobile && mouse.x > 0 && isHero) {
         const normalizedX = mouse.x / width;
-        mouseTargetMorph = Math.max(0, Math.min(1, (normalizedX - 0.45) / 0.25));
+        if (normalizedX > 0.60) {
+          // Progresses smoothly across the right 40% (0.60 to 0.86)
+          mouseTargetMorph = Math.min(1, (normalizedX - 0.60) / 0.24);
+        } else {
+          mouseTargetMorph = 0;
+        }
       }
 
       // 3. Combined effective target morph (Hardware Gyro, Gesture Toggle, or Cursor)
@@ -898,6 +937,7 @@ export default function BackgroundParticles() {
 
       // Pass all uniforms directly to the GPU
       gl.uniform2f(u_resolutionLoc, width, height);
+      gl.uniform2f(u_portCenterLoc, portCenter.x, portCenter.y);
       gl.uniform1f(u_timeLoc, time);
       gl.uniform1f(u_morphLoc, morphBlend);
       gl.uniform1f(u_sectionLoc, currentSection);
@@ -920,9 +960,21 @@ export default function BackgroundParticles() {
 
     animationFrameId = requestAnimationFrame(render);
 
+    const handleVisibilityChange = () => {
+      isTabVisible = document.visibilityState === "visible";
+      if (isTabVisible && !isModalOpen) {
+        previousTime = performance.now();
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("modal-visibility-change", handleModalChange);
+      window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
       window.removeEventListener("scroll", handleScroll);
@@ -946,7 +998,7 @@ export default function BackgroundParticles() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      className="pointer-events-none fixed inset-0 w-screen h-screen z-0 overflow-hidden"
     >
       <canvas ref={canvasRef} className="block w-full h-full" />
     </motion.div>
