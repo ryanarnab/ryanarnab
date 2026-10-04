@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ArrowUpRight, Copy, Check, Radio, Send, Globe, Sparkles, Orbit } from "lucide-react";
+import { ArrowUpRight, Copy, Check, Radio, Send, Sparkles, Crosshair, Signal } from "lucide-react";
+import { triggerLightHaptic, triggerSuccessHaptic } from "@/lib/haptics";
 
 interface SocialChannel {
   name: string;
@@ -63,6 +64,7 @@ export default function ContactSection() {
   }, []);
 
   const copyEmail = () => {
+    triggerSuccessHaptic();
     navigator.clipboard.writeText(email);
     setCopied(true);
     setTimeout(() => setCopied(false), 2600);
@@ -78,78 +80,89 @@ export default function ContactSection() {
   return (
     <footer
       id="contact"
-      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 pt-24 sm:pt-36 pb-12 border-t border-white/10"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 pt-24 sm:pt-36 pb-12"
     >
+      {/* Edge divider at top */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+      <div className="absolute top-0 left-0 w-[120px] h-[1px] bg-gradient-to-r from-[#d4b068] to-transparent" />
+
       <div className="mx-auto w-full max-w-[1440px]">
         
-        {/* SECTION HEADER */}
-        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 gap-4">
+        {/* SECTION HEADER — Angular */}
+        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
-              <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-mono font-semibold">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-6 w-6 flex items-center justify-center bg-[#d4b068]/10 text-[#d4b068] border border-[#d4b068]/30"
+                style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+              >
+                <Signal size={10} />
+              </div>
+              <span className="text-xs uppercase tracking-[0.25em] text-[#d4b068] font-mono font-bold">
                 Sector 04 // Deep Space Transmission
               </span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#fffdf0]">
-              Initialize Contact
+            <h2 className="text-4xl sm:text-6xl font-bold tracking-[-0.04em] text-[#fffdf0]">
+              Initialize <span className="text-[#d4b068]">Contact</span>
             </h2>
           </div>
 
-          <div className="flex items-center gap-6">
-            <span className="text-xs font-mono tracking-widest text-white/50">
-              SATELLITE WAVES PROPAGATING
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-mono tracking-widest text-white/40 uppercase">
+              Satellite Waves Propagating
             </span>
-            <span className="font-mono text-xs tracking-widest text-[#ffd900]/70">
-              04
-            </span>
+            <div className="h-8 w-[2px] bg-gradient-to-b from-[#d4b068] to-transparent" />
           </div>
         </div>
 
         {/* BENTO GRID: TRANSMISSION MATRIX */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 mb-6">
           
           {/* CARD 1: PRIMARY DISPATCH TERMINAL (7 COLS) */}
-          <div className="lg:col-span-7 flex flex-col justify-between rounded-3xl liquid-glass p-8 sm:p-12 hover:border-[#ffd900]/30 transition-all">
+          <div className="lg:col-span-7 flex flex-col justify-between angular-panel p-8 sm:p-12 transition-all">
             <div>
-              <div className="flex items-center gap-2 mb-6">
-                <Send size={15} className="text-[#ffd900]" />
-                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+              <div className="flex items-center gap-3 mb-8">
+                <Send size={14} className="text-[#d4b068]" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#d4b068] font-bold">
                   Direct Comms Channel
                 </span>
+                <div className="flex-1 h-[1px] bg-gradient-to-r from-[#d4b068]/20 to-transparent ml-3" />
               </div>
 
-              <h3 className="text-[clamp(32px,5vw,64px)] font-medium leading-[0.95] tracking-[-0.06em] text-[#fffdf0] mb-6">
+              <h3 className="text-[clamp(28px,4.5vw,58px)] font-bold leading-[0.95] tracking-[-0.05em] text-[#fffdf0] mb-6">
                 HAVE AN IDEA OR MISSION IN MIND?
                 <br />
-                <span className="text-[#ffd900]">LET&apos;S TALK.</span>
+                <span className="text-[#d4b068]">LET&apos;S TALK.</span>
               </h3>
 
-              <p className="text-sm sm:text-base leading-relaxed text-[#fffdf0]/70 max-w-lg mb-8">
+              <p className="text-sm sm:text-base leading-relaxed text-[#fffdf0]/60 max-w-lg mb-8">
                 Currently open for select brand identity commissions, spatial motion systems, and creative technology collaborations.
               </p>
             </div>
 
             {/* Email dispatch strip */}
-            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex-1 flex items-center justify-between rounded-2xl bg-white/5 px-4 sm:px-5 py-3 border border-white/10">
-                <span className="font-mono text-xs sm:text-sm text-[#ffd900] truncate">
+            <div className="pt-6 border-t border-white/8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex-1 flex items-center justify-between bg-white/4 px-4 sm:px-5 py-3.5 border border-white/8"
+                style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
+              >
+                <span className="font-mono text-xs sm:text-sm text-[#d4b068] truncate font-bold">
                   {email}
                 </span>
                 <button
                   onClick={copyEmail}
                   data-cursor-label={copied ? "copied! ✓" : "copy email 📋"}
-                  className="ml-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 transition-colors cursor-pointer"
+                  className="ml-3 p-1.5 bg-white/8 hover:bg-white/15 text-white/80 transition-colors cursor-pointer"
                   title="Copy email to clipboard"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
                 >
-                  {copied ? <Check size={14} className="text-[#ffd900]" /> : <Copy size={14} />}
+                  {copied ? <Check size={14} className="text-[#d4b068]" /> : <Copy size={14} />}
                 </button>
               </div>
 
               <a
                 href={getMailtoHref()}
                 data-cursor-label="open mail client ✉️"
-                className="tactile-switch-accent rounded-2xl px-6 py-3.5 text-xs sm:text-sm font-semibold tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-transform group"
+                className="tactile-switch-accent px-6 py-3.5 text-xs sm:text-sm font-bold tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition-transform group"
+                style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
               >
                 <span>Transmit Signal</span>
                 <Send size={14} className="transition-transform group-hover:translate-x-0.5" />
@@ -158,16 +171,16 @@ export default function ContactSection() {
           </div>
 
           {/* CARD 2: MISSION PRESET SELECTOR (5 COLS) */}
-          <div className="lg:col-span-5 flex flex-col justify-between rounded-3xl liquid-glass p-8 hover:border-[#ffd900]/30 transition-all">
+          <div className="lg:col-span-5 flex flex-col justify-between angular-panel p-8 transition-all">
             <div>
-              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#ffd900]">
+              <div className="flex items-center justify-between pb-4 border-b border-white/8 mb-6">
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#d4b068] font-bold">
                   Transmission Frequency
                 </span>
-                <Sparkles size={14} className="text-[#ffd900]" />
+                <Sparkles size={12} className="text-[#d4b068]" />
               </div>
 
-              <p className="text-xs font-mono text-white/60 mb-5">
+              <p className="text-[10px] font-mono text-white/50 mb-5 tracking-wider uppercase">
                 Select an operational focus to auto-configure transmission parameters:
               </p>
 
@@ -177,19 +190,25 @@ export default function ContactSection() {
                   return (
                     <button
                       key={preset.label}
-                      onClick={() => setSelectedPreset(isSelected ? null : preset.subject)}
+                      onClick={() => {
+                        triggerLightHaptic();
+                        setSelectedPreset(isSelected ? null : preset.subject);
+                      }}
                       data-cursor-label="select preset ✦"
-                      className={`w-full text-left rounded-2xl p-4 transition-all duration-200 border cursor-pointer ${
+                      className={`w-full text-left p-4 transition-all duration-200 border cursor-pointer ${
                         isSelected
-                          ? "liquid-metal border-[#ffd900]/60 text-[#ffd900] shadow-[0_0_16px_rgba(255,217,0,0.2)]"
-                          : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-white/25"
+                          ? "angular-panel border-[#d4b068]/50 text-[#d4b068] shadow-[0_0_20px_rgba(212, 176, 104,0.15)]"
+                          : "bg-white/3 border-white/8 text-white/75 hover:bg-white/6 hover:border-white/15"
                       }`}
+                      style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">{preset.label}</span>
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900]" />
+                        <span className="text-sm font-bold">{preset.label}</span>
+                        <span className="h-2 w-2 bg-[#d4b068]"
+                          style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+                        />
                       </div>
-                      <span className="text-[11px] font-mono text-white/50 block">
+                      <span className="text-[10px] font-mono text-white/40 block tracking-wider uppercase">
                         {preset.subject}
                       </span>
                     </button>
@@ -198,16 +217,16 @@ export default function ContactSection() {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10 text-[11px] font-mono text-white/40 flex items-center justify-between">
-              <span>ACTIVE FREQUENCY: {selectedPreset ? "CUSTOM LOCKED" : "GENERAL DISPATCH"}</span>
-              <Orbit size={13} className="animate-spin text-[#ffd900]" />
+            <div className="mt-6 pt-4 border-t border-white/8 text-[10px] font-mono text-white/30 flex items-center justify-between uppercase tracking-widest">
+              <span>Frequency: {selectedPreset ? "Custom Locked" : "General Dispatch"}</span>
+              <Crosshair size={11} className="text-[#d4b068]" />
             </div>
           </div>
 
         </div>
 
-        {/* BENTO GRID: ROW 2 (ORBITAL UPLINKS & EARTH STATION) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        {/* BENTO GRID: ROW 2 (ORBITAL UPLINKS) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {SOCIAL_CHANNELS.map((social) => (
             <a
               key={social.name}
@@ -215,52 +234,57 @@ export default function ContactSection() {
               target="_blank"
               rel="noopener noreferrer"
               data-cursor-label={`open ${social.name.toLowerCase()} ↗`}
-              className="group flex flex-col justify-between rounded-3xl liquid-glass p-6 sm:p-7 transition-all duration-300 hover:scale-[1.02] hover:border-[#ffd900]/40"
+              className="group flex flex-col justify-between angular-panel-sm p-6 sm:p-7 transition-all duration-300 hover:scale-[1.02]"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-mono tracking-widest text-[#ffd900] uppercase">
+                  <span className="text-[9px] font-mono tracking-[0.2em] text-[#d4b068] uppercase font-bold">
                     {social.tag}
                   </span>
-                  <ArrowUpRight size={15} className="text-white/40 group-hover:text-[#ffd900] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <ArrowUpRight size={14} className="text-white/30 group-hover:text-[#d4b068] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </div>
 
-                <h4 className="text-xl font-medium tracking-tight text-[#fffdf0] mb-1 group-hover:text-[#ffd900] transition-colors">
+                <h4 className="text-xl font-bold tracking-tight text-[#fffdf0] mb-1 group-hover:text-[#d4b068] transition-colors">
                   {social.name}
                 </h4>
-                <span className="font-mono text-xs text-white/50 block mb-3">
+                <span className="font-mono text-xs text-white/40 block mb-3 tracking-wider">
                   {social.handle}
                 </span>
 
-                <p className="text-xs leading-relaxed text-white/65">
+                <p className="text-xs leading-relaxed text-white/50">
                   {social.desc}
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-white/40">
-                <span>CHANNEL: ONLINE</span>
-                <span className="text-[#ffd900]">CONNECT →</span>
+              <div className="mt-6 pt-4 border-t border-white/8 flex items-center justify-between text-[10px] font-mono text-white/30 uppercase tracking-widest">
+                <span>Channel: Online</span>
+                <span className="text-[#d4b068] font-bold">Connect →</span>
               </div>
             </a>
           ))}
         </div>
 
-        {/* FOOTER BAR & TELEMETRY */}
-        <div className="mt-16 sm:mt-24 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/50">
+        {/* FOOTER BAR — Angular */}
+        <div className="mt-16 sm:mt-24 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono text-white/40 uppercase tracking-widest">
+          {/* Edge line */}
+          <div className="absolute left-6 sm:left-10 lg:left-16 right-6 sm:right-10 lg:right-16 h-[1px] bg-gradient-to-r from-[#d4b068]/30 via-white/8 to-transparent" style={{ marginTop: "-32px" }} />
+          
           <div className="flex items-center gap-3">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/10 p-1">
+            <div className="flex h-6 w-6 items-center justify-center bg-white/8 p-1"
+              style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+            >
               <Image src="/RyanArnab.svg" alt="RyanArnab" width={16} height={16} className="h-full w-full object-contain" />
             </div>
-            <span>© 2026 RYAN ARNAB · ALL RIGHTS RESERVED</span>
+            <span>© 2026 Ryan Arnab · All Rights Reserved</span>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px]">
+          <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <Radio size={11} className="text-[#ffd900] animate-pulse" />
-              GUWAHATI 26.14°N 91.73°E
+              <Radio size={10} className="text-[#d4b068] animate-pulse" />
+              Guwahati 26.14°N 91.73°E
             </span>
-            <span>·</span>
-            <span>{time || "UTC CLOCK"}</span>
+            <span className="text-white/15">·</span>
+            <span className="text-[#d4b068]/60">{time || "UTC CLOCK"}</span>
           </div>
         </div>
 

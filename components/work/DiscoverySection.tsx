@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Compass, Sparkles, Orbit } from "lucide-react";
+import { ArrowUpRight, Compass, Sparkles, Crosshair, Zap } from "lucide-react";
 import { useSound } from "@/components/sound/SoundProvider";
-import { triggerLightHaptic } from "@/lib/haptics";
+import { triggerLightHaptic, triggerMediumHaptic } from "@/lib/haptics";
 
 interface ProjectItem {
   id: string;
@@ -80,7 +80,7 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
 
   const handleOpen = (id: string) => {
     playWarp();
-    triggerLightHaptic();
+    triggerMediumHaptic();
     if (onOpenProject) {
       onOpenProject(id);
     } else {
@@ -99,166 +99,173 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
   return (
     <section
       id="work"
-      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 py-24 sm:py-36"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 py-24 sm:py-36 angular-bg-pattern"
     >
       <div className="mx-auto w-full max-w-[1440px]">
         
-        {/* SECTION HEADER & TELEMETRY */}
-        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 gap-4">
+        {/* SECTION HEADER — Angular Edge */}
+        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
-              <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-mono font-semibold">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-6 w-6 flex items-center justify-center bg-[#d4b068]/10 text-[#d4b068] border border-[#d4b068]/30"
+                style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+              >
+                <Crosshair size={10} />
+              </div>
+              <span className="text-xs uppercase tracking-[0.25em] text-[#d4b068] font-mono font-bold">
                 Sector 01 // Selected Artifacts
               </span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#fffdf0]">
-              Featured Expeditions
+            <h2 className="text-4xl sm:text-6xl font-bold tracking-[-0.04em] text-[#fffdf0]">
+              Featured <span className="text-[#d4b068]">Expeditions</span>
             </h2>
           </div>
 
-          <div className="flex items-center gap-6">
-            <span className="text-xs font-mono tracking-widest text-white/50">
-              MODULAR GRID // 05 OF 12
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-mono tracking-widest text-white/40 uppercase">
+              Tactical Grid // 05 of 12
             </span>
-            <span className="text-xs font-mono tracking-widest text-[#ffd900]/70">
-              01
-            </span>
+            <div className="h-8 w-[2px] bg-gradient-to-b from-[#d4b068] to-transparent" />
           </div>
         </div>
 
-        {/* MODULAR BENTO GRID OF EXPEDITIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
+        {/* MODULAR ANGULAR GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
           
-          {/* CARD 1: FEATURED TITAN (7 COLS) */}
+          {/* CARD 1: FEATURED TITAN (7 COLS) — Angular Panel */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             data-cursor-label={`inspect ${p1.title.toLowerCase()} ↗`}
-            className="md:col-span-7 group relative flex flex-col justify-between overflow-hidden rounded-3xl liquid-glass p-6 sm:p-8 transition-all duration-300 hover:border-[#ffd900]/40"
+            className="md:col-span-7 group relative flex flex-col justify-between overflow-hidden angular-panel p-0 transition-all duration-300"
           >
-            <div>
-              {/* Media Container */}
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-950">
-                <Image
-                  src={p1.src}
-                  alt={p1.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 60vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                
-                {/* Badge overlay */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-mono tracking-wider text-[#ffd900] backdrop-blur-md border border-white/10">
-                  <Sparkles size={11} className="animate-spin" />
-                  <span>{p1.number}</span>
-                </div>
-
-                <div className="absolute top-4 right-4 rounded-full bg-black/60 px-3 py-1 text-[11px] font-mono tracking-wider text-white/70 backdrop-blur-md border border-white/10">
-                  {p1.year}
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    {p1.tags.map((tag) => (
-                      <span key={tag} className="rounded-md bg-white/15 px-2.5 py-1 text-[10px] font-mono text-white/90 backdrop-blur-md">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+            {/* Media Container — Full bleed */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-950">
+              <Image
+                src={p1.src}
+                alt={p1.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+              
+              {/* Angular badge overlay */}
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-[#d4b068] border border-[#d4b068]/20"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
+              >
+                <Sparkles size={10} className="animate-spin" />
+                <span>{p1.number}</span>
               </div>
 
-              {/* Meta information */}
-              <div className="mt-6 flex flex-col gap-2">
-                <span className="text-xs uppercase tracking-[0.18em] text-[#ffd900] font-mono">
-                  {p1.category}
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
-                  {p1.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-[#fffdf0]/70 max-w-xl">
-                  {p1.desc}
-                </p>
+              <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-white/70 border border-white/10"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
+              >
+                {p1.year}
+              </div>
+
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                <div className="flex flex-wrap gap-1.5">
+                  {p1.tags.map((tag) => (
+                    <span key={tag} className="bg-white/10 backdrop-blur-md px-2.5 py-1 text-[9px] font-mono text-white/90 uppercase tracking-wider">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs font-mono text-white/40">STATUS: ARCHIVED · READY</span>
+            {/* Meta information */}
+            <div className="p-6 sm:p-8 flex flex-col gap-2">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[#d4b068] font-mono font-bold">
+                {p1.category}
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
+                {p1.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-[#fffdf0]/60 max-w-xl">
+                {p1.desc}
+              </p>
+            </div>
+
+            <div className="mx-6 sm:mx-8 mb-6 pt-4 border-t border-white/8 flex items-center justify-between">
+              <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Status: Archived · Ready</span>
               <button
                 onClick={() => handleOpen(p1.id)}
-                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50 cursor-pointer"
+                className="tactile-switch inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold text-white transition-all group-hover:border-[#d4b068]/50 cursor-pointer uppercase tracking-wider"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
               >
-                <span>Inspect Dossier</span>
-                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#ffd900]" />
+                <span>Inspect</span>
+                <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#d4b068]" />
               </button>
             </div>
           </motion.div>
 
           {/* CARD 2: INTERFACE SYSTEMS (5 COLS) */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             data-cursor-label={`inspect ${p2.title.toLowerCase()} ↗`}
-            className="md:col-span-5 group relative flex flex-col justify-between overflow-hidden rounded-3xl liquid-glass p-6 sm:p-8 transition-all duration-300 hover:border-[#ffd900]/40"
+            className="md:col-span-5 group relative flex flex-col justify-between overflow-hidden angular-panel p-0 transition-all duration-300"
           >
-            <div>
-              {/* Media Container */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-zinc-950">
-                <Image
-                  src={p2.src}
-                  alt={p2.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                
-                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-mono tracking-wider text-[#ffd900] backdrop-blur-md border border-white/10">
-                  <Orbit size={11} className="animate-spin" />
-                  <span>{p2.number}</span>
-                </div>
-
-                <div className="absolute top-4 right-4 rounded-full bg-black/60 px-3 py-1 text-[11px] font-mono tracking-wider text-white/70 backdrop-blur-md border border-white/10">
-                  {p2.year}
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                  {p2.tags.map((tag) => (
-                    <span key={tag} className="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-mono text-white/90 backdrop-blur-md">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950">
+              <Image
+                src={p2.src}
+                alt={p2.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-[#d4b068] border border-[#d4b068]/20"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
+              >
+                <Zap size={10} />
+                <span>{p2.number}</span>
               </div>
 
-              {/* Meta info */}
-              <div className="mt-6 flex flex-col gap-2">
-                <span className="text-xs uppercase tracking-[0.18em] text-[#ffd900] font-mono">
-                  {p2.category}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
-                  {p2.title}
-                </h3>
-                <p className="text-xs sm:text-sm leading-relaxed text-[#fffdf0]/70">
-                  {p2.desc}
-                </p>
+              <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-white/70 border border-white/10"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
+              >
+                {p2.year}
+              </div>
+
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
+                {p2.tags.map((tag) => (
+                  <span key={tag} className="bg-white/10 backdrop-blur-md px-2 py-0.5 text-[9px] font-mono text-white/90 uppercase tracking-wider">
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs font-mono text-white/40">HAPTIC: VERIFIED</span>
+            <div className="p-6 sm:p-8 flex flex-col gap-2">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[#d4b068] font-mono font-bold">
+                {p2.category}
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
+                {p2.title}
+              </h3>
+              <p className="text-xs sm:text-sm leading-relaxed text-[#fffdf0]/60">
+                {p2.desc}
+              </p>
+            </div>
+
+            <div className="mx-6 sm:mx-8 mb-6 pt-4 border-t border-white/8 flex items-center justify-between">
+              <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Haptic: Verified</span>
               <button
                 onClick={() => handleOpen(p2.id)}
-                className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium text-white transition-all group-hover:border-[#ffd900]/50 cursor-pointer"
+                className="tactile-switch inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold text-white transition-all group-hover:border-[#d4b068]/50 cursor-pointer uppercase tracking-wider"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
               >
-                <span>Inspect Dossier</span>
-                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#ffd900]" />
+                <span>Inspect</span>
+                <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#d4b068]" />
               </button>
             </div>
           </motion.div>
@@ -272,55 +279,57 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
               data-cursor-label={`inspect ${project.title.toLowerCase()} ↗`}
-              className="md:col-span-4 group relative flex flex-col justify-between overflow-hidden rounded-3xl liquid-glass p-5 sm:p-6 transition-all duration-300 hover:scale-[1.01] hover:border-[#ffd900]/40"
+              className="md:col-span-4 group relative flex flex-col justify-between overflow-hidden angular-panel-sm p-0 transition-all duration-300 hover:scale-[1.01]"
             >
-              <div>
-                <div className="relative aspect-[16/11] w-full overflow-hidden rounded-xl bg-zinc-950">
-                  <Image
-                    src={project.src}
-                    alt={project.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  
-                  <div className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-0.5 text-[10px] font-mono tracking-wider text-[#ffd900] backdrop-blur-md border border-white/10">
-                    {project.number}
-                  </div>
-
-                  <div className="absolute top-3 right-3 rounded-full bg-black/60 px-2.5 py-0.5 text-[10px] font-mono tracking-wider text-white/60 backdrop-blur-md border border-white/10">
-                    {project.year}
-                  </div>
+              <div className="relative aspect-[16/11] w-full overflow-hidden bg-zinc-950">
+                <Image
+                  src={project.src}
+                  alt={project.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                
+                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-[#d4b068] border border-[#d4b068]/20"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+                >
+                  {project.number}
                 </div>
 
-                <div className="mt-5 flex flex-col gap-1.5">
-                  <span className="text-[11px] uppercase tracking-[0.16em] text-[#ffd900] font-mono">
-                    {project.category}
-                  </span>
-                  <h3 className="text-lg font-medium tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs leading-relaxed text-[#fffdf0]/65 line-clamp-2">
-                    {project.desc}
-                  </p>
+                <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-white/60 border border-white/10"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+                >
+                  {project.year}
                 </div>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+              <div className="p-5 sm:p-6 flex flex-col gap-1.5">
+                <span className="text-[10px] uppercase tracking-[0.18em] text-[#d4b068] font-mono font-bold">
+                  {project.category}
+                </span>
+                <h3 className="text-lg font-bold tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
+                  {project.title}
+                </h3>
+                <p className="text-xs leading-relaxed text-[#fffdf0]/55 line-clamp-2">
+                  {project.desc}
+                </p>
+              </div>
+
+              <div className="mx-5 sm:mx-6 mb-5 pt-4 border-t border-white/8 flex items-center justify-between">
                 <div className="flex gap-1">
                   {project.tags.slice(0, 2).map((t) => (
-                    <span key={t} className="rounded bg-white/10 px-2 py-0.5 text-[9px] font-mono text-white/60">
+                    <span key={t} className="bg-white/8 px-2 py-0.5 text-[8px] font-mono text-white/50 uppercase tracking-wider">
                       {t}
                     </span>
                   ))}
                 </div>
                 <button
                   onClick={() => handleOpen(project.id)}
-                  className="text-xs font-mono text-white/70 hover:text-[#ffd900] flex items-center gap-1 transition-colors cursor-pointer"
+                  className="text-[10px] font-mono font-bold text-white/60 hover:text-[#d4b068] flex items-center gap-1 transition-colors cursor-pointer uppercase tracking-wider"
                 >
                   <span>Inspect</span>
-                  <ArrowUpRight size={13} />
+                  <ArrowUpRight size={11} />
                 </button>
               </div>
             </motion.div>
@@ -328,16 +337,18 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
 
         </div>
 
-        {/* BOTTOM ARCHIVE LINK */}
-        <div className="mt-14 sm:mt-20 flex justify-center">
+        {/* BOTTOM ARCHIVE LINK — Angular */}
+        <div className="mt-16 sm:mt-24 flex justify-center px-2">
           <Link
             href="/works"
             data-cursor-label="view all 12 works ↗"
-            className="tactile-switch rounded-2xl px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-widest uppercase flex items-center gap-3 transition-transform hover:scale-[1.02] text-[#fffdf0]"
+            className="tactile-switch px-6 sm:px-10 py-4 sm:py-5 text-xs sm:text-sm font-mono font-bold tracking-widest uppercase flex items-center justify-center gap-3 transition-transform hover:scale-[1.02] text-[#fffdf0] max-w-full text-center"
+            style={{ clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))" }}
           >
-            <Compass size={16} className="text-[#ffd900] animate-spin" />
-            <span>Explore All 12 Expeditions in Deep Archive</span>
-            <ArrowUpRight size={16} className="text-[#ffd900]" />
+            <Compass size={16} className="text-[#d4b068] animate-spin shrink-0" />
+            <span className="hidden sm:inline">Explore All 12 Expeditions in Deep Archive</span>
+            <span className="sm:hidden text-[11px] truncate">Explore All 12 Expeditions</span>
+            <ArrowUpRight size={16} className="text-[#d4b068] shrink-0" />
           </Link>
         </div>
 

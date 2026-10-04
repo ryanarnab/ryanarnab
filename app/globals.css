@@ -2,12 +2,16 @@
 
 :root {
   --background: #000000;
-  --foreground: #fffdf0;
-  --muted: #a3a3a3;
-  --accent: #ffd900;
-  --mars-rust: #eab308;
-  --mars-gold: #ffd900;
-  --border: rgba(255, 217, 0, 0.14);
+  --foreground: #f5f4ed;
+  --muted: #999999;
+  --accent: #d4b068;
+  --accent-hot: #be984c;
+  --mars-rust: #c49842;
+  --mars-gold: #d4b068;
+  --border: rgba(212, 176, 104, 0.12);
+  --edge: rgba(255, 255, 255, 0.06);
+  --cinematic-dark: #050508;
+  --cinematic-mid: #09090f;
 }
 
 @theme inline {
@@ -28,12 +32,24 @@ html {
 
 html,
 body {
+  width: 100%;
+  max-width: 100vw;
   min-height: 100%;
   background-color: #000000;
   background-image: none;
   color: #fffdf0;
   overflow-x: hidden;
   touch-action: pan-y;
+}
+
+/* Eliminate 300ms mobile touch delay for instant interactive feedback */
+@media (pointer: coarse) {
+  button,
+  a,
+  input,
+  [role="button"] {
+    touch-action: manipulation;
+  }
 }
 
 body {
@@ -53,8 +69,85 @@ body {
 }
 
 /* ==========================================================================
-   LIQUID GLASS & LIQUID METAL DESIGN SYSTEM
+   CINEMATIC ANGULAR DESIGN SYSTEM — RIOT-INSPIRED
    ========================================================================== */
+
+/* ── Angular Glass Panel ─────────────────────────────────────────────── */
+.angular-panel {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(10, 10, 16, 0.85) 40%,
+    rgba(5, 5, 10, 0.95) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+    0 24px 64px -16px rgba(0, 0, 0, 0.9);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  transform: translateZ(0);
+}
+
+.angular-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  background: linear-gradient(135deg, rgba(212, 176, 104, 0.1), transparent 50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.angular-panel:hover::before {
+  opacity: 1;
+}
+
+/* ── Angular Panel Small (less aggressive clip) ─────────────────────── */
+.angular-panel-sm {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(10, 10, 16, 0.8) 50%,
+    rgba(5, 5, 10, 0.92) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 48px -12px rgba(0, 0, 0, 0.85);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transform: translateZ(0);
+}
+
+/* ── Cinematic Hero Frame ────────────────────────────────────────────── */
+.hero-frame {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(5, 5, 8, 0.6) 100%
+  );
+  clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 40px 100%, 0 calc(100% - 40px));
+}
+
+.hero-frame::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 40px 100%, 0 calc(100% - 40px));
+  background: linear-gradient(135deg, rgba(212, 176, 104, 0.25), transparent 40%, transparent 60%, rgba(212, 176, 104, 0.12));
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ── LEGACY: Liquid Glass and Liquid Metal (kept for backward compatibility) ── */
 
 /* Telemetry & Base Glass */
 .glass-telemetry {
@@ -77,24 +170,29 @@ body {
 
 /* Premium Liquid Glass Surface */
 .liquid-glass {
-  background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 14, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4),
-    0 20px 48px -12px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(10, 10, 16, 0.8) 40%,
+    rgba(5, 5, 10, 0.92) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 20px 48px -12px rgba(0, 0, 0, 0.85);
   transform: translateZ(0);
 }
 
-/* Liquid Metal Chrome Pill / Card */
+/* Liquid Metal Chrome */
 .liquid-metal {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, rgba(22, 22, 28, 0.88) 45%, rgba(10, 10, 14, 0.95) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.6),
     0 12px 30px rgba(0, 0, 0, 0.65);
@@ -103,13 +201,13 @@ body {
 
 /* Liquid Metal Molten Gold Accent */
 .liquid-metal-gold {
-  background: linear-gradient(135deg, #fff5b3 0%, #ffd900 35%, #d4a700 70%, #997700 100%);
+  background: linear-gradient(135deg, #f5ebd2 0%, #d4b068 35%, #b58f4a 70%, #80622d 100%);
   color: #050505;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 -1px 2px rgba(0, 0, 0, 0.35),
-    0 10px 30px rgba(255, 217, 0, 0.38);
+    0 10px 30px rgba(212, 176, 104, 0.3);
   transform: translateZ(0);
 }
 
@@ -119,7 +217,7 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
     0 8px 32px rgba(0, 0, 0, 0.7),
     0 0 16px rgba(255, 255, 255, 0.1);
@@ -132,13 +230,17 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     0 16px 40px rgba(0, 0, 0, 0.75);
   transform: translateZ(0);
 }
 
-/* 100% GPU Compositor Thread Zero-G Buoyancy */
+/* ==========================================================================
+   CINEMATIC ANIMATIONS & KEYFRAMES
+   ========================================================================== */
+
+/* Zero-G Buoyancy */
 @keyframes zeroGBuoyantA {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-7px) rotate(1.2deg); }
@@ -159,21 +261,75 @@ body {
   will-change: transform;
 }
 
+/* Horizontal Glitch Scan Line */
+@keyframes glitchScan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.glitch-scanline {
+  animation: glitchScan 4s linear infinite;
+}
+
+/* Angular Edge Glow Pulse */
+@keyframes edgePulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+.edge-glow-pulse {
+  animation: edgePulse 3s ease-in-out infinite;
+}
+
+/* Diagonal Wipe Reveal */
+@keyframes diagonalReveal {
+  from {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+.diagonal-reveal {
+  animation: diagonalReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Cinematic Background Angular Pattern */
+.angular-bg-pattern {
+  position: relative;
+}
+
+.angular-bg-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(212, 176, 104, 0.02) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(212, 176, 104, 0.015) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(212, 176, 104, 0.02) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(212, 176, 104, 0.015) 25%, transparent 25%);
+  background-size: 80px 80px;
+  background-position: 0 0, 0 40px, 40px -40px, -40px 0;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
 /* ==========================================================================
-   TACTILE LIQUID METAL & LIQUID GLASS SWITCHES
+   TACTILE SWITCHES (Cinematic Variant)
    ========================================================================== */
 .tactile-switch {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.11) 0%, rgba(20, 20, 24, 0.85) 50%, rgba(12, 12, 14, 0.95) 100%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(16, 16, 20, 0.9) 50%, rgba(8, 8, 12, 0.98) 100%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5),
     0 6px 20px rgba(0, 0, 0, 0.55);
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -185,37 +341,38 @@ body {
 }
 
 .tactile-switch:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.16) 0%, rgba(28, 28, 34, 0.9) 50%, rgba(16, 16, 20, 0.95) 100%);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+  border-color: rgba(212, 176, 104, 0.3);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(24, 24, 30, 0.9) 50%, rgba(12, 12, 16, 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5),
     0 8px 28px rgba(0, 0, 0, 0.6),
-    0 0 16px rgba(255, 255, 255, 0.08);
+    0 0 20px rgba(212, 176, 104, 0.06);
 }
 
 .tactile-switch:active,
 .tactile-switch.is-pressed {
   transform: scale(0.96) translateY(1px) !important;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 5px rgba(0, 0, 0, 0.8),
     0 2px 8px rgba(0, 0, 0, 0.4) !important;
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Primary Accent Mechanical Switch (Molten Liquid Gold) */
+/* Primary Accent Switch (Subtle Champagne Titanium Gold) */
 .tactile-switch-accent {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff3a8 0%, #ffd900 35%, #cca300 70%, #997a00 100%);
+  background: linear-gradient(135deg, #f0e2be 0%, #d4b068 32%, #b89148 68%, #8e6d2e 100%);
   color: #050505;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.35),
-    0 6px 24px rgba(255, 217, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 6px 24px rgba(212, 176, 104, 0.28),
+    0 0 35px rgba(212, 176, 104, 0.12);
   transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.14s ease,
               filter 0.2s ease;
@@ -225,18 +382,19 @@ body {
 
 .tactile-switch-accent:hover {
   filter: brightness(1.08);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.35),
-    0 10px 32px rgba(255, 217, 0, 0.55);
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 30px rgba(212, 176, 104, 0.4),
+    0 0 50px rgba(212, 176, 104, 0.16);
 }
 
 .tactile-switch-accent:active,
 .tactile-switch-accent.is-pressed {
   transform: scale(0.96) translateY(1px) !important;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.55),
-    0 2px 8px rgba(255, 217, 0, 0.2) !important;
+    0 2px 8px rgba(212, 176, 104, 0.15) !important;
 }
 
 /* Prevent unwanted selection on drag/canvas elements while keeping text selectable */
@@ -249,7 +407,44 @@ nav,
 }
 
 /* ==========================================================================
-   DYNAMIC SPECULAR LIGHTING & GLOW REACTION
+   ANGULAR DECORATIVE EDGES & CINEMATIC BORDERS
+   ========================================================================== */
+
+/* Sharp diagonal accent line */
+.accent-slash {
+  position: relative;
+}
+
+.accent-slash::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -12px;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, #d4b068, transparent);
+  transform: skewX(-15deg);
+  opacity: 0.5;
+}
+
+/* Section edge divider with angular cut */
+.edge-divider {
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.edge-divider::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, #d4b068, transparent);
+}
+
+/* ==========================================================================
+   SPECULAR GLOW & LIGHTING
    ========================================================================== */
 .specular-glow {
   position: relative;
@@ -266,7 +461,7 @@ nav,
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.08) 50%,
+    rgba(212, 176, 104, 0.05) 50%,
     transparent 100%
   );
   transform: skewX(-20deg);
@@ -279,7 +474,108 @@ nav,
   transition: left 0.8s ease-in-out;
 }
 
-/* Print styles for Dossier Resume PDF export */
+/* ==========================================================================
+   NAVBAR COMMAND DECK ENHANCEMENTS
+   ========================================================================== */
+
+/* Nav dock ambient border glow on hover */
+@keyframes navBorderPulse {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.08); }
+  50% { border-color: rgba(212, 176, 104, 0.2); }
+}
+
+.nav-dock-active {
+  animation: navBorderPulse 3s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   CINEMATIC SCROLLBAR
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050508;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(212, 176, 104, 0.35), rgba(212, 176, 104, 0.1));
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(212, 176, 104, 0.55), rgba(212, 176, 104, 0.25));
+}
+
+/* ==========================================================================
+   TACTICAL HUD & CINEMATIC UTILITIES
+   ========================================================================== */
+
+/* Left-edge Tactical Rail — Subtle Titanium Edge */
+.tactical-edge-rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  z-index: 45;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(212, 176, 104, 0.5) 0%,
+    rgba(212, 176, 104, 0.2) 20%,
+    rgba(212, 176, 104, 0.05) 50%,
+    rgba(212, 176, 104, 0.2) 80%,
+    rgba(212, 176, 104, 0.5) 100%
+  );
+  box-shadow: 0 0 8px rgba(212, 176, 104, 0.15);
+}
+
+@media (max-width: 768px) {
+  .tactical-edge-rail {
+    width: 2px;
+  }
+}
+
+/* Tactical Green Status Tag (top right) */
+.tactical-badge-green {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: rgba(16, 185, 129, 0.9);
+  font-family: var(--font-geist-mono, monospace);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+}
+
+/* Riot Style Thick Gold Bar Underline */
+.riot-underline {
+  height: 3.5px;
+  background: #d4b068;
+  box-shadow: 0 0 10px rgba(212, 176, 104, 0.4);
+  position: relative;
+}
+
+.riot-underline::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 0;
+  width: 3.5px;
+  height: 3.5px;
+  background: #d4b068;
+}
+
+/* Diamond Star Crosshair Icon (✦) */
+.riot-star {
+  display: inline-block;
+  color: #d4b068;
+  filter: drop-shadow(0 0 5px rgba(212, 176, 104, 0.6));
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   ========================================================================== */
 @media print {
   body {
     background: #ffffff !important;
@@ -289,6 +585,8 @@ nav,
   .liquid-metal,
   .tactile-switch,
   .glass-dock,
+  .angular-panel,
+  .tactical-edge-rail,
   #cursor,
   canvas {
     display: none !important;
@@ -299,4 +597,4 @@ nav,
     border: 1px solid #cccccc !important;
     box-shadow: none !important;
   }
-}
+}

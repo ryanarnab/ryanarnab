@@ -46,19 +46,7 @@ function resolveContextualLabel(
     window.scrollY < (window.innerHeight || 800) * 0.55 &&
     (window.location.pathname === "/" || window.location.pathname === "");
 
-  // --- 1. STARFIELD MORPH LABELS (STRICTLY HERO SCREEN & 60/40 SPLIT) ---
-  // Starts only in the right 40% of the screen (cursorX >= viewportWidth * 0.60)
-  const isRightZone = viewportWidth > 0 && cursorX >= viewportWidth * 0.60;
-  if (isHeroScreen && isRightZone && !interactiveEl) {
-    if (morphBlend >= 0.65) {
-      return "arnab ☞";
-    }
-    if (morphBlend > 0.04) {
-      return "move more ☞";
-    }
-  }
-
-  // --- 2. EXPLICIT data-cursor-label attribute ---
+  // --- 1. EXPLICIT data-cursor-label attribute ---
   if (interactiveEl) {
     const explicit = interactiveEl.getAttribute("data-cursor-label");
     if (explicit) return explicit;
@@ -487,7 +475,7 @@ export default function Cursor() {
           will-change-transform
           ${
             isInteractive
-              ? "h-3.5 w-3.5 bg-white shadow-[0_0_16px_rgba(255,255,255,0.9),0_0_24px_rgba(255,217,0,0.5)]"
+              ? "h-3.5 w-3.5 bg-white shadow-[0_0_16px_rgba(255,255,255,0.9),0_0_24px_rgba(212, 176, 104,0.5)]"
               : "h-2 w-2 bg-white/95 shadow-[0_0_10px_rgba(255,255,255,0.7)]"
           }
         `}
@@ -513,7 +501,7 @@ export default function Cursor() {
           ${
             activeLabel
               ? activeLabel.includes("arnab")
-                ? "glass-cursor-pill border-[#ffd900]/70 bg-black/90 px-4 py-1.5 shadow-[0_0_24px_rgba(255,217,0,0.35),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                ? "glass-cursor-pill border-[#d4b068]/70 bg-black/90 px-4 py-1.5 shadow-[0_0_24px_rgba(212, 176, 104,0.35),inset_0_1px_0_rgba(255,255,255,0.4)]"
                 : "glass-cursor-pill px-3.5 py-1 text-[11px] font-medium tracking-[0.06em]"
               : "h-2 w-2 bg-white/70 shadow-[0_0_8px_rgba(255,255,255,0.6)] rounded-full"
           }
@@ -522,19 +510,19 @@ export default function Cursor() {
         {activeLabel && (
           activeLabel.includes("arnab") ? (
             <span className="flex items-center gap-2 whitespace-nowrap">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] shadow-[0_0_8px_rgba(255,217,0,1)] animate-ping" />
-              <span className="font-mono text-xs font-bold text-[#ffd900] tracking-wider uppercase">arnab</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] shadow-[0_0_8px_rgba(212, 176, 104,1)] animate-ping" />
+              <span className="font-mono text-xs font-bold text-[#d4b068] tracking-wider uppercase">arnab</span>
               <span className="text-sm select-none animate-pulse">👉</span>
             </span>
           ) : activeLabel.includes("move more") ? (
             <span className="flex items-center gap-2 whitespace-nowrap text-white/95 text-[11px] font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] animate-pulse" />
               <span className="tracking-wide">move more</span>
               <span className="text-xs select-none">👉</span>
             </span>
           ) : (
             <span className="flex items-center gap-1.5 whitespace-nowrap text-white/90 text-[11px] font-mono">
-              <span className="h-1 w-1 rounded-full bg-[#ffd900] shadow-[0_0_6px_rgba(255,217,0,0.9)]" />
+              <span className="h-1 w-1 rounded-full bg-[#d4b068] shadow-[0_0_6px_rgba(212, 176, 104,0.9)]" />
               <span>{activeLabel}</span>
             </span>
           )

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowUpRight, FlaskConical, Activity, Layers, Cpu, Atom } from "lucide-react";
+import { ArrowUpRight, FlaskConical, Activity, Layers, Cpu, Atom, Zap } from "lucide-react";
 
 interface Experiment {
   number: string;
@@ -66,39 +66,41 @@ export default function PlaygroundSection() {
     >
       <div className="mx-auto w-full max-w-[1440px]">
 
-        {/* SECTION HEADER */}
-        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 gap-4">
+        {/* SECTION HEADER — Angular */}
+        <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
-              <span className="text-xs uppercase tracking-[0.2em] text-[#ffd900] font-mono font-semibold">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-6 w-6 flex items-center justify-center bg-[#d4b068]/10 text-[#d4b068] border border-[#d4b068]/30"
+                style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+              >
+                <Zap size={10} />
+              </div>
+              <span className="text-xs uppercase tracking-[0.25em] text-[#d4b068] font-mono font-bold">
                 Sector 03 // Orbital Research Lab
               </span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#fffdf0]">
-              Playground & Experiments
+            <h2 className="text-4xl sm:text-6xl font-bold tracking-[-0.04em] text-[#fffdf0]">
+              Playground <span className="text-[#d4b068]">&amp;</span> Experiments
             </h2>
           </div>
 
-          <div className="flex items-center gap-6">
-            <span className="text-xs font-mono tracking-widest text-white/50">
-              QUANTUM SINE LATTICE ACTIVE
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-mono tracking-widest text-white/40 uppercase">
+              Quantum Sine Lattice Active
             </span>
-            <span className="font-mono text-xs tracking-widest text-[#ffd900]/70">
-              03
-            </span>
+            <div className="h-8 w-[2px] bg-gradient-to-b from-[#d4b068] to-transparent" />
           </div>
         </div>
 
-        {/* DESCRIPTION PILL */}
+        {/* DESCRIPTION */}
         <div className="mb-10 max-w-xl">
-          <p className="text-sm sm:text-base leading-relaxed text-[#fffdf0]/75">
+          <p className="text-sm sm:text-base leading-relaxed text-[#fffdf0]/65">
             Artifacts built without formal client constraints — exploratory orbits, procedural typography experiments, and acoustic shaders interesting enough to keep alive.
           </p>
         </div>
 
-        {/* 4-CELL MODULAR EXPERIMENT GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        {/* 4-CELL MODULAR EXPERIMENT GRID — Angular */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {EXPERIMENTS.map((exp, idx) => {
             const Icon = exp.icon;
             return (
@@ -109,49 +111,53 @@ export default function PlaygroundSection() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 data-cursor-label={`launch: ${exp.title.toLowerCase()} 🧪`}
-                className="group relative flex flex-col justify-between rounded-3xl liquid-glass p-7 sm:p-9 transition-all duration-300 hover:border-[#ffd900]/40 hover:scale-[1.01]"
+                className="group relative flex flex-col justify-between angular-panel p-7 sm:p-9 transition-all duration-300 hover:scale-[1.01]"
               >
                 <div>
                   {/* Top Bar */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                  <div className="flex items-center justify-between border-b border-white/8 pb-4 mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-[#ffd900] border border-white/15">
+                      <div className="flex h-9 w-9 items-center justify-center bg-[#d4b068]/8 text-[#d4b068] border border-[#d4b068]/20"
+                        style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
+                      >
                         <Icon size={16} />
                       </div>
-                      <span className="font-mono text-xs text-[#ffd900] tracking-widest font-semibold">
+                      <span className="font-mono text-[10px] text-[#d4b068] tracking-widest font-bold uppercase">
                         {exp.number}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-mono tracking-wider text-white/70">
+                      <span className="bg-[#d4b068]/10 border border-[#d4b068]/20 px-2.5 py-0.5 text-[9px] font-mono tracking-wider text-[#d4b068] uppercase font-bold"
+                        style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+                      >
                         {exp.status}
                       </span>
-                      <span className="font-mono text-xs text-white/40">
+                      <span className="font-mono text-[10px] text-white/35 tracking-widest">
                         {exp.year}
                       </span>
                     </div>
                   </div>
 
                   {/* Title & Desc */}
-                  <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-white/50 block mb-1">
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block mb-1 font-bold">
                     {exp.type}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-medium tracking-tight text-[#fffdf0] mb-3 group-hover:text-[#ffd900] transition-colors">
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fffdf0] mb-3 group-hover:text-[#d4b068] transition-colors">
                     {exp.title}
                   </h3>
-                  <p className="text-xs sm:text-sm leading-relaxed text-white/70 mb-6">
+                  <p className="text-xs sm:text-sm leading-relaxed text-white/55 mb-6">
                     {exp.desc}
                   </p>
                 </div>
 
                 {/* Footer Tags & CTA */}
-                <div className="pt-5 border-t border-white/10 flex items-center justify-between">
+                <div className="pt-5 border-t border-white/8 flex items-center justify-between">
                   <div className="flex flex-wrap gap-1.5">
                     {exp.tags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-md bg-white/5 px-2.5 py-1 text-[10px] font-mono text-white/60 group-hover:text-white transition-colors"
+                        className="bg-white/5 px-2.5 py-1 text-[9px] font-mono text-white/45 group-hover:text-white/75 transition-colors uppercase tracking-wider"
                       >
                         {t}
                       </span>
@@ -160,10 +166,11 @@ export default function PlaygroundSection() {
 
                   <Link
                     href="/playground"
-                    className="tactile-switch inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-mono text-white transition-all group-hover:border-[#ffd900]/50"
+                    className="tactile-switch inline-flex items-center gap-2 px-4 py-2 text-[10px] font-mono font-bold text-white transition-all group-hover:border-[#d4b068]/50 uppercase tracking-widest"
+                    style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
                   >
                     <span>Test Lab</span>
-                    <ArrowUpRight size={13} className="text-[#ffd900]" />
+                    <ArrowUpRight size={11} className="text-[#d4b068]" />
                   </Link>
                 </div>
               </motion.div>
@@ -171,16 +178,18 @@ export default function PlaygroundSection() {
           })}
         </div>
 
-        {/* BOTTOM ARCHIVE ACTION */}
-        <div className="mt-14 sm:mt-16 flex justify-center">
+        {/* BOTTOM ARCHIVE ACTION — Angular */}
+        <div className="mt-16 sm:mt-20 flex justify-center px-2">
           <Link
             href="/playground"
             data-cursor-label="open full playground 🧪"
-            className="tactile-switch rounded-2xl px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-widest uppercase flex items-center gap-3 transition-transform hover:scale-[1.02] text-[#fffdf0]"
+            className="tactile-switch px-6 sm:px-10 py-4 sm:py-5 text-xs sm:text-sm font-mono font-bold tracking-widest uppercase flex items-center justify-center gap-3 transition-transform hover:scale-[1.02] text-[#fffdf0] max-w-full text-center"
+            style={{ clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))" }}
           >
-            <FlaskConical size={16} className="text-[#ffd900] animate-pulse" />
-            <span>Launch Complete Research Laboratory</span>
-            <ArrowUpRight size={16} className="text-[#ffd900]" />
+            <FlaskConical size={16} className="text-[#d4b068] animate-pulse shrink-0" />
+            <span className="hidden sm:inline">Launch Complete Research Laboratory</span>
+            <span className="sm:hidden text-[11px] truncate">Launch Research Lab</span>
+            <ArrowUpRight size={16} className="text-[#d4b068] shrink-0" />
           </Link>
         </div>
 

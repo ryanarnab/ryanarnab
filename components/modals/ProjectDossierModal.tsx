@@ -52,7 +52,7 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
       impact: "Adopted across global keynote presentations, spatial exhibition pavilions, and a comprehensive 240-page interactive brand architecture system.",
     },
     colors: [
-      { name: "Orbital Gold", hex: "#FFD900" },
+      { name: "Orbital Gold", hex: "#d4b068" },
       { name: "Deep Void", hex: "#08080C" },
       { name: "Mars Rust", hex: "#EAB308" },
       { name: "Solar Starlight", hex: "#FFFDF0" },
@@ -85,7 +85,7 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
     colors: [
       { name: "Molten Chrome", hex: "#E0E0E6" },
       { name: "Cyan Resonance", hex: "#00E5FF" },
-      { name: "Telemetry Amber", hex: "#FFD900" },
+      { name: "Telemetry Amber", hex: "#d4b068" },
       { name: "Obsidian", hex: "#050508" },
     ],
     specs: [
@@ -115,7 +115,7 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
     },
     colors: [
       { name: "Singularity Black", hex: "#000000" },
-      { name: "Accretion Gold", hex: "#FFD900" },
+      { name: "Accretion Gold", hex: "#d4b068" },
       { name: "Event Horizon", hex: "#6366F1" },
       { name: "Plasma White", hex: "#FFFFFF" },
     ],
@@ -146,7 +146,7 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
     },
     colors: [
       { name: "Cosmic Neon", hex: "#A855F7" },
-      { name: "Solar Flare", hex: "#FFD900" },
+      { name: "Solar Flare", hex: "#d4b068" },
       { name: "Deep Sea Abyss", hex: "#0A0D1A" },
       { name: "Stardust", hex: "#E2E8F0" },
     ],
@@ -176,7 +176,7 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
       impact: "Awarded Tokyo Type Directors Club Annual recognition and featured in contemporary typographic anthologies.",
     },
     colors: [
-      { name: "Radar Amber", hex: "#FFD900" },
+      { name: "Radar Amber", hex: "#d4b068" },
       { name: "Carbon Fiber", hex: "#121214" },
       { name: "Silver Leaf", hex: "#CBD5E1" },
       { name: "Void Grey", hex: "#27272A" },
@@ -240,13 +240,22 @@ export default function ProjectDossierModal({
         className="fixed inset-0 bg-black/90 cursor-pointer"
       />
 
-      {/* Modal Container */}
-      <div className="relative w-full max-w-4xl bg-[#0a0a0f] rounded-2xl sm:rounded-3xl border border-white/20 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[88vh]">
+      {/* Modal Container — Angular Riot Styling */}
+      <div 
+        className="relative w-full max-w-4xl bg-[#0a0a10] border border-[#d4b068]/30 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[88vh]"
+        style={{ clipPath: "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))" }}
+      >
+        {/* Top gold accent line */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#d4b068] to-transparent" />
+
         {/* Top Telemetry Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02] shrink-0">
           <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-[#ffd900] animate-ping" />
-            <span className="text-xs font-mono font-semibold tracking-[0.2em] text-[#ffd900]">
+            <span 
+              className="h-2 w-2 bg-[#d4b068] animate-ping" 
+              style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+            />
+            <span className="text-xs font-mono font-semibold tracking-[0.2em] text-[#d4b068]">
               {project.number}
             </span>
             <span className="hidden sm:inline-block text-white/30 text-xs">/</span>
@@ -259,7 +268,8 @@ export default function ProjectDossierModal({
               playClick();
               onClose();
             }}
-            className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 text-white/60 hover:text-white angular-panel-sm transition-colors"
+            style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
             aria-label="Close Case Study"
           >
             <X className="w-5 h-5" />
@@ -271,22 +281,30 @@ export default function ProjectDossierModal({
           {/* Title & Metadata Row */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
             <div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-[#fffdf0] mb-2">
+              <div className="text-[10px] font-mono text-[#d4b068] tracking-widest uppercase mb-1 flex items-center gap-1.5">
+                <span>✦</span>
+                <span>EXPEDITION DOSSIER</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#fffdf0] mb-2 uppercase">
                 {project.title}
               </h2>
-              <p className="text-white/60 text-sm sm:text-base max-w-2xl font-sans">
+              <div className="w-20 h-[2px] bg-[#d4b068] my-2" />
+              <p className="text-white/60 text-sm sm:text-base max-w-2xl font-sans leading-relaxed">
                 {project.desc}
               </p>
             </div>
             <div className="flex flex-wrap sm:flex-col gap-2 sm:gap-1 text-xs font-mono text-white/50 shrink-0">
-              <div><span className="text-white/30">CLIENT:</span> {project.client}</div>
-              <div><span className="text-white/30">ROLE:</span> {project.role}</div>
-              <div><span className="text-white/30">CYCLE:</span> {project.year}</div>
+              <div><span className="text-white/30">CLIENT:</span> <span className="text-white/80">{project.client}</span></div>
+              <div><span className="text-white/30">ROLE:</span> <span className="text-white/80">{project.role}</span></div>
+              <div><span className="text-white/30">CYCLE:</span> <span className="text-[#d4b068]">{project.year}</span></div>
             </div>
           </div>
 
           {/* Visual Showcase Frame */}
-          <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] rounded-2xl overflow-hidden border border-white/15 shadow-xl bg-black">
+          <div 
+            className="relative w-full aspect-[16/9] sm:aspect-[21/9] overflow-hidden border border-white/15 shadow-xl bg-black"
+            style={{ clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))" }}
+          >
             <Image
               src={project.src}
               alt={project.title}
@@ -304,7 +322,7 @@ export default function ProjectDossierModal({
                 SYSTEM COLOR TOKENS (CLICK TO COPY HEX)
               </span>
               {copiedHex && (
-                <span className="text-[#ffd900] font-mono flex items-center gap-1 text-xs animate-pulse">
+                <span className="text-[#d4b068] font-mono flex items-center gap-1 text-xs animate-pulse">
                   <Check className="w-3.5 h-3.5" /> COPIED {copiedHex}
                 </span>
               )}
@@ -316,17 +334,21 @@ export default function ProjectDossierModal({
                   key={c.name}
                   onClick={() => copyColor(c.hex)}
                   onMouseEnter={playHover}
-                  className="group p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#ffd900]/40 transition-all text-left flex items-center gap-3 cursor-pointer"
+                  className="group p-3 border border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#d4b068]/40 transition-all text-left flex items-center gap-3 cursor-pointer"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
                 >
                   <div
-                    className="w-8 h-8 rounded-lg border border-white/20 shrink-0 shadow-inner"
-                    style={{ backgroundColor: c.hex }}
+                    className="w-8 h-8 border border-white/20 shrink-0 shadow-inner"
+                    style={{ 
+                      backgroundColor: c.hex,
+                      clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" 
+                    }}
                   />
                   <div className="min-w-0">
                     <div className="text-xs font-medium text-white truncate">
                       {c.name}
                     </div>
-                    <div className="text-[11px] font-mono text-white/50 group-hover:text-[#ffd900] flex items-center gap-1">
+                    <div className="text-[11px] font-mono text-white/50 group-hover:text-[#d4b068] flex items-center gap-1">
                       {c.hex}
                       <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
@@ -339,24 +361,24 @@ export default function ProjectDossierModal({
           {/* Architectural Narrative */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10">
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#ffd900]">
-                01 // THE CHALLENGE
+              <span className="text-xs font-mono uppercase tracking-wider text-[#d4b068] flex items-center gap-1">
+                <span>✦</span> 01 // THE CHALLENGE
               </span>
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-sans">
                 {project.narrative.objective}
               </p>
             </div>
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#ffd900]">
-                02 // ARCHITECTURE
+              <span className="text-xs font-mono uppercase tracking-wider text-[#d4b068] flex items-center gap-1">
+                <span>✦</span> 02 // ARCHITECTURE
               </span>
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-sans">
                 {project.narrative.architecture}
               </p>
             </div>
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#ffd900]">
-                03 // OUTCOME
+              <span className="text-xs font-mono uppercase tracking-wider text-[#d4b068] flex items-center gap-1">
+                <span>✦</span> 03 // OUTCOME
               </span>
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed font-sans">
                 {project.narrative.impact}
@@ -365,7 +387,10 @@ export default function ProjectDossierModal({
           </div>
 
           {/* Technical Specifications Matrix */}
-          <div className="bg-white/[0.02] rounded-xl p-5 border border-white/10">
+          <div 
+            className="bg-white/[0.02] p-5 border border-white/10"
+            style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
+          >
             <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-3">
               TELEMETRY SPECIFICATIONS
             </div>
@@ -389,7 +414,8 @@ export default function ProjectDossierModal({
               {project.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-mono border border-white/15 bg-white/5 text-white/70"
+                  className="px-2.5 py-1 text-[11px] font-mono border border-white/15 bg-white/5 text-white/70"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))" }}
                 >
                   #{tag}
                 </span>
@@ -406,7 +432,8 @@ export default function ProjectDossierModal({
                     playClick();
                     triggerLightHaptic();
                   }}
-                  className="px-4 py-2.5 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-mono flex items-center gap-2 text-white flex-1 sm:flex-initial justify-center transition-colors"
+                  className="px-4 py-2.5 border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-mono flex items-center gap-2 text-white flex-1 sm:flex-initial justify-center transition-colors"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
                 >
                   <span>VIEW ON BEHANCE</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -419,7 +446,8 @@ export default function ProjectDossierModal({
                   const contactEl = document.querySelector("#contact");
                   contactEl?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="tactile-switch-accent px-5 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 flex-1 sm:flex-initial justify-center cursor-pointer"
+                className="tactile-switch-accent px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 flex-1 sm:flex-initial justify-center cursor-pointer"
+                style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
               >
                 <span>INQUIRE ABOUT MISSION</span>
                 <ArrowUpRight className="w-4 h-4" />

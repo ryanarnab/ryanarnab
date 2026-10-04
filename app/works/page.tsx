@@ -143,15 +143,15 @@ export default function WorksPage() {
           
           {/* HEADER */}
           <div className="mb-14 sm:mb-20">
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#ffd900] mb-4">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-pulse" />
+            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#d4b068] mb-4">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] animate-pulse" />
               <span>Sector 01 // Expedition Archive</span>
             </div>
 
             <h1 className="text-[clamp(44px,8vw,110px)] font-medium leading-[0.9] tracking-[-0.075em] text-[#fffdf0]">
               DISCOVERED
               <br />
-              <span className="text-[#ffd900]/50">ARTIFACTS.</span>
+              <span className="text-[#d4b068]/50">ARTIFACTS.</span>
             </h1>
 
             <p className="mt-6 max-w-[500px] text-sm sm:text-base leading-relaxed text-[#fffdf0]/70">
@@ -171,8 +171,8 @@ export default function WorksPage() {
                 }}
                 className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                   activeFilter === cat
-                    ? "bg-[#ffd900] text-black font-bold shadow-[0_0_16px_rgba(255,217,0,0.5)]"
-                    : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#ffd900]/40"
+                    ? "bg-[#d4b068] text-black font-bold shadow-[0_0_16px_rgba(212, 176, 104,0.5)]"
+                    : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#d4b068]/40"
                 }`}
               >
                 {cat}
@@ -192,7 +192,7 @@ export default function WorksPage() {
                   transition={{ duration: 0.5 }}
                   key={project.id}
                   onClick={() => handleInspect(project.dossierId)}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#ffd900]/50 hover:shadow-[0_0_30px_rgba(255,217,0,0.2)] cursor-pointer"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#d4b068]/50 hover:shadow-[0_0_30px_rgba(212, 176, 104,0.2)] cursor-pointer"
                 >
                   {/* IMAGE FRAME */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-zinc-900">
@@ -203,7 +203,7 @@ export default function WorksPage() {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3 rounded-full bg-black/80 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#ffd900] backdrop-blur-md border border-[#ffd900]/30 z-10">
+                    <div className="absolute top-3 left-3 rounded-full bg-black/80 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#d4b068] backdrop-blur-md border border-[#d4b068]/30 z-10">
                       {project.id}
                     </div>
                   </div>
@@ -211,12 +211,12 @@ export default function WorksPage() {
                   {/* CONTENT */}
                   <div className="mt-5 flex flex-col flex-1 justify-between">
                     <div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[#ffd900]/70 mb-2">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#d4b068]/70 mb-2">
                         <span>{project.category}</span>
                         <span>{project.year}</span>
                       </div>
 
-                      <h3 className="text-xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#ffd900] transition-colors">
+                      <h3 className="text-xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
                         {project.title}
                       </h3>
 
@@ -231,13 +231,13 @@ export default function WorksPage() {
                         {project.tags.slice(0, 2).map((tag) => (
                           <span
                             key={tag}
-                            className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#ffd900]/30 border border-transparent transition-colors"
+                            className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#d4b068]/30 border border-transparent transition-colors"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
-                      <span className="text-xs font-mono text-white/70 group-hover:text-[#ffd900] flex items-center gap-1 transition-colors">
+                      <span className="text-xs font-mono text-white/70 group-hover:text-[#d4b068] flex items-center gap-1 transition-colors">
                         <span>Dossier</span>
                         <ArrowUpRight size={13} />
                       </span>

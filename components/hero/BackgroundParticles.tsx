@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { triggerSnapHaptic, triggerSelectionHaptic } from "@/lib/haptics";
 
 declare global {
   interface Window {
@@ -54,16 +55,16 @@ void main() {
     sec0.xy += drift;
     float sec0Opacity = 0.38;
 
-    // Gentle cursor repulsion in Section 0
-    if (u_mouse.x > -500.0 && u_morph < 0.5) {
+    // Gentle cursor repulsion in Section 0: Starfield reacts to cursor as usual
+    if (u_mouse.x > -500.0) {
         vec2 d = sec0.xy - u_mouse;
         float distSq = dot(d, d);
-        float radius = 170.0;
+        float radius = 175.0;
         if (distSq < radius * radius && distSq > 0.001) {
             float dist = sqrt(distSq);
             float strength = pow(1.0 - dist / radius, 2.0);
-            sec0.xy += (d / dist) * strength * 95.0;
-            sec0Opacity = 0.38 * max(0.0, 1.0 - strength * 1.2);
+            sec0.xy += (d / dist) * strength * 90.0;
+            sec0Opacity = 0.38 * max(0.05, 1.0 - strength * 1.1);
         }
     }
 
@@ -178,18 +179,18 @@ void main() {
     float warpBoost = min(abs(u_warp) * 0.25, 2.5);
     gl_PointSize = clamp(baseSize + warpBoost, 1.0, 24.0);
 
-    // Color Selection
+    // Color Selection — Subtle Champagne Titanium & Starlight Palette
     vec3 c;
     if (u_morph > 0.3 && a_isPortrait > 0.5) {
-        c = vec3(1.0, 0.84, 0.15); // Vibrant Solid Solar Gold #ffd626
+        c = vec3(0.85, 0.72, 0.46); // Refined Warm Champagne Gold
     } else if (a_colorIndex < 0.5) {
-        c = vec3(1.0, 1.0, 1.0);    // Pure Stardust
+        c = vec3(0.96, 0.96, 0.94); // Pure Starlight White
     } else if (a_colorIndex < 1.5) {
-        c = vec3(0.98, 0.75, 0.14); // Solar Amber
+        c = vec3(0.80, 0.68, 0.44); // Subtle Champagne Tone
     } else if (a_colorIndex < 2.5) {
-        c = vec3(0.98, 0.57, 0.24); // Mars Rust
+        c = vec3(0.70, 0.58, 0.38); // Muted Bronze Titanium
     } else {
-        c = vec3(0.99, 0.90, 0.54); // Golden Hour Light
+        c = vec3(0.90, 0.80, 0.58); // Soft Warm Glow
     }
 
     v_color = vec4(c, clamp(opacity, 0.0, 1.0));
@@ -344,6 +345,8 @@ export default function BackgroundParticles() {
 
     let morphBlend = 0;
     let toggledMorph = false;
+    let lastDispatchedMorph = false;
+    let gyroSnapFired = false;
     let currentSection = 0;
     let scrollVelocity = 0;
     let lastScrollY = 0;
@@ -446,20 +449,32 @@ export default function BackgroundParticles() {
       const cellH = height / rows;
 
       // Portrait layout geometry:
-      // Desktop: Anchored near the RIGHT EDGE of the screen with generous negative space from center typography
+      // Desktop: Anchored inside the HUD box portal (#hero-face-portal) for pixel-precise alignment
       // Mobile: Centered in the middle of the phone screen
-      const portraitAreaW = isMobile
+      let portraitAreaW = isMobile
         ? Math.min(width * 0.82, 350)
-        : Math.min(width * 0.28, 400);
-      const portraitAreaH = isMobile ? portraitAreaW : portraitAreaW * 1.15;
+        : Math.min(width * 0.28, 380);
+      let portraitAreaH = isMobile ? portraitAreaW : portraitAreaW * 1.15;
 
       const rightMargin = Math.max(width * 0.05, 54);
-      const portraitLeft = isMobile
+      let portraitLeft = isMobile
         ? (width - portraitAreaW) / 2
         : width - portraitAreaW - rightMargin;
-      const portraitTop = isMobile
+      let portraitTop = isMobile
         ? Math.max((height - portraitAreaH) / 2 - 20, height * 0.16)
         : (height - portraitAreaH) / 2;
+
+      // If portal box element exists and is rendered, center the morphed face precisely inside it
+      const portalEl = typeof document !== "undefined" ? document.getElementById("hero-face-portal") : null;
+      if (portalEl) {
+        const rect = portalEl.getBoundingClientRect();
+        if (rect.width > 60 && rect.height > 60) {
+          portraitAreaW = Math.min(rect.width * 0.76, 320);
+          portraitAreaH = portraitAreaW * 1.18;
+          portraitLeft = rect.left + (rect.width - portraitAreaW) * 0.5;
+          portraitTop = (rect.top + window.scrollY) + (rect.height - portraitAreaH) * 0.44;
+        }
+      }
 
       portCenter = {
         x: portraitLeft + portraitAreaW * 0.5,
@@ -655,19 +670,24 @@ export default function BackgroundParticles() {
 
     updateTargetSection();
 
-    // --- MOBILE HARDWARE GYROSCOPE (DeviceOrientation API) ---
+    // --- MOBILE HARDWARE GYROSCOPE (DeviceOrientation API with Resting Angle Offset) ---
     const handleOrientation = (e: DeviceOrientationEvent) => {
       if (e.gamma !== null && e.beta !== null) {
         gyroAvailable = true;
-        tilt.gamma = e.gamma; // Left/Right tilt in degrees (-90 to +90)
-        tilt.beta = e.beta;   // Front/Back tilt in degrees (-180 to +180)
+        // Clamp gamma (roll left/right) to -45 to +45 deg
+        tilt.gamma = Math.max(-45, Math.min(45, e.gamma));
+
+        // When holding phone at eye level, human hands rest at ~48 degrees pitch
+        const restingPitch = 48.0;
+        const normalizedBeta = Math.max(-40, Math.min(40, e.beta - restingPitch));
+        tilt.beta = normalizedBeta;
 
         // Dispatch telemetry for hero badges
         window.dispatchEvent(
           new CustomEvent("gyro-telemetry", {
             detail: {
-              gamma: Math.round(e.gamma),
-              beta: Math.round(e.beta),
+              gamma: Math.round(tilt.gamma),
+              beta: Math.round(tilt.beta),
               available: true,
               denied: false,
             },
@@ -748,6 +768,12 @@ export default function BackgroundParticles() {
     let lastTapY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+        triggerSelectionHaptic();
+      }
+
       if (e.touches.length !== 1) return;
       const target = e.target as HTMLElement | null;
 
@@ -770,23 +796,26 @@ export default function BackgroundParticles() {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
 
-      // Start 500ms Long-Press Timer
+      // Start 450ms Long-Press Timer
       if (longPressTimer) clearTimeout(longPressTimer);
       longPressTimer = setTimeout(() => {
-        // Trigger face morph on 500ms hold
+        // Trigger face morph on 450ms hold
         toggledMorph = !toggledMorph;
-        if (navigator.vibrate) {
-          navigator.vibrate(60);
-        }
+        triggerSnapHaptic();
         window.dispatchEvent(
           new CustomEvent("face-morph-trigger", {
             detail: { active: toggledMorph, source: "long-press" },
           })
         );
-      }, 500);
+      }, 450);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+
       if (e.touches.length !== 1 || !longPressTimer) return;
       const dx = e.touches[0].clientX - touchStartX;
       const dy = e.touches[0].clientY - touchStartY;
@@ -798,6 +827,9 @@ export default function BackgroundParticles() {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = null;
@@ -827,9 +859,7 @@ export default function BackgroundParticles() {
       if (timeSinceLast < 320 && distFromLast < 28) {
         // Double-tap triggered!
         toggledMorph = !toggledMorph;
-        if (navigator.vibrate) {
-          navigator.vibrate([35, 45, 35]);
-        }
+        triggerSnapHaptic();
         window.dispatchEvent(
           new CustomEvent("face-morph-trigger", {
             detail: { active: toggledMorph, source: "double-tap" },
@@ -846,9 +876,7 @@ export default function BackgroundParticles() {
     // Public window helper APIs
     window.__triggerFaceMorph = (enabled?: boolean) => {
       toggledMorph = enabled !== undefined ? enabled : !toggledMorph;
-      if (navigator.vibrate && toggledMorph) {
-        navigator.vibrate(40);
-      }
+      triggerSnapHaptic();
     };
     window.__toggleFaceMorph = () => {
       toggledMorph = !toggledMorph;
@@ -862,6 +890,7 @@ export default function BackgroundParticles() {
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("realign-particles", rebuildBuffers);
 
     let isTabVisible = true;
     let isModalOpen = false;
@@ -893,29 +922,56 @@ export default function BackgroundParticles() {
       tilt.smoothGamma += (tilt.gamma - tilt.smoothGamma) * 0.12;
       tilt.smoothBeta += (tilt.beta - tilt.smoothBeta) * 0.12;
 
-      // 1. Gyro Trigger: Tilt phone right (> 25 degrees) snaps into face formation!
+      // 1. Gyro Trigger: Tilt phone right (> 20 degrees) snaps into face formation!
       let gyroTargetMorph = 0;
-      if (tilt.smoothGamma >= 25.0) {
+      if (tilt.smoothGamma >= 20.0) {
         gyroTargetMorph = 1.0; // Snap into portrait!
+        if (!gyroSnapFired) {
+          gyroSnapFired = true;
+          triggerSnapHaptic();
+        }
       } else if (tilt.smoothGamma > 8.0) {
-        gyroTargetMorph = (tilt.smoothGamma - 8.0) / 17.0; // Smooth preview transition
+        gyroTargetMorph = (tilt.smoothGamma - 8.0) / 12.0; // Smooth preview transition
       } else {
         gyroTargetMorph = 0.0;
-      }
-
-      // 2. Desktop cursor hover trigger (60/40 screen split: starts at 60% of screen width)
-      let mouseTargetMorph = 0;
-      if (!isMobile && mouse.x > 0 && isHero) {
-        const normalizedX = mouse.x / width;
-        if (normalizedX > 0.60) {
-          // Progresses smoothly across the right 40% (0.60 to 0.86)
-          mouseTargetMorph = Math.min(1, (normalizedX - 0.60) / 0.24);
-        } else {
-          mouseTargetMorph = 0;
+        if (tilt.smoothGamma < 12.0) {
+          gyroSnapFired = false;
         }
       }
 
-      // 3. Combined effective target morph (Hardware Gyro, Gesture Toggle, or Cursor)
+      // 2. Desktop cursor hover trigger: ONLY begins and is active when cursor is taken to the box (#hero-face-portal)
+      let mouseTargetMorph = 0;
+      let isHoveringPortal = false;
+      if (!isMobile && mouse.x > -500 && mouse.y > -500 && isHero) {
+        const portalEl = typeof document !== "undefined" ? document.getElementById("hero-face-portal") : null;
+        if (portalEl) {
+          const rect = portalEl.getBoundingClientRect();
+          // Check if cursor is inside the HUD box portal
+          if (
+            mouse.x >= rect.left &&
+            mouse.x <= rect.right &&
+            mouse.y >= rect.top &&
+            mouse.y <= rect.bottom
+          ) {
+            isHoveringPortal = true;
+            mouseTargetMorph = 1.0;
+
+            // Interactive 3D parallax tilt tracking cursor inside the box
+            const cx = rect.left + rect.width * 0.5;
+            const cy = rect.top + rect.height * 0.5;
+            const normX = Math.max(-1, Math.min(1, (mouse.x - cx) / (rect.width * 0.5)));
+            const normY = Math.max(-1, Math.min(1, (mouse.y - cy) / (rect.height * 0.5)));
+            tilt.gamma = normX * 22.0;
+            tilt.beta = normY * 16.0;
+          } else {
+            // Outside the box: reset 3D tilt
+            tilt.gamma = 0;
+            tilt.beta = 0;
+          }
+        }
+      }
+
+      // 3. Combined effective target morph (Hardware Gyro, Explicit Toggle, or Cursor inside Portal Box)
       let targetMorph = 0;
       if (isHero && portraitReady) {
         targetMorph = Math.max(
@@ -926,8 +982,19 @@ export default function BackgroundParticles() {
       }
 
       // Smooth GLSL uniform morph interpolation
-      morphBlend += (targetMorph - morphBlend) * (isHero ? 0.075 : 0.2);
-      if (!isHero && morphBlend < 0.01) morphBlend = 0;
+      morphBlend += (targetMorph - morphBlend) * (isHero ? 0.085 : 0.2);
+      if (!isHero && morphBlend < 0.005) morphBlend = 0;
+
+      // Update UI badge state if morph crossed boundary
+      const morphActiveNow = morphBlend > 0.45;
+      if (morphActiveNow !== lastDispatchedMorph) {
+        lastDispatchedMorph = morphActiveNow;
+        window.dispatchEvent(
+          new CustomEvent("face-morph-trigger", {
+            detail: { active: morphActiveNow, source: isHoveringPortal ? "hover" : "state" },
+          })
+        );
+      }
 
       // Update global for Cursor labels
       window.__starfieldMorphBlend = isHero ? morphBlend : 0;
@@ -982,6 +1049,7 @@ export default function BackgroundParticles() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("realign-particles", rebuildBuffers);
       window.removeEventListener("touchend", onFirstUserGesture);
       window.removeEventListener("click", onFirstUserGesture);
       delete window.__triggerFaceMorph;

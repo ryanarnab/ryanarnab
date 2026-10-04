@@ -150,13 +150,15 @@ export default function SpacePingLoader({
           className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#000000] select-none cursor-pointer overflow-hidden touch-none"
         >
           {/* Subtle Ambient Cosmic Glow */}
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(255,217,0,0.06),rgba(0,0,0,0)_100%)]" />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(212, 176, 104,0.06),rgba(0,0,0,0)_100%)]" />
 
           {/* TOP TELEMETRY PROTOCOL BAR */}
-          <div className="absolute top-6 sm:top-10 left-6 right-6 flex items-center justify-between text-white/40 font-mono text-[9px] sm:text-[10px] tracking-[0.2em] uppercase pointer-events-auto">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ffd900] animate-ping" />
-              <span className="text-white/70 font-semibold">SIGNAL TELEMETRY // EXPEDITION 00</span>
+          <div className="absolute top-5 sm:top-10 left-4 right-4 sm:left-6 sm:right-6 flex items-center justify-between text-white/40 font-mono text-[9px] sm:text-[10px] tracking-[0.2em] uppercase pointer-events-auto">
+            <div className="flex items-center gap-2 truncate">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] animate-ping shrink-0" />
+              <span className="text-white/70 font-semibold truncate text-[9px] sm:text-[10px]">
+                <span className="hidden sm:inline">SIGNAL TELEMETRY // </span>EXPEDITION 00
+              </span>
             </div>
 
             {/* Mute Toggle */}
@@ -165,10 +167,10 @@ export default function SpacePingLoader({
                 e.stopPropagation();
                 setIsMuted(!isMuted);
               }}
-              className="liquid-glass rounded-full px-2.5 py-1 flex items-center gap-1.5 hover:text-white transition-colors"
+              className="liquid-glass rounded-full px-2.5 py-1 flex items-center gap-1.5 hover:text-white transition-colors shrink-0"
               title={isMuted ? "Unmute sound" : "Mute sound"}
             >
-              {isMuted ? <VolumeX size={11} /> : <Volume2 size={11} className="text-[#ffd900]" />}
+              {isMuted ? <VolumeX size={11} /> : <Volume2 size={11} className="text-[#d4b068]" />}
               <span className="text-[8px] tracking-widest">{isMuted ? "MUTED" : "AUDIO ON"}</span>
             </button>
           </div>
@@ -176,7 +178,7 @@ export default function SpacePingLoader({
           {/* ========================================================================= */}
           {/* CENTER RESONATING SPACE PING SONAR SYSTEM                                */}
           {/* ========================================================================= */}
-          <div className="relative flex items-center justify-center w-[340px] h-[340px] sm:w-[460px] sm:h-[460px]">
+          <div className="relative flex items-center justify-center w-[min(320px,88vw)] h-[min(320px,88vw)] sm:w-[460px] sm:h-[460px]">
             
             {/* SVG RESONATING CIRCULAR RADAR RINGS */}
             <svg
@@ -188,21 +190,21 @@ export default function SpacePingLoader({
               <defs>
                 {/* Gold Solar Gradient */}
                 <linearGradient id="sonarGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffd900" stopOpacity="0.8" />
+                  <stop offset="0%" stopColor="#d4b068" stopOpacity="0.8" />
                   <stop offset="50%" stopColor="#ffb703" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#ffd900" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#d4b068" stopOpacity="0.05" />
                 </linearGradient>
 
                 <linearGradient id="radarSweepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffd900" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#ffd900" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#d4b068" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#d4b068" stopOpacity="0" />
                 </linearGradient>
               </defs>
 
               {/* Static Background Guide Rings */}
               <circle cx="230" cy="230" r="45" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="1" />
               <circle cx="230" cy="230" r="95" stroke="rgba(255, 255, 255, 0.06)" strokeWidth="1" strokeDasharray="3 6" />
-              <circle cx="230" cy="230" r="150" stroke="rgba(255, 217, 0, 0.12)" strokeWidth="1" />
+              <circle cx="230" cy="230" r="150" stroke="rgba(212, 176, 104, 0.12)" strokeWidth="1" />
               <circle cx="230" cy="230" r="210" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="1" strokeDasharray="2 8" />
 
               {/* Crosshair Cardinal Coordinate Guides */}
@@ -210,10 +212,10 @@ export default function SpacePingLoader({
               <line x1="230" y1="20" x2="230" y2="440" stroke="rgba(255, 255, 255, 0.06)" strokeWidth="1" strokeDasharray="4 8" />
 
               {/* Cardinal Corner Tick Marks */}
-              <circle cx="230" cy="20" r="2.5" fill="#ffd900" opacity="0.6" />
-              <circle cx="440" cy="230" r="2.5" fill="#ffd900" opacity="0.6" />
-              <circle cx="230" cy="440" r="2.5" fill="#ffd900" opacity="0.6" />
-              <circle cx="20" cy="230" r="2.5" fill="#ffd900" opacity="0.6" />
+              <circle cx="230" cy="20" r="2.5" fill="#d4b068" opacity="0.6" />
+              <circle cx="440" cy="230" r="2.5" fill="#d4b068" opacity="0.6" />
+              <circle cx="230" cy="440" r="2.5" fill="#d4b068" opacity="0.6" />
+              <circle cx="20" cy="230" r="2.5" fill="#d4b068" opacity="0.6" />
             </svg>
 
             {/* RESONATING RIPPLE 1 (Staggered Expansion Waves) */}
@@ -228,7 +230,7 @@ export default function SpacePingLoader({
                 ease: [0.21, 0.45, 0.32, 0.95],
                 delay: 0,
               }}
-              className="absolute h-44 w-44 rounded-full border border-[#ffd900]/70 shadow-[0_0_20px_rgba(255,217,0,0.3)] pointer-events-none"
+              className="absolute h-44 w-44 rounded-full border border-[#d4b068]/70 shadow-[0_0_20px_rgba(212, 176, 104,0.3)] pointer-events-none"
             />
 
             {/* RESONATING RIPPLE 2 */}
@@ -265,13 +267,13 @@ export default function SpacePingLoader({
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="absolute w-[290px] h-[290px] sm:w-[320px] sm:h-[320px] rounded-full border border-dashed border-[#ffd900]/25 flex items-center justify-center pointer-events-none"
+              className="absolute w-[290px] h-[290px] sm:w-[320px] sm:h-[320px] rounded-full border border-dashed border-[#d4b068]/25 flex items-center justify-center pointer-events-none"
             >
               {/* Compass tick indices */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 text-[8px] font-mono text-[#ffd900]/60">000°</div>
-              <div className="absolute right-0 top-1/2 translate-x-1 -translate-y-1/2 text-[8px] font-mono text-[#ffd900]/60">090°</div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 text-[8px] font-mono text-[#ffd900]/60">180°</div>
-              <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 text-[8px] font-mono text-[#ffd900]/60">270°</div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 text-[8px] font-mono text-[#d4b068]/60">000°</div>
+              <div className="absolute right-0 top-1/2 translate-x-1 -translate-y-1/2 text-[8px] font-mono text-[#d4b068]/60">090°</div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 text-[8px] font-mono text-[#d4b068]/60">180°</div>
+              <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 text-[8px] font-mono text-[#d4b068]/60">270°</div>
             </motion.div>
 
             {/* SWEEPING RADAR SCANNER BEAM */}
@@ -280,7 +282,7 @@ export default function SpacePingLoader({
               transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
               className="absolute w-[280px] h-[280px] pointer-events-none origin-center"
               style={{
-                background: "conic-gradient(from 0deg at 50% 50%, rgba(255,217,0,0.18) 0deg, rgba(255,217,0,0) 65deg, transparent 360deg)",
+                background: "conic-gradient(from 0deg at 50% 50%, rgba(212, 176, 104,0.18) 0deg, rgba(212, 176, 104,0) 65deg, transparent 360deg)",
                 borderRadius: "50%",
               }}
             />
@@ -291,27 +293,27 @@ export default function SpacePingLoader({
                 initial={{ scale: 0.2, opacity: 1 }}
                 animate={{ scale: 16, opacity: 0 }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute h-32 w-32 rounded-full bg-gradient-to-r from-[#ffd900] via-yellow-200 to-white shadow-[0_0_120px_rgba(255,217,0,1)] pointer-events-none z-30"
+                className="absolute h-32 w-32 rounded-full bg-gradient-to-r from-[#d4b068] via-amber-100 to-white shadow-[0_0_120px_rgba(212,176,104,0.6)] pointer-events-none z-30"
               />
             )}
 
             {/* CENTRAL SPACE PING BEACON EMITTER */}
             <div className="relative z-20 flex items-center justify-center">
               {/* Halo Glow */}
-              <div className="absolute h-16 w-16 rounded-full bg-[#ffd900]/20 blur-xl animate-pulse" />
+              <div className="absolute h-16 w-16 rounded-full bg-[#d4b068]/20 blur-xl animate-pulse" />
 
               {/* Middle Orb */}
               <motion.div
                 animate={{
                   scale: [1, 1.25, 1],
                   boxShadow: [
-                    "0 0 20px rgba(255,217,0,0.8)",
-                    "0 0 45px rgba(255,217,0,1)",
-                    "0 0 20px rgba(255,217,0,0.8)",
+                    "0 0 20px rgba(212, 176, 104,0.8)",
+                    "0 0 45px rgba(212, 176, 104,1)",
+                    "0 0 20px rgba(212, 176, 104,0.8)",
                   ],
                 }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                className="relative h-6 w-6 rounded-full bg-[#ffd900] flex items-center justify-center border border-white"
+                className="relative h-6 w-6 rounded-full bg-[#d4b068] flex items-center justify-center border border-white"
               >
                 {/* Core White Hot Starlight Center */}
                 <div className="h-2 w-2 rounded-full bg-white shadow-[0_0_10px_white]" />
@@ -327,7 +329,7 @@ export default function SpacePingLoader({
             
             {/* Live Status Readout */}
             <div className="flex items-center gap-2 mb-3">
-              <Radio size={13} className="text-[#ffd900] animate-pulse" />
+              <Radio size={13} className="text-[#d4b068] animate-pulse" />
               <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.2em] text-[#fffdf0] uppercase">
                 {statusText}
               </span>
@@ -336,7 +338,7 @@ export default function SpacePingLoader({
             {/* Numeric Progress Bar */}
             <div className="w-56 sm:w-72 h-[2px] bg-white/10 rounded-full overflow-hidden relative mb-3">
               <motion.div
-                className="h-full bg-gradient-to-r from-[#ffd900] to-yellow-200 shadow-[0_0_10px_#ffd900]"
+                className="h-full bg-gradient-to-r from-[#d4b068] to-amber-200 shadow-[0_0_10px_#d4b068]"
                 style={{ width: `${progress}%` }}
                 transition={{ ease: "easeOut" }}
               />
@@ -345,12 +347,12 @@ export default function SpacePingLoader({
             {/* Percentage & Frequency Readouts */}
             <div className="w-56 sm:w-72 flex items-center justify-between text-[10px] font-mono text-white/50 tracking-wider">
               <span>RX // 1420.405 MHz</span>
-              <span className="text-[#ffd900] font-bold">[{String(progress).padStart(2, "0")}%]</span>
+              <span className="text-[#d4b068] font-bold">[{String(progress).padStart(2, "0")}%]</span>
             </div>
 
             {/* Skip Interaction Hint */}
-            <div className="mt-8 flex items-center gap-1.5 text-[9px] font-mono tracking-[0.24em] text-white/35 uppercase hover:text-[#ffd900] transition-colors">
-              <Sparkles size={11} className="text-[#ffd900]/70" />
+            <div className="mt-8 flex items-center gap-1.5 text-[9px] font-mono tracking-[0.24em] text-white/35 uppercase hover:text-[#d4b068] transition-colors">
+              <Sparkles size={11} className="text-[#d4b068]/70" />
               <span>Click or tap anywhere to warp ↵</span>
             </div>
           </div>

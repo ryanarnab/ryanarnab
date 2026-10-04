@@ -10,6 +10,7 @@ import AboutSection from "@/components/about/AboutSection";
 import PlaygroundSection from "@/components/playground/PlaygroundSection";
 import ContactSection from "@/components/contact/ContactSection";
 import OrbitalSidebar from "@/components/navigation/OrbitalSidebar";
+import TacticalHUD from "@/components/hud/TacticalHUD";
 import BackgroundParticles from "@/components/hero/BackgroundParticles";
 import SpacePingLoader from "@/components/loader/SpacePingLoader";
 import ProjectDossierModal from "@/components/modals/ProjectDossierModal";
@@ -59,6 +60,7 @@ export default function Home() {
       <Cursor />
       <BackgroundParticles />
       <OrbitalSidebar />
+      <TacticalHUD />
 
       <Navbar />
       <Hero />
