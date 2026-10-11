@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const photos = [
-  "/images/1.webp",
-  "/images/2.webp",
-  "/images/3.webp",
-  "/images/4.webp",
-  "/images/5.webp",
-  "/images/6.webp",
+  "/images/works/brand-identity-1.png",
+  "/images/works/typography-1.png",
+  "/images/works/zened-1.png",
+  "/images/works/poster-technophilia.png",
+  "/images/works/poster-winterfest.png",
+  "/images/works/sports-rgu.png",
 ];
 
 type TrailImage = {

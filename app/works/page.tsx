@@ -17,7 +17,7 @@ interface Project {
   id: string;
   dossierId: string;
   title: string;
-  category: "Identity" | "Motion" | "Spatial" | "Creative Dev";
+  category: "Identity" | "Typography" | "3D & CGI" | "Art Direction" | "Editorial";
   year: string;
   description: string;
   src: string;
@@ -28,66 +28,96 @@ const ALL_PROJECTS: Project[] = [
   {
     id: "EXP-01",
     dossierId: "01",
-    title: "CHRONO IDENTITY SYSTEM",
+    title: "RYAN ARNAB IDENTITY SYSTEM",
     category: "Identity",
     year: "2026",
-    description: "A dynamic temporal visual identity exploring kinetic letterforms and relativistic grid systems.",
-    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-    tags: ["Brand Identity", "Design System", "Motion Studies"],
+    description: "Personal visual identity and geometric monogram mark system exploring kinetic grid structures and gold accents.",
+    src: "/images/works/brand-identity-1.png",
+    tags: ["Brand Architecture", "Monogram", "Identity System"],
   },
   {
     id: "EXP-02",
     dossierId: "02",
-    title: "AURA HAPTIC INTERFACE",
-    category: "Creative Dev",
+    title: "KOKUYO CAMEL TYPEFACE REDESIGN",
+    category: "Typography",
     year: "2026",
-    description: "Tactile micro-interaction laboratory mapping acoustic frequencies to physical gesture physics.",
-    src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop",
-    tags: ["WebGL", "Sensory UI", "Creative Coding"],
+    description: "A custom display typeface redesign (CAMEL.TTF) and comprehensive type specimen crafted for Kokuyo Camel.",
+    src: "/images/works/typography-1.png",
+    tags: ["Typeface Design", "Typography", "Branding"],
   },
   {
     id: "EXP-03",
     dossierId: "03",
-    title: "GRAVITY SYSTEMS SIMULATION",
-    category: "Spatial",
+    title: "ZENED CYBERNETIC CGI",
+    category: "3D & CGI",
     year: "2025",
-    description: "3D planetary topology and gravitational lens simulations rendered in real-time.",
-    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-    tags: ["3D CGI", "Blender", "Spatial Computing"],
+    description: "Dark metallic spatial CGI render exploring biomechanical cybernetic forms and radiant particle emissions.",
+    src: "/images/works/zened-1.png",
+    tags: ["3D CGI", "Blender", "Lighting & Particles"],
   },
   {
     id: "EXP-04",
     dossierId: "04",
-    title: "COSMIC FLUX EXPERIENCES",
-    category: "Motion",
-    year: "2025—26",
-    description: "Editorial kinetic typography films and spatial motion graphics for immersive installations.",
-    src: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=1200&auto=format&fit=crop",
-    tags: ["Motion Design", "After Effects", "Film Direction"],
+    title: "TECHNOPHILIA 4.0 KEY VISUAL",
+    category: "Art Direction",
+    year: "2025",
+    description: "Futuristic cyber-mech key visual identity and comprehensive collateral system for annual technology symposium.",
+    src: "/images/works/poster-technophilia.png",
+    tags: ["Key Visual", "Art Direction", "Event Branding"],
   },
   {
     id: "EXP-05",
     dossierId: "05",
-    title: "TELEMETRY LABS ARCHIVE",
-    category: "Identity",
+    title: "EASTERN HIMALAYAN NATURENOMICS",
+    category: "Editorial",
     year: "2025",
-    description: "Aerospace telemetry data visualization and astronomical typography specimens.",
-    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-    tags: ["Typography", "Editorial", "Data Design"],
+    description: "13th Eastern Himalayan Naturenomics Forum visual identity, typography system, and ecological publication design.",
+    src: "/images/works/poster-naturenomics.png",
+    tags: ["Editorial", "Environmental", "Print & Digital"],
   },
   {
     id: "EXP-06",
-    dossierId: "02", // Aura fallback
-    title: "SOLARIS SOUND MATRIX",
-    category: "Creative Dev",
+    dossierId: "01",
+    title: "BRAND IDENTITY GUIDELINES",
+    category: "Identity",
     year: "2026",
-    description: "Synthesizer wave visualizer converting orbital planetary soundscapes into kinetic vector fields.",
-    src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop",
-    tags: ["Audio Visualizer", "Generative Art", "Interactive"],
+    description: "Brand architecture guidelines, grid geometry, spacing rules, and comprehensive identity collateral.",
+    src: "/images/works/brand-identity-4.png",
+    tags: ["Brand Guidelines", "Manual", "Grid Systems"],
+  },
+  {
+    id: "EXP-07",
+    dossierId: "02",
+    title: "CAMEL.TTF PROCESS & GLYPHS",
+    category: "Typography",
+    year: "2026",
+    description: "Character anatomy, ligature development, stroke weight balancing, and kerning pairs.",
+    src: "/images/works/typography-5.png",
+    tags: ["Glyph Anatomy", "Kerning", "Process"],
+  },
+  {
+    id: "EXP-08",
+    dossierId: "04",
+    title: "WHISPERS OF WINTER FESTIVAL",
+    category: "Art Direction",
+    year: "2025",
+    description: "Festive spatial typography and winter celebration visual campaign designed for student council events.",
+    src: "/images/works/poster-winterfest.png",
+    tags: ["Festive", "Spatial Type", "Poster"],
+  },
+  {
+    id: "EXP-09",
+    dossierId: "04",
+    title: "RGU INTER-UNIVERSITY FOOTBALL",
+    category: "Art Direction",
+    year: "2026",
+    description: "High-energy collegiate football matchday posters and athletic identity for AIU North East tournament.",
+    src: "/images/works/sports-rgu.png",
+    tags: ["Sports Branding", "Matchday", "Athletics"],
   },
 ];
 
-const CATEGORIES = ["All", "Identity", "Motion", "Spatial", "Creative Dev"] as const;
+const CATEGORIES = ["All", "Identity", "Typography", "3D & CGI", "Art Direction", "Editorial"] as const;
 
 export default function WorksPage() {
   const [activeFilter, setActiveFilter] = useState<string>("All");
