@@ -42,6 +42,13 @@ export function ScrollProvider({
       smoothWheel: true,
       syncTouch: false,
       wheelMultiplier: 1,
+      prevent: (node) => {
+        return Boolean(
+          node.hasAttribute?.("data-lenis-prevent") ||
+          node.classList?.contains("modal-scroll") ||
+          node.closest?.("[data-lenis-prevent], .modal-scroll, [role='dialog']")
+        );
+      },
     });
     lenisRef.current = lenis;
 

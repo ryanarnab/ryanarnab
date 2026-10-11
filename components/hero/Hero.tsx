@@ -164,7 +164,7 @@ export default function Hero() {
   return (
     <motion.section
       id="hero"
-      className="sticky top-0 flex min-h-screen w-full items-center justify-center overflow-hidden"
+      className="sticky top-0 flex min-h-[100dvh] xl:min-h-screen w-full items-center justify-center overflow-hidden hero-compact-height"
       style={{
         y: heroY,
         opacity: heroOpacity,
@@ -198,17 +198,17 @@ export default function Hero() {
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col lg:flex-row items-center justify-between text-left px-6 sm:px-10 lg:px-16 pt-24 sm:pt-20 pb-12 gap-8 lg:gap-8"
+        className="relative z-10 mx-auto flex w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px] flex-col lg:flex-row items-center justify-between text-left px-5 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-20 sm:pt-24 lg:pt-16 xl:pt-20 pb-8 sm:pb-12 gap-6 lg:gap-8 xl:gap-12 2xl:gap-16"
       >
         {/* LEFT COLUMN: Clean, High-Impact Riot Typography & CTAs */}
-        <div className="flex-1 flex flex-col items-start justify-center max-w-2xl w-full">
+        <div className="flex-1 flex flex-col items-start justify-center max-w-full lg:max-w-[560px] xl:max-w-2xl 2xl:max-w-3xl w-full min-w-0">
           
           {/* TACTICAL STATUS BADGE */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-            className="mb-5 sm:mb-7"
+            className="mb-4 sm:mb-6 xl:mb-7 hero-badge-compact"
           >
             <div 
               data-cursor-label="telemetry: guwahati 📍"
@@ -284,7 +284,7 @@ export default function Hero() {
                   playWarp();
                   handleToggleOrRestore();
                 }}
-                className="text-[clamp(58px,13vw,165px)] font-black leading-[0.88] tracking-[-0.05em] text-[#fffdf0] text-left select-none transition-opacity duration-300"
+                className="text-[clamp(44px,7.8vw,120px)] xl:text-[clamp(72px,7.5vw,145px)] 2xl:text-[clamp(100px,8vw,175px)] font-black leading-[0.88] tracking-[-0.05em] text-[#fffdf0] text-left select-none transition-opacity duration-300 hero-title-compact"
               >
                 <GravityWord gravityOn={gravityOn} wordIndex={0}>RYAN</GravityWord>
                 <GravityWord gravityOn={gravityOn} wordIndex={1}>ARNAB</GravityWord>
@@ -296,7 +296,7 @@ export default function Hero() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-4 sm:mt-5 flex items-center gap-2 origin-left"
+              className="mt-3 sm:mt-5 flex items-center gap-2 origin-left"
             >
               <div className="h-[4px] w-48 sm:w-64 bg-[#d4b068] shadow-[0_0_14px_rgba(212,176,104,0.7)]" />
               <div className="h-[4px] w-[6px] bg-[#d4b068] shadow-[0_0_8px_rgba(212,176,104,0.5)]" />
@@ -324,7 +324,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
             data-cursor-label="curiosity creates better ✦"
-            className="mt-6 sm:mt-8 max-w-[540px] text-left text-sm sm:text-base leading-relaxed text-[#fffdf0]/80 font-normal"
+            className="mt-5 sm:mt-7 xl:mt-8 max-w-[520px] 2xl:max-w-[620px] text-left text-xs sm:text-sm xl:text-base leading-relaxed text-[#fffdf0]/80 font-normal"
           >
             Communication Designer & Creative Technologist forging <span className="text-[#d4b068] font-semibold">brand identities</span>, tactical interfaces, and kinetic digital arsenals.
           </motion.p>
@@ -334,7 +334,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.45 }}
-            className="mt-8 sm:mt-10 flex flex-wrap items-center gap-3 sm:gap-4 max-w-full w-full"
+            className="mt-6 sm:mt-8 xl:mt-10 flex flex-wrap items-center gap-2.5 sm:gap-3 xl:gap-4 max-w-full w-full hero-cta-compact"
           >
             {/* Primary CTA */}
             <motion.button
@@ -342,7 +342,7 @@ export default function Hero() {
               transition={{ type: "spring", stiffness: 600, damping: 25 }}
               onClick={() => scrollToSection("work")}
               data-cursor-label="explore expeditions ↓"
-              className="tactile-switch-accent px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wider uppercase flex items-center justify-center gap-2.5 cursor-pointer shadow-[0_0_24px_rgba(212,176,104,0.25)]"
+              className="tactile-switch-accent px-5 sm:px-7 2xl:px-8 py-3 sm:py-3.5 2xl:py-4 text-xs sm:text-sm font-bold tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_24px_rgba(212,176,104,0.25)]"
               style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
             >
               <Target size={14} />
@@ -356,7 +356,7 @@ export default function Hero() {
               transition={{ type: "spring", stiffness: 600, damping: 25 }}
               onClick={() => scrollToSection("contact")}
               data-cursor-label="transmit signal ⚡"
-              className="tactile-switch px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-[#fffdf0] tracking-wider uppercase flex items-center justify-center gap-2.5 cursor-pointer hover:border-[#d4b068]/50"
+              className="tactile-switch px-5 sm:px-7 2xl:px-8 py-3 sm:py-3.5 2xl:py-4 text-xs sm:text-sm font-semibold text-[#fffdf0] tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer hover:border-[#d4b068]/50"
               style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
             >
               <span className="h-2 w-2 bg-[#d4b068] animate-ping" style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }} />
@@ -373,7 +373,7 @@ export default function Hero() {
                 triggerImpactHaptic();
               }}
               data-cursor-label={gravityOn ? "turn off gravity 🎈" : "restore gravity 🧲"}
-              className={`tactile-switch px-4 sm:px-5 py-3.5 sm:py-4 text-[11px] sm:text-xs font-mono tracking-wider uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+              className={`tactile-switch px-3.5 sm:px-4 2xl:px-5 py-3 sm:py-3.5 2xl:py-4 text-[11px] sm:text-xs font-mono tracking-wider uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 !gravityOn
                   ? "border-[#d4b068]/80 text-[#d4b068] bg-[#d4b068]/15 shadow-[0_0_18px_rgba(212,176,104,0.25)]"
                   : "text-white/80 border-white/15 hover:border-[#d4b068]/30"
@@ -394,7 +394,7 @@ export default function Hero() {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="hidden lg:flex flex-1 max-w-lg w-full aspect-[4/5] relative items-center justify-center pointer-events-auto select-none"
+          className="hidden lg:flex flex-1 max-w-[340px] xl:max-w-[420px] 2xl:max-w-[500px] 3xl:max-w-[560px] w-full aspect-[4/5] max-h-[52vh] xl:max-h-[62vh] 2xl:max-h-[68vh] relative items-center justify-center pointer-events-auto select-none hero-portal-compact"
         >
           {/* Floating Diamond Crosshairs (✦) */}
           <div className="absolute -top-4 right-10 text-xl text-[#d4b068] filter drop-shadow-[0_0_8px_rgba(212,176,104,0.7)] animate-pulse">

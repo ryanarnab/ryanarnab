@@ -13,118 +13,31 @@ import DossierResumeModal from "@/components/modals/DossierResumeModal";
 import { useSound } from "@/components/sound/SoundProvider";
 import { triggerLightHaptic } from "@/lib/haptics";
 
-interface Project {
-  id: string;
-  dossierId: string;
-  title: string;
-  category: "Identity" | "Typography" | "3D & CGI" | "Art Direction" | "Editorial";
-  year: string;
-  description: string;
-  src: string;
-  tags: string[];
-}
-
-const ALL_PROJECTS: Project[] = [
-  {
-    id: "EXP-01",
-    dossierId: "01",
-    title: "RYAN ARNAB IDENTITY SYSTEM",
-    category: "Identity",
-    year: "2026",
-    description: "Personal visual identity and geometric monogram mark system exploring kinetic grid structures and gold accents.",
-    src: "/images/works/brand-identity-1.png",
-    tags: ["Brand Architecture", "Monogram", "Identity System"],
-  },
-  {
-    id: "EXP-02",
-    dossierId: "02",
-    title: "KOKUYO CAMEL TYPEFACE REDESIGN",
-    category: "Typography",
-    year: "2026",
-    description: "A custom display typeface redesign (CAMEL.TTF) and comprehensive type specimen crafted for Kokuyo Camel.",
-    src: "/images/works/typography-1.png",
-    tags: ["Typeface Design", "Typography", "Branding"],
-  },
-  {
-    id: "EXP-03",
-    dossierId: "03",
-    title: "ZENED CYBERNETIC CGI",
-    category: "3D & CGI",
-    year: "2025",
-    description: "Dark metallic spatial CGI render exploring biomechanical cybernetic forms and radiant particle emissions.",
-    src: "/images/works/zened-1.png",
-    tags: ["3D CGI", "Blender", "Lighting & Particles"],
-  },
-  {
-    id: "EXP-04",
-    dossierId: "04",
-    title: "TECHNOPHILIA 4.0 KEY VISUAL",
-    category: "Art Direction",
-    year: "2025",
-    description: "Futuristic cyber-mech key visual identity and comprehensive collateral system for annual technology symposium.",
-    src: "/images/works/poster-technophilia.png",
-    tags: ["Key Visual", "Art Direction", "Event Branding"],
-  },
-  {
-    id: "EXP-05",
-    dossierId: "05",
-    title: "EASTERN HIMALAYAN NATURENOMICS",
-    category: "Editorial",
-    year: "2025",
-    description: "13th Eastern Himalayan Naturenomics Forum visual identity, typography system, and ecological publication design.",
-    src: "/images/works/poster-naturenomics.png",
-    tags: ["Editorial", "Environmental", "Print & Digital"],
-  },
-  {
-    id: "EXP-06",
-    dossierId: "01",
-    title: "BRAND IDENTITY GUIDELINES",
-    category: "Identity",
-    year: "2026",
-    description: "Brand architecture guidelines, grid geometry, spacing rules, and comprehensive identity collateral.",
-    src: "/images/works/brand-identity-4.png",
-    tags: ["Brand Guidelines", "Manual", "Grid Systems"],
-  },
-  {
-    id: "EXP-07",
-    dossierId: "02",
-    title: "CAMEL.TTF PROCESS & GLYPHS",
-    category: "Typography",
-    year: "2026",
-    description: "Character anatomy, ligature development, stroke weight balancing, and kerning pairs.",
-    src: "/images/works/typography-5.png",
-    tags: ["Glyph Anatomy", "Kerning", "Process"],
-  },
-  {
-    id: "EXP-08",
-    dossierId: "04",
-    title: "WHISPERS OF WINTER FESTIVAL",
-    category: "Art Direction",
-    year: "2025",
-    description: "Festive spatial typography and winter celebration visual campaign designed for student council events.",
-    src: "/images/works/poster-winterfest.png",
-    tags: ["Festive", "Spatial Type", "Poster"],
-  },
-  {
-    id: "EXP-09",
-    dossierId: "04",
-    title: "RGU INTER-UNIVERSITY FOOTBALL",
-    category: "Art Direction",
-    year: "2026",
-    description: "High-energy collegiate football matchday posters and athletic identity for AIU North East tournament.",
-    src: "/images/works/sports-rgu.png",
-    tags: ["Sports Branding", "Matchday", "Athletics"],
-  },
-];
+import Link from "next/link";
+import { UploadCloud } from "lucide-react";
+import { getAllProjects, getShowcaseProjects, getProjectMetrics, ProjectItem } from "@/lib/projects";
 
 const CATEGORIES = ["All", "Identity", "Typography", "3D & CGI", "Art Direction", "Editorial"] as const;
 
 export default function WorksPage() {
+  const [projectsList, setProjectsList] = useState<ProjectItem[]>(() => getAllProjects());
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const { playWarp, playClick } = useSound();
+
+  // Load fresh projects on mount to capture any newly uploaded artifacts
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.projects)) {
+          setProjectsList(data.projects);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleDossierOpen = () => setIsDossierOpen(true);
@@ -158,24 +71,39 @@ export default function WorksPage() {
     setActiveProjectId(dossierId);
   };
 
+  const showcaseCount = projectsList.filter((p) => p.status === "showcase").length;
+  const totalCount = projectsList.length;
+
   const filteredProjects =
     activeFilter === "All"
-      ? ALL_PROJECTS
-      : ALL_PROJECTS.filter((p) => p.category === activeFilter);
+      ? projectsList
+      : projectsList.filter((p) => p.category.toLowerCase().includes(activeFilter.toLowerCase()) || p.category === activeFilter);
 
   return (
     <ScrollProvider>
       <Cursor />
       <Navbar />
 
-      <main className="relative min-h-screen w-full bg-black text-white px-6 sm:px-10 pt-36 sm:pt-44 pb-20">
-        <div className="mx-auto max-w-[1400px]">
+      <main className="relative min-h-screen w-full bg-black text-white px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-20 pt-32 sm:pt-40 pb-20">
+        <div className="mx-auto w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px]">
           
           {/* HEADER */}
           <div className="mb-14 sm:mb-20">
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#d4b068] mb-4">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] animate-pulse" />
-              <span>Sector 01 // Expedition Archive</span>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#d4b068]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#d4b068] animate-pulse" />
+                <span>Sector 01 // Expedition Archive ({showcaseCount} Active · {totalCount} Total)</span>
+              </div>
+
+              <Link
+                href="/upload"
+                data-cursor-label="upload project ↗"
+                className="tactile-switch px-4 py-2 text-xs font-mono font-bold text-[#d4b068] border border-[#d4b068]/30 hover:border-[#d4b068] bg-[#d4b068]/10 hover:bg-[#d4b068]/20 flex items-center gap-2 uppercase tracking-wider transition-all"
+                style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+              >
+                <UploadCloud size={14} />
+                <span>+ Upload Project</span>
+              </Link>
             </div>
 
             <h1 className="text-[clamp(44px,8vw,110px)] font-medium leading-[0.9] tracking-[-0.075em] text-[#fffdf0]">
@@ -192,89 +120,154 @@ export default function WorksPage() {
 
           {/* FILTER PILLS */}
           <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-6 mb-12 sm:mb-16">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  playClick();
-                  setActiveFilter(cat);
-                }}
-                className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                  activeFilter === cat
-                    ? "bg-[#d4b068] text-black font-bold shadow-[0_0_16px_rgba(212, 176, 104,0.5)]"
-                    : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#d4b068]/40"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            {CATEGORIES.map((cat) => {
+              const count = cat === "All" 
+                ? showcaseCount 
+                : projectsList.filter((p) => p.status === "showcase" && (p.category.toLowerCase().includes(cat.toLowerCase()) || p.category === cat)).length;
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    playClick();
+                    setActiveFilter(cat);
+                  }}
+                  className={`rounded-full px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                    activeFilter === cat
+                      ? "bg-[#d4b068] text-black font-bold shadow-[0_0_16px_rgba(212, 176, 104,0.5)]"
+                      : "border border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-[#d4b068]/40"
+                  }`}
+                >
+                  <span>{cat}</span>
+                  <span className={`text-[10px] ${activeFilter === cat ? "text-black/70" : "text-white/40"}`}>
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* PROJECT GRID */}
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 gap-6 xl:gap-8">
             <AnimatePresence>
-              {filteredProjects.map((project) => (
-                <motion.article
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.5 }}
-                  key={project.id}
-                  onClick={() => handleInspect(project.dossierId)}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#d4b068]/50 hover:shadow-[0_0_30px_rgba(212, 176, 104,0.2)] cursor-pointer"
-                >
-                  {/* IMAGE FRAME */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-zinc-900">
-                    <Image
-                      src={project.src}
-                      alt={project.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute top-3 left-3 rounded-full bg-black/80 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#d4b068] backdrop-blur-md border border-[#d4b068]/30 z-10">
-                      {project.id}
-                    </div>
-                  </div>
+              {filteredProjects.map((project) => {
+                const isUploading = project.status === "uploading_soon" || project.isUploadingSoon;
 
-                  {/* CONTENT */}
-                  <div className="mt-5 flex flex-col flex-1 justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[#d4b068]/70 mb-2">
-                        <span>{project.category}</span>
-                        <span>{project.year}</span>
+                if (isUploading) {
+                  return (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.5 }}
+                      key={project.id}
+                      data-cursor-label="uploading soon"
+                      className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-[#14141a]/90 p-6 min-h-[360px] select-none backdrop-blur-2xl"
+                    >
+                      {/* Blurred Grey Background */}
+                      <div className="absolute inset-0 bg-[#16161e] -z-10" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
+
+                      {/* Top Bar with Minimalist Index */}
+                      <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
+                        <span className="text-[10px] font-mono tracking-widest text-white/30 uppercase">
+                          {project.id}
+                        </span>
+                        <span className="text-[9px] font-mono tracking-widest px-2.5 py-0.5 rounded-full bg-white/[0.04] text-white/40 border border-white/5">
+                          LOCKED
+                        </span>
                       </div>
 
-                      <h3 className="text-xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
-                        {project.title}
-                      </h3>
-
-                      <p className="mt-2 text-xs leading-relaxed text-[#fffdf0]/60">
-                        {project.description}
-                      </p>
-                    </div>
-
-                    {/* ACTION & TAGS */}
-                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#d4b068]/30 border border-transparent transition-colors"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                      {/* Centered Minimalist Uploading Soon Indicator (No texts) */}
+                      <div className="flex flex-col items-center justify-center gap-3 text-center my-auto py-8">
+                        <div 
+                          className="h-10 w-10 flex items-center justify-center rounded-full bg-white/[0.03] border border-white/10 text-white/40 shadow-inner"
+                        >
+                          <span className="h-2 w-2 rounded-full bg-[#d4b068]/60 animate-pulse" />
+                        </div>
+                        <span className="text-xs font-mono font-bold tracking-[0.28em] text-white/60 uppercase">
+                          UPLOADING SOON
+                        </span>
+                        <div className="w-10 h-[1px] bg-white/10 my-0.5" />
+                        <span className="text-[10px] font-mono tracking-widest text-white/30 uppercase">
+                          TRANSMISSION PENDING
+                        </span>
                       </div>
-                      <span className="text-xs font-mono text-white/70 group-hover:text-[#d4b068] flex items-center gap-1 transition-colors">
-                        <span>Dossier</span>
-                        <ArrowUpRight size={13} />
-                      </span>
+
+                      {/* Bottom Subtle Status Bar */}
+                      <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-white/25">
+                        <span>ARCHIVED</span>
+                        <span>COMING SOON</span>
+                      </div>
+                    </motion.div>
+                  );
+                }
+
+                return (
+                  <motion.article
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.5 }}
+                    key={project.id}
+                    onClick={() => handleInspect(project.dossierId || project.id)}
+                    data-cursor-label={`inspect ${project.title.toLowerCase()} ↗`}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-[#d4b068]/50 hover:shadow-[0_0_30px_rgba(212, 176, 104,0.2)] cursor-pointer"
+                  >
+                    {/* IMAGE FRAME */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-zinc-900">
+                      <Image
+                        src={project.src}
+                        alt={project.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 left-3 rounded-full bg-black/80 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#d4b068] backdrop-blur-md border border-[#d4b068]/30 z-10">
+                        {project.id}
+                      </div>
                     </div>
-                  </div>
-                </motion.article>
-              ))}
+
+                    {/* CONTENT */}
+                    <div className="mt-5 flex flex-col flex-1 justify-between">
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[#d4b068]/70 mb-2">
+                          <span>{project.category}</span>
+                          <span>{project.year}</span>
+                        </div>
+
+                        <h3 className="text-xl font-medium tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
+                          {project.title}
+                        </h3>
+
+                        <p className="mt-2 text-xs leading-relaxed text-[#fffdf0]/60">
+                          {project.desc || project.description}
+                        </p>
+                      </div>
+
+                      {/* ACTION & TAGS */}
+                      <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div className="flex flex-wrap gap-1.5">
+                          {project.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/50 group-hover:border-[#d4b068]/30 border border-transparent transition-colors"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-xs font-mono text-white/70 group-hover:text-[#d4b068] flex items-center gap-1 transition-colors">
+                          <span>Dossier</span>
+                          <ArrowUpRight size={13} />
+                        </span>
+                      </div>
+                    </div>
+                  </motion.article>
+                );
+              })}
             </AnimatePresence>
           </motion.div>
 

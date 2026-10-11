@@ -80,13 +80,13 @@ export default function ContactSection() {
   return (
     <footer
       id="contact"
-      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 pt-24 sm:pt-36 pb-12"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-20 pt-20 sm:pt-28 xl:pt-36 pb-12"
     >
       {/* Edge divider at top */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/8 to-transparent" />
       <div className="absolute top-0 left-0 w-[120px] h-[1px] bg-gradient-to-r from-[#d4b068] to-transparent" />
 
-      <div className="mx-auto w-full max-w-[1440px]">
+      <div className="mx-auto w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px]">
         
         {/* SECTION HEADER — Angular */}
         <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">

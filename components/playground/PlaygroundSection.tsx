@@ -62,9 +62,9 @@ export default function PlaygroundSection() {
   return (
     <section
       id="playground"
-      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 py-24 sm:py-36"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-28 xl:py-36"
     >
-      <div className="mx-auto w-full max-w-[1440px]">
+      <div className="mx-auto w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px]">
 
         {/* SECTION HEADER — Angular */}
         <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">

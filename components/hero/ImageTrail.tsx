@@ -7,10 +7,10 @@ import { useEffect, useRef, useState } from "react";
 const photos = [
   "/images/works/brand-identity-1.png",
   "/images/works/typography-1.png",
-  "/images/works/zened-1.png",
-  "/images/works/poster-technophilia.png",
-  "/images/works/poster-winterfest.png",
-  "/images/works/sports-rgu.png",
+  "/images/works/brand-identity-2.png",
+  "/images/works/typography-2.png",
+  "/images/works/brand-identity-3.png",
+  "/images/works/typography-3.png",
 ];
 
 type TrailImage = {

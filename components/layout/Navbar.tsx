@@ -336,7 +336,7 @@ export default function Navbar() {
           scrolled ? "pt-2.5 sm:pt-4" : "pt-4 sm:pt-6"
         }`}
       >
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-3 sm:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px] items-center justify-between px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
 
           {/* ─── 1. BRAND LOGO & TELEMETRY ─────────────────────────────── */}
           <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto min-w-0">

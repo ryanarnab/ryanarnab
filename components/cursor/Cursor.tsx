@@ -475,8 +475,8 @@ export default function Cursor() {
           will-change-transform
           ${
             isInteractive
-              ? "h-3.5 w-3.5 bg-white shadow-[0_0_16px_rgba(255,255,255,0.9),0_0_24px_rgba(212, 176, 104,0.5)]"
-              : "h-2 w-2 bg-white/95 shadow-[0_0_10px_rgba(255,255,255,0.7)]"
+              ? "h-4 w-4 bg-white shadow-[0_0_18px_rgba(255,255,255,0.95),0_0_28px_rgba(212,176,104,0.6)]"
+              : "h-3 w-3 bg-white shadow-[0_0_12px_rgba(255,255,255,0.85),0_0_6px_rgba(212,176,104,0.4)]"
           }
         `}
       />
@@ -503,7 +503,7 @@ export default function Cursor() {
               ? activeLabel.includes("arnab")
                 ? "glass-cursor-pill border-[#d4b068]/70 bg-black/90 px-4 py-1.5 shadow-[0_0_24px_rgba(212, 176, 104,0.35),inset_0_1px_0_rgba(255,255,255,0.4)]"
                 : "glass-cursor-pill px-3.5 py-1 text-[11px] font-medium tracking-[0.06em]"
-              : "h-2 w-2 bg-white/70 shadow-[0_0_8px_rgba(255,255,255,0.6)] rounded-full"
+              : "h-1.5 w-1.5 bg-[#d4b068] shadow-[0_0_8px_rgba(212,176,104,0.95)] rounded-full"
           }
         `}
       >

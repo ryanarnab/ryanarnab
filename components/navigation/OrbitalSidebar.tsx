@@ -79,7 +79,7 @@ export default function OrbitalSidebar() {
   return (
     <aside
       aria-label="Orbital Telemetry Navigation"
-      className="hidden lg:flex fixed left-6 sm:left-8 xl:left-10 top-1/2 -translate-y-1/2 z-40 flex-col items-center select-none pointer-events-auto"
+      className="hidden xl:flex fixed left-3 2xl:left-6 3xl:left-10 top-1/2 -translate-y-1/2 z-40 flex-col items-center select-none pointer-events-auto"
     >
       {/* TOP TELEMETRY STATUS */}
       <div className="mb-3 flex flex-col items-center">

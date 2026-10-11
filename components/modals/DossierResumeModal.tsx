@@ -68,14 +68,17 @@ export default function DossierResumeModal({
 
       {/* Dossier Card Container — Angular Riot Styling */}
       <div 
-        className="relative w-full max-w-3xl bg-[#0a0a10] border border-[#d4b068]/30 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[90dvh]"
+        data-lenis-prevent="true"
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl xl:max-w-4xl bg-[#0a0a10] border border-[#d4b068]/30 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[90dvh] 2xl:max-h-[85vh]"
         style={{ clipPath: "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))" }}
       >
         {/* Top gold accent line */}
         <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#d4b068] to-transparent" />
 
         {/* Header Telemetry Strip */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 border-b border-white/10 bg-white/[0.02] gap-2">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 border-b border-white/10 bg-white/[0.02] gap-2 shrink-0">
           <div className="flex items-center gap-2 truncate">
             <span 
               className="h-2 w-2 bg-[#d4b068] animate-pulse shrink-0" 
@@ -110,8 +113,14 @@ export default function DossierResumeModal({
           </div>
         </div>
 
-            {/* Scrollable Content */}
-            <div className="overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-thin scrollbar-thumb-white/20">
+        {/* Scrollable Content */}
+        <div 
+          data-lenis-prevent="true"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          tabIndex={0}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-8 modal-scroll focus:outline-none"
+        >
 
               {/* Identity & Coordinates */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/10 pb-6">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,69 +8,7 @@ import { ArrowUpRight, Compass, Sparkles, Crosshair, Zap } from "lucide-react";
 import { useSound } from "@/components/sound/SoundProvider";
 import { triggerLightHaptic, triggerMediumHaptic } from "@/lib/haptics";
 
-interface ProjectItem {
-  id: string;
-  number: string;
-  title: string;
-  category: string;
-  year: string;
-  src: string;
-  desc: string;
-  tags: string[];
-}
-
-const PROJECTS: ProjectItem[] = [
-  {
-    id: "01",
-    number: "EXPEDITION // 01",
-    title: "RYAN ARNAB IDENTITY",
-    category: "IDENTITY · MONOGRAM SYSTEM",
-    year: "2026",
-    src: "/images/works/brand-identity-1.png",
-    desc: "Personal visual identity and geometric monogram mark system exploring kinetic grid structures and gold accents.",
-    tags: ["Brand Architecture", "Monogram", "Identity System"],
-  },
-  {
-    id: "02",
-    number: "EXPEDITION // 02",
-    title: "KOKUYO CAMEL",
-    category: "TYPOGRAPHY · TYPE DESIGN",
-    year: "2026",
-    src: "/images/works/typography-1.png",
-    desc: "A custom display typeface redesign (CAMEL.TTF) and comprehensive type specimen crafted for Kokuyo Camel.",
-    tags: ["Typeface Design", "Typography", "Branding"],
-  },
-  {
-    id: "03",
-    number: "EXPEDITION // 03",
-    title: "ZENED CGI",
-    category: "3D SIMULATION · CGI",
-    year: "2025",
-    src: "/images/works/zened-1.png",
-    desc: "Dark metallic spatial CGI render exploring biomechanical cybernetic forms and radiant particle emissions.",
-    tags: ["3D CGI", "Blender", "Lighting & Particles"],
-  },
-  {
-    id: "04",
-    number: "EXPEDITION // 04",
-    title: "TECHNOPHILIA 4.0",
-    category: "ART DIRECTION · KEY VISUAL",
-    year: "2025",
-    src: "/images/works/poster-technophilia.png",
-    desc: "Futuristic cyber-mech key visual identity and comprehensive collateral system for annual technology symposium.",
-    tags: ["Key Visual", "Art Direction", "Event Branding"],
-  },
-  {
-    id: "05",
-    number: "EXPEDITION // 05",
-    title: "NATURENOMICS FORUM",
-    category: "EDITORIAL · VISUAL CAMPAIGN",
-    year: "2025",
-    src: "/images/works/poster-naturenomics.png",
-    desc: "13th Eastern Himalayan Naturenomics Forum visual identity, typography system, and ecological publication design.",
-    tags: ["Editorial", "Environmental", "Print & Digital"],
-  },
-];
+import { getAllProjects, getShowcaseProjects, getProjectMetrics, ProjectItem } from "@/lib/projects";
 
 interface DiscoverySectionProps {
   onOpenProject?: (id: string) => void;
@@ -77,6 +16,22 @@ interface DiscoverySectionProps {
 
 export default function DiscoverySection({ onOpenProject }: DiscoverySectionProps) {
   const { playWarp } = useSound();
+  const [allProjects, setAllProjects] = useState<ProjectItem[]>(() => getAllProjects());
+  const [showcaseProjects, setShowcaseProjects] = useState<ProjectItem[]>(() => getShowcaseProjects());
+  const [metrics, setMetrics] = useState(() => getProjectMetrics());
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.projects)) {
+          setAllProjects(data.projects);
+          setShowcaseProjects(data.projects.filter((p: ProjectItem) => p.status === "showcase"));
+          if (data.metrics) setMetrics(data.metrics);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleOpen = (id: string) => {
     playWarp();
@@ -90,18 +45,16 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
     }
   };
 
-  const p1 = PROJECTS[0];
-  const p2 = PROJECTS[1];
-  const p3 = PROJECTS[2];
-  const p4 = PROJECTS[3];
-  const p5 = PROJECTS[4];
+  const p1 = showcaseProjects[0] || allProjects[0];
+  const p2 = showcaseProjects[1] || allProjects[1];
+  const remainingProjects = allProjects.slice(2);
 
   return (
     <section
       id="work"
-      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-6 sm:px-10 lg:px-16 py-24 sm:py-36 angular-bg-pattern"
+      className="relative z-10 w-full overflow-hidden bg-transparent text-white px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 2xl:px-20 py-20 sm:py-28 xl:py-36 angular-bg-pattern"
     >
-      <div className="mx-auto w-full max-w-[1440px]">
+      <div className="mx-auto w-full max-w-[1440px] xl:max-w-[1560px] 2xl:max-w-[1720px] 3xl:max-w-[1920px]">
         
         {/* SECTION HEADER — Angular Edge */}
         <div className="mb-14 sm:mb-20 flex flex-col sm:flex-row sm:items-end justify-between edge-divider pb-6 gap-4">
@@ -123,7 +76,7 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
 
           <div className="flex items-center gap-4">
             <span className="text-[11px] font-mono tracking-widest text-white/40 uppercase">
-              Tactical Grid // 05 of 12
+              Tactical Grid // {metrics.formattedShowcaseCount} of {metrics.formattedTotalCount}
             </span>
             <div className="h-8 w-[2px] bg-gradient-to-b from-[#d4b068] to-transparent" />
           </div>
@@ -158,7 +111,7 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
                 style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
               >
                 <Sparkles size={10} className="animate-spin" />
-                <span>{p1.number}</span>
+                <span>{p1.code || p1.number || `EXP-${p1.id}`}</span>
               </div>
 
               <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-white/70 border border-white/10"
@@ -227,7 +180,7 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
                 style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
               >
                 <Zap size={10} />
-                <span>{p2.number}</span>
+                <span>{p2.code || p2.number || `EXP-${p2.id}`}</span>
               </div>
 
               <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono tracking-widest text-white/70 border border-white/10"
@@ -270,70 +223,126 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
             </div>
           </motion.div>
 
-          {/* ROW 2: TRIO EXPEDITIONS (4 COLS EACH) */}
-          {[p3, p4, p5].map((project, idx) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              data-cursor-label={`inspect ${project.title.toLowerCase()} ↗`}
-              className="md:col-span-4 group relative flex flex-col justify-between overflow-hidden angular-panel-sm p-0 transition-all duration-300 hover:scale-[1.01]"
-            >
-              <div className="relative aspect-[16/11] w-full overflow-hidden bg-zinc-950">
-                <Image
-                  src={project.src}
-                  alt={project.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                
-                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-[#d4b068] border border-[#d4b068]/20"
-                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+          {/* ROW 2: TRIO EXPEDITIONS (4 COLS EACH) — DYNAMIC SHOWCASE / UPLOADING SOON */}
+          {remainingProjects.map((project, idx) => {
+            const isUploadingSoon = project.status === "uploading_soon";
+
+            if (isUploadingSoon) {
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                  data-cursor-label="uploading soon"
+                  className="md:col-span-4 relative flex flex-col justify-between overflow-hidden angular-panel-sm p-0 min-h-[340px] bg-[#14141a]/90 border border-white/[0.08] select-none backdrop-blur-2xl group"
+                  style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
                 >
-                  {project.number}
-                </div>
+                  {/* Blurred Grey Background */}
+                  <div className="absolute inset-0 bg-[#16161e] -z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
 
-                <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-white/60 border border-white/10"
-                  style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
-                >
-                  {project.year}
-                </div>
-              </div>
-
-              <div className="p-5 sm:p-6 flex flex-col gap-1.5">
-                <span className="text-[10px] uppercase tracking-[0.18em] text-[#d4b068] font-mono font-bold">
-                  {project.category}
-                </span>
-                <h3 className="text-lg font-bold tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
-                  {project.title}
-                </h3>
-                <p className="text-xs leading-relaxed text-[#fffdf0]/55 line-clamp-2">
-                  {project.desc}
-                </p>
-              </div>
-
-              <div className="mx-5 sm:mx-6 mb-5 pt-4 border-t border-white/8 flex items-center justify-between">
-                <div className="flex gap-1">
-                  {project.tags.slice(0, 2).map((t) => (
-                    <span key={t} className="bg-white/8 px-2 py-0.5 text-[8px] font-mono text-white/50 uppercase tracking-wider">
-                      {t}
+                  {/* Top Bar with Minimalist Index */}
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                    <span className="text-[10px] font-mono tracking-widest text-white/30 uppercase">
+                      {project.code || `EXP-${project.id}`}
                     </span>
-                  ))}
+                    <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 bg-white/[0.04] text-white/40 border border-white/5">
+                      LOCKED
+                    </span>
+                  </div>
+
+                  {/* Centered Minimalist Uploading Soon Indicator (No texts) */}
+                  <div className="flex flex-col items-center justify-center gap-3 text-center px-6 py-12 my-auto">
+                    <div 
+                      className="h-10 w-10 flex items-center justify-center bg-white/[0.03] border border-white/10 text-white/40 shadow-inner"
+                      style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+                    >
+                      <span className="h-2 w-2 rounded-full bg-[#d4b068]/60 animate-pulse" />
+                    </div>
+                    <span className="text-xs font-mono font-bold tracking-[0.28em] text-white/60 uppercase">
+                      UPLOADING SOON
+                    </span>
+                    <div className="w-10 h-[1px] bg-white/10 my-0.5" />
+                    <span className="text-[10px] font-mono tracking-widest text-white/30 uppercase">
+                      TRANSMISSION PENDING
+                    </span>
+                  </div>
+
+                  {/* Bottom Subtle Status Bar */}
+                  <div className="mx-5 mb-5 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-white/25">
+                    <span>STATUS: ARCHIVED</span>
+                    <span>COMING SOON</span>
+                  </div>
+                </motion.div>
+              );
+            }
+
+            return (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                data-cursor-label={`inspect ${project.title.toLowerCase()} ↗`}
+                className="md:col-span-4 group relative flex flex-col justify-between overflow-hidden angular-panel-sm p-0 transition-all duration-300 hover:scale-[1.01]"
+              >
+                <div className="relative aspect-[16/11] w-full overflow-hidden bg-zinc-950">
+                  <Image
+                    src={project.src}
+                    alt={project.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                  
+                  <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-[#d4b068] border border-[#d4b068]/20"
+                    style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+                  >
+                    {project.code || `EXP-${project.id}`}
+                  </div>
+
+                  <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-mono tracking-widest text-white/60 border border-white/10"
+                    style={{ clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))" }}
+                  >
+                    {project.year}
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleOpen(project.id)}
-                  className="text-[10px] font-mono font-bold text-white/60 hover:text-[#d4b068] flex items-center gap-1 transition-colors cursor-pointer uppercase tracking-wider"
-                >
-                  <span>Inspect</span>
-                  <ArrowUpRight size={11} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
+
+                <div className="p-5 sm:p-6 flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-[#d4b068] font-mono font-bold">
+                    {project.category}
+                  </span>
+                  <h3 className="text-lg font-bold tracking-tight text-[#fffdf0] group-hover:text-[#d4b068] transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed text-[#fffdf0]/55 line-clamp-2">
+                    {project.desc}
+                  </p>
+                </div>
+
+                <div className="mx-5 sm:mx-6 mb-5 pt-4 border-t border-white/8 flex items-center justify-between">
+                  <div className="flex gap-1">
+                    {project.tags.slice(0, 2).map((t) => (
+                      <span key={t} className="bg-white/8 px-2 py-0.5 text-[8px] font-mono text-white/50 uppercase tracking-wider">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => handleOpen(project.id)}
+                    className="text-[10px] font-mono font-bold text-white/60 hover:text-[#d4b068] flex items-center gap-1 transition-colors cursor-pointer uppercase tracking-wider"
+                  >
+                    <span>Inspect</span>
+                    <ArrowUpRight size={11} />
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
 
         </div>
 
@@ -341,13 +350,13 @@ export default function DiscoverySection({ onOpenProject }: DiscoverySectionProp
         <div className="mt-16 sm:mt-24 flex justify-center px-2">
           <Link
             href="/works"
-            data-cursor-label="view all 12 works ↗"
+            data-cursor-label={`view all ${metrics.showcaseCount} works ↗`}
             className="tactile-switch px-6 sm:px-10 py-4 sm:py-5 text-xs sm:text-sm font-mono font-bold tracking-widest uppercase flex items-center justify-center gap-3 transition-transform hover:scale-[1.02] text-[#fffdf0] max-w-full text-center"
             style={{ clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))" }}
           >
             <Compass size={16} className="text-[#d4b068] animate-spin shrink-0" />
-            <span className="hidden sm:inline">Explore All 12 Expeditions in Deep Archive</span>
-            <span className="sm:hidden text-[11px] truncate">Explore All 12 Expeditions</span>
+            <span className="hidden sm:inline">Explore All {metrics.showcaseCount} Expeditions in Deep Archive</span>
+            <span className="sm:hidden text-[11px] truncate">Explore All {metrics.showcaseCount} Expeditions</span>
             <ArrowUpRight size={16} className="text-[#d4b068] shrink-0" />
           </Link>
         </div>

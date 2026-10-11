@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Share2, Check } from "lucide-react";
+import { Heart, Share2, Check, UploadCloud } from "lucide-react";
 import { useSound } from "@/components/sound/SoundProvider";
 import { triggerHeartbeatHaptic, triggerSuccessHaptic } from "@/lib/haptics";
 
@@ -49,15 +50,15 @@ export default function TacticalHUD() {
       {/* ─── 1. TACTICAL SUBTLE EDGE RAIL (LEFT SIDE) ───────────────────── */}
       <div 
         aria-hidden="true" 
-        className="tactical-edge-rail hidden md:block" 
+        className="hidden 2xl:block fixed left-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none select-none" 
       >
-        <div className="absolute top-28 left-[14px] text-[8px] font-mono text-[#d4b068]/40 tracking-[0.25em] uppercase rotate-90 origin-top-left pointer-events-none whitespace-nowrap">
+        <div className="text-[8px] font-mono text-[#d4b068]/30 tracking-[0.25em] uppercase -rotate-90 origin-center whitespace-nowrap">
           SYSTEM // 26.14°N 91.73°E · GHY
         </div>
       </div>
 
       {/* ─── 2. TOP RIGHT SUBTLE STATUS TAG ──────────────────────────────── */}
-      <div className="fixed top-5 sm:top-6 right-5 sm:right-8 z-50 pointer-events-auto hidden md:flex items-center gap-2">
+      <div className="fixed top-4 sm:top-6 right-4 sm:right-8 z-50 pointer-events-auto hidden md:flex items-center gap-2">
         <div 
           className="tactical-badge-green px-2.5 py-1 text-[9px] uppercase font-mono tracking-widest flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
         >
@@ -69,7 +70,7 @@ export default function TacticalHUD() {
       {/* ─── 3. RIGHT-EDGE MINIMALIST ENGAGEMENT DOCK (LIKE & SHARE ONLY) ─── */}
       <aside 
         aria-label="Portfolio Interaction"
-        className="fixed right-3 sm:right-6 bottom-20 md:bottom-28 z-40 flex flex-col items-center gap-2.5 select-none pointer-events-auto"
+        className="fixed right-3 sm:right-6 2xl:right-8 bottom-20 md:bottom-28 z-40 flex flex-col items-center gap-2.5 select-none pointer-events-auto"
       >
         {/* Floating Heart Particles */}
         <div className="relative">
@@ -140,6 +141,25 @@ export default function TacticalHUD() {
               {copiedShare ? "COPIED" : "SHARE"}
             </span>
           </motion.button>
+        </div>
+
+        {/* Upload Project Button */}
+        <div className="relative">
+          <Link
+            href="/upload"
+            data-cursor-label="upload project +"
+            className="group relative flex flex-col items-center justify-center p-2.5 sm:p-3 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl text-white/70 hover:text-[#d4b068] border-white/10 hover:border-[#d4b068]/40 hover:bg-black/80"
+            style={{
+              clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))",
+              border: "1px solid",
+            }}
+            title="Upload New Expedition"
+          >
+            <UploadCloud size={17} className="transition-transform duration-300 group-hover:scale-110 text-[#d4b068]/80 group-hover:text-[#d4b068]" />
+            <span className="text-[9px] font-mono font-medium tracking-tight mt-1 text-white/80">
+              UPLOAD
+            </span>
+          </Link>
         </div>
       </aside>
     </>

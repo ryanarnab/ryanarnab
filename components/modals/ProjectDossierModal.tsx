@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useSound } from "@/components/sound/SoundProvider";
 import { triggerLightHaptic } from "@/lib/haptics";
+import { getProjectById } from "@/lib/projects";
 
 export interface ProjectDetail {
   id: string;
@@ -200,7 +201,31 @@ export default function ProjectDossierModal({
   projectId,
   onClose,
 }: ProjectDossierModalProps) {
-  const project = projectId ? PROJECT_DETAILS[projectId] || null : null;
+  const found = projectId ? getProjectById(projectId) : null;
+  const rawProject = found && found.status === "showcase" 
+    ? found 
+    : (projectId && (projectId === "01" || projectId === "02") ? PROJECT_DETAILS[projectId] : null);
+
+  const project = rawProject ? {
+    ...rawProject,
+    number: (rawProject as any).code || (rawProject as any).number || `EXPEDITION // ${rawProject.id}`,
+    client: rawProject.client || "Studio Archive",
+    role: rawProject.role || "Lead Creative Technologist",
+    colors: rawProject.colors || [
+      { name: "Orbital Gold", hex: "#d4b068" },
+      { name: "Deep Void", hex: "#08080C" }
+    ],
+    specs: rawProject.specs || [
+      { label: "GRID SCALE", value: "8pt Modular System" },
+      { label: "STATUS", value: "Verified · Active" }
+    ],
+    narrative: rawProject.narrative || {
+      objective: rawProject.desc,
+      architecture: "Constructed on relativistic grid geometry with dynamic micro-interactions.",
+      impact: "Archived and deployed as an active artifact in the personal telemetry portfolio."
+    },
+    tags: rawProject.tags || [rawProject.category, "Expedition"]
+  } : null;
   const { playClick, playHover, playSuccess, playWarp } = useSound();
   const [copiedHex, setCopiedHex] = useState<string | null>(null);
 
@@ -241,7 +266,10 @@ export default function ProjectDossierModal({
 
       {/* Modal Container — Angular Riot Styling */}
       <div 
-        className="relative w-full max-w-4xl bg-[#0a0a10] border border-[#d4b068]/30 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[88vh]"
+        data-lenis-prevent="true"
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        className="relative w-full max-w-4xl xl:max-w-5xl 2xl:max-w-6xl bg-[#0a0a10] border border-[#d4b068]/30 shadow-[0_30px_90px_rgba(0,0,0,0.95)] overflow-hidden z-10 my-auto flex flex-col max-h-[88vh] 2xl:max-h-[85vh]"
         style={{ clipPath: "polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px))" }}
       >
         {/* Top gold accent line */}
@@ -276,7 +304,13 @@ export default function ProjectDossierModal({
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto p-6 sm:p-8 space-y-7 scrollbar-thin scrollbar-thumb-white/20">
+        <div 
+          data-lenis-prevent="true"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          tabIndex={0}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-7 modal-scroll focus:outline-none"
+        >
           {/* Title & Metadata Row */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
             <div>

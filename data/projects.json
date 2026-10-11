@@ -1,0 +1,103 @@
+[
+  {
+    "id": "01",
+    "code": "EXP-01",
+    "title": "RYAN ARNAB IDENTITY SYSTEM",
+    "category": "Identity",
+    "year": "2026",
+    "client": "Ryan Arnab Studio",
+    "role": "Brand Identity Designer & Art Director",
+    "src": "/images/works/brand-identity-1.png",
+    "conceptSrc": "/images/works/brand-identity-3.png",
+    "desc": "Personal visual identity and geometric monogram mark system exploring kinetic grid structures and gold accents.",
+    "narrative": {
+      "objective": "To engineer an authoritative personal visual identity and monogram mark that harmonizes razor-sharp modernist geometry with dynamic negative space.",
+      "architecture": "Constructed on interlocking diagonal axes evoking the letterforms 'R' and 'A', paired with a solar gold and deep void dark-mode color taxonomy.",
+      "impact": "Established as the hallmark signature across all digital platforms, physical portfolio presentations, and personal stationery."
+    },
+    "colors": [
+      { "name": "Orbital Gold", "hex": "#d4b068" },
+      { "name": "Deep Void", "hex": "#08080C" },
+      { "name": "Neon Amber", "hex": "#EAB308" },
+      { "name": "Solar Starlight", "hex": "#FFFDF0" }
+    ],
+    "specs": [
+      { "label": "GRID SCALE", "value": "8pt Kinetic Modular Matrix" },
+      { "label": "TYPOGRAPHY", "value": "Geist Mono & Instrument Serif" },
+      { "label": "PRIMARY TONE", "value": "Gold (#d4b068) / Void (#000000)" },
+      { "label": "DELIVERABLES", "value": "Monogram, Guidelines, Digital Collateral" }
+    ],
+    "tags": ["Brand Architecture", "Monogram", "Identity System"],
+    "status": "showcase"
+  },
+  {
+    "id": "02",
+    "code": "EXP-02",
+    "title": "KOKUYO CAMEL TYPEFACE REDESIGN",
+    "category": "Typography",
+    "year": "2026",
+    "client": "Kokuyo Camel Brand Division",
+    "role": "Lead Type Designer & Brand Strategist",
+    "src": "/images/works/typography-1.png",
+    "conceptSrc": "/images/works/typography-4.png",
+    "desc": "A custom display typeface redesign (CAMEL.TTF) and comprehensive type specimen crafted for Kokuyo Camel.",
+    "narrative": {
+      "objective": "To modernize Kokuyo Camel's legendary stationery heritage into an expressive display font family that bridges analog warmth with contemporary geometric precision.",
+      "architecture": "Forged with extreme stroke contrast, high ascenders, and geometric ink-traps optimized for large-scale packaging, posters, and digital display environments.",
+      "impact": "Adopted as the foundational display typeface for brand campaigns, premium stationery packaging, and international retail promotions."
+    },
+    "colors": [
+      { "name": "Camel Umber", "hex": "#4A3728" },
+      { "name": "Sunlit Ochre", "hex": "#D49B35" },
+      { "name": "Scribe Gold", "hex": "#d4b068" },
+      { "name": "Parchment White", "hex": "#FDFBF7" }
+    ],
+    "specs": [
+      { "label": "WEIGHT RANGE", "value": "Display Black & Medium" },
+      { "label": "GLYPH SET", "value": "Latin Extended (280+ Glyphs)" },
+      { "label": "INK TRAPS", "value": "Geometric Deep Pockets (0.4em)" },
+      { "label": "APPLICATIONS", "value": "Packaging, Signage, Campaign Type" }
+    ],
+    "tags": ["Typeface Design", "Typography", "Branding"],
+    "status": "showcase"
+  },
+  {
+    "id": "03",
+    "code": "EXP-03",
+    "title": "EXPEDITION // 03",
+    "category": "3D & CGI",
+    "year": "2025",
+    "client": "",
+    "role": "",
+    "src": "/images/works/zened-1.png",
+    "desc": "",
+    "tags": [],
+    "status": "uploading_soon"
+  },
+  {
+    "id": "04",
+    "code": "EXP-04",
+    "title": "EXPEDITION // 04",
+    "category": "Art Direction",
+    "year": "2025",
+    "client": "",
+    "role": "",
+    "src": "/images/works/poster-technophilia.png",
+    "desc": "",
+    "tags": [],
+    "status": "uploading_soon"
+  },
+  {
+    "id": "05",
+    "code": "EXP-05",
+    "title": "EXPEDITION // 05",
+    "category": "Editorial",
+    "year": "2025",
+    "client": "",
+    "role": "",
+    "src": "/images/works/poster-naturenomics.png",
+    "desc": "",
+    "tags": [],
+    "status": "uploading_soon"
+  }
+]
